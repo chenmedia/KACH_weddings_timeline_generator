@@ -109,6 +109,31 @@ førstegangslasten – og brudeparets skrivebeskyttede visning – holdes liten.
 2. Legg til tekstene under `items.<nøkkel>` i **både** `src/locales/nb.js` og
    `src/locales/en.js`.
 
+## Backend (Phase 1 — scaffold)
+
+Et valgfritt backend for lagring, innlogging og integrasjoner er **skissert, men
+inaktivt som standard**: uten miljøvariabler kjører appen akkurat som før
+(localStorage). Stack: **Vercel Serverless Functions (`/api`) + Neon Postgres +
+Drizzle + Clerk** — ingen rammeverk-omskriving av frontend.
+
+Det som er på plass i denne fasen:
+
+- **Database:** `db/schema.js` (Drizzle) + genererte migrasjoner i
+  `db/migrations/`. `npm run db:generate` lager ny SQL, `npm run db:migrate`
+  kjører dem (krever `DATABASE_URL`).
+- **API (`/api`):** `health`, `timelines` (liste/opprett/hent/endre/slett),
+  `overrides`, `public/timeline/:slug` (skrivebeskyttet for brudeparet, kun
+  klient-trygge felt), og `cron/{retention,storage-report}` (lagringshygiene,
+  beskyttet av `CRON_SECRET`; planlagt i `vercel.json`).
+- **Adaptere (rene, testet):** `src/lib/row-mapper.js` (DB-rad ↔ `state`) og
+  `src/lib/state-source.js` (localStorage i dag, API når påslått). Dato­logikken i
+  `milestones.js`/`dates.js` er fortsatt eneste kilde — beregnede datoer lagres
+  aldri.
+
+Slå på backend: sett variablene i `.env.example` (Neon, Clerk, `CRON_SECRET`),
+kjør `npm run db:migrate`, og koble frontend til (Clerk-innlogging, dashboard,
+`/c/:slug`-rute, `main.js` → `state-source`) — neste steg i Phase 1.
+
 ## Hoste på Vercel
 
 Prosjektet bygges med Vite; Vercel oppdager dette automatisk.

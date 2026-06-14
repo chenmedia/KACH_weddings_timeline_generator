@@ -1,4 +1,8 @@
-import { PLAUSIBLE_DOMAIN, PLAUSIBLE_SRC, PLAUSIBLE_SRI } from './config.js';
+// Cookieless analytics config (build-time). Kept here, not in config.js, so the
+// pure libs stay Node-safe. Set VITE_PLAUSIBLE_DOMAIN to enable.
+const PLAUSIBLE_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DOMAIN || '';
+const PLAUSIBLE_SRC = import.meta.env.VITE_PLAUSIBLE_SRC || 'https://plausible.io/js/script.js';
+const PLAUSIBLE_SRI = import.meta.env.VITE_PLAUSIBLE_SRI || '';
 
 // Cookieless, privacy-friendly analytics. Inert unless VITE_PLAUSIBLE_DOMAIN
 // is set at build time — so there is no tracking by default.

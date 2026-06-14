@@ -63,7 +63,6 @@ export const DEFAULT_LANG = 'nb';
 
 export const SITE_URL = 'www.kachweddings.no';
 
-// Cookieless analytics: set VITE_PLAUSIBLE_DOMAIN at build time to enable.
-export const PLAUSIBLE_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DOMAIN || '';
-export const PLAUSIBLE_SRC = import.meta.env.VITE_PLAUSIBLE_SRC || 'https://plausible.io/js/script.js';
-export const PLAUSIBLE_SRI = import.meta.env.VITE_PLAUSIBLE_SRI || '';
+// NOTE: keep this file free of `import.meta.env` / DOM so it (and the pure libs
+// that import it — dates.js, milestones.js, state.js) can be reused server-side
+// in /api under plain Node. Build-time/analytics config lives in analytics.js.

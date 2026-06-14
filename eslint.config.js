@@ -17,11 +17,15 @@ export default [
     },
   },
   {
-    files: ['test/**/*.js', '*.config.js'],
+    // Server-side code (Vercel functions, DB schema/migrations, tooling configs).
+    files: ['test/**/*.js', 'api/**/*.js', 'db/**/*.js', 'scripts/**/*.js', '*.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: { ...globals.node },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
     },
   },
 ];
