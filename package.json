@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@clerk/backend": "^3.7.0",
+    "@clerk/clerk-js": "^6.16.1",
     "@neondatabase/serverless": "^1.1.0",
     "drizzle-orm": "^0.45.2"
   }

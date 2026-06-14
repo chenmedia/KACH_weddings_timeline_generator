@@ -14,6 +14,19 @@ export default {
     eyebrow: 'Planning timeline for wedding photography',
   },
 
+  dashboard: {
+    title: 'Couples',
+    newBtn: 'New couple',
+    empty: 'No couples yet. Create your first one.',
+    loading: 'Loading …',
+    error: 'Could not load the list.',
+    delete: 'Delete',
+    deleteConfirm: 'Delete this couple? This cannot be undone.',
+    selectPrompt: 'Select a couple from the list, or create a new one.',
+    signInTitle: 'Sign in',
+    signInIntro: 'Sign in to create and save timelines.',
+  },
+
   controls: {
     title: 'Set up the timeline',
     fields: {

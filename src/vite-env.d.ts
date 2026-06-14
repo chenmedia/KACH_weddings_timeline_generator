@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_PLAUSIBLE_DOMAIN?: string;
   readonly VITE_PLAUSIBLE_SRC?: string;
   readonly VITE_PLAUSIBLE_SRI?: string;
+  readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 }
 
 interface ImportMeta {

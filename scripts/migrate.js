@@ -10,7 +10,7 @@ import pg from 'pg';
 const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'db', 'migrations');
 
 async function main() {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
   if (!url) {
     console.error('DATABASE_URL is not set');
     process.exit(1);

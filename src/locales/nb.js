@@ -13,6 +13,19 @@ export default {
     eyebrow: 'Tidslinje for planlegging av bryllupsfotografering',
   },
 
+  dashboard: {
+    title: 'Brudepar',
+    newBtn: 'Nytt brudepar',
+    empty: 'Ingen brudepar ennå. Opprett det første.',
+    loading: 'Laster …',
+    error: 'Kunne ikke laste listen.',
+    delete: 'Slett',
+    deleteConfirm: 'Slette dette brudeparet? Dette kan ikke angres.',
+    selectPrompt: 'Velg et brudepar i listen, eller opprett et nytt.',
+    signInTitle: 'Logg inn',
+    signInIntro: 'Logg inn for å lage og lagre tidslinjer.',
+  },
+
   controls: {
     title: 'Sett opp tidslinjen',
     fields: {
