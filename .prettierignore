@@ -1,0 +1,7 @@
+dist
+node_modules
+public/fonts
+package-lock.json
+*.png
+*.svg
+*.woff2

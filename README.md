@@ -46,6 +46,22 @@ npm run build    # bygger til dist/
 npm run preview  # serverer dist/ lokalt
 ```
 
+## Utvikling og kvalitet
+
+```bash
+npm test          # kjører enhetstestene (Vitest)
+npm run lint      # ESLint
+npm run format    # Prettier (skriv), eller format:check
+npm run typecheck # typesjekk via JSDoc + tsc (jsconfig.json)
+```
+
+Enhetstestene dekker den rene logikken (datoer/helligdager, milepæl-beregning,
+validering/sanitering av tilstand, og CSV/.ics-generering). En GitHub
+Actions-arbeidsflyt (`.github/workflows/ci.yml`) kjører lint, format, typecheck,
+tester og bygg på hver PR. Avhengigheter holdes oppdatert av Dependabot.
+
+Node-versjon er festet i `.nvmrc` (Node 20+). Se `SECURITY.md` for sikkerhetsmodell.
+
 ## Prosjektstruktur
 
 ```
@@ -70,15 +86,22 @@ npm run preview  # serverer dist/ lokalt
 │   │   ├── controls.js    # skjema + milepæl-editor
 │   │   └── render.js      # tidslinjen
 │   ├── exporters/
-│   │   ├── csv.js         # Canva/CSV
-│   │   ├── ics.js         # kalender (.ics)
-│   │   └── pdf.js         # PDF (raster + vektor-reserve)
+│   │   ├── csv.js         # Canva/CSV (buildCSV + nedlasting)
+│   │   ├── ics.js         # kalender (.ics) (buildICS + nedlasting)
+│   │   └── pdf/           # PDF, splittet: index, raster, vector, fonts, overlay, util
 │   ├── analytics.js       # valgfri cookieless statistikk
+│   ├── types.js           # JSDoc-typedefinisjoner
 │   └── styles.css
+├── test/                  # Vitest enhetstester
+├── .github/               # CI-arbeidsflyt + Dependabot
 ├── vite.config.js
 ├── vercel.json
+├── jsconfig.json
 └── .env.example
 ```
+
+Eksportørene (CSV/.ics/PDF) lastes ved behov (dynamisk import), så
+førstegangslasten – og brudeparets skrivebeskyttede visning – holdes liten.
 
 ### Legge til en ny milepæl
 

@@ -58,9 +58,11 @@ export default {
     defaultCouple: 'Deres tidslinje',
     empty: 'Velg en bryllupsdato for å se tidslinjen.',
     finalWhen: (sendDays) =>
-      sendDays === 0 ? 'på bryllupsdagen'
-      : sendDays === 1 ? 'dagen etter bryllupet'
-      : `${sendDays} dager etter bryllupet`,
+      sendDays === 0
+        ? 'på bryllupsdagen'
+        : sendDays === 1
+          ? 'dagen etter bryllupet'
+          : `${sendDays} dager etter bryllupet`,
     finalDesc: (whenText, termDays) =>
       `Restbeløpet betales. Fakturaen sendes ${whenText}, med ${termDays} dagers betalingsfrist.`,
     finalWho: (sentDate) => `Fakturaen sendes ${sentDate}.`,
@@ -80,51 +82,64 @@ export default {
 
   items: {
     welcome: {
-      tag: 'Oppstart', title: 'Velkommen til KACH Weddings',
+      tag: 'Oppstart',
+      title: 'Velkommen til KACH Weddings',
       desc: 'Dato og avtale er bekreftet, og dere er offisielt en del av KACH Weddings. Jeg gleder meg til å bli kjent med dere og til å fortelle historien deres.',
       who: 'KACH Weddings tar kontakt innen 48 timer etter at kontrakten er signert.',
     },
     getToKnow: {
-      tag: 'Spørreskjema', dateLabel: 'Etter bestilling', weekday: 'Innen en uke',
+      tag: 'Spørreskjema',
+      dateLabel: 'Etter bestilling',
+      weekday: 'Innen en uke',
       title: 'La oss bli kjent',
       desc: 'Et lite spørreskjema så jeg kan bli ordentlig kjent med dere: historien deres, hva som betyr noe, og stilen deres. Jo bedre jeg kjenner dere, jo mer «dere» blir bildene.',
       who: 'KACH Weddings sender skjemaet kort tid etter bestillingen.',
     },
     timelineQ: {
-      tag: 'Spørreskjema', title: 'Kjøreplanskjema',
+      tag: 'Spørreskjema',
+      title: 'Kjøreplanskjema',
       desc: 'Et spørreskjema med de praktiske detaljene rundt selve dagen: tider, steder, kontaktpersoner og program. Det danner grunnlaget for kjøreplanen vi lager sammen.',
       who: 'KACH Weddings sender det alltid den 1. i måneden, så dere kan fylle ut i ro og mak.',
     },
     plancall: {
-      tag: 'Planlegging', title: 'Planleggingssamtale',
+      tag: 'Planlegging',
+      title: 'Planleggingssamtale',
       desc: 'Vi tar en prat og går gjennom hele dagen: kjøreplan, ønskeliste, familiebilder og hvilke bilder som betyr mest for dere.',
       who: 'Omtrent en uke etter skjemaet. Vi avtaler tidspunkt sammen.',
     },
     finalSync: {
-      tag: 'Bekreftelse', title: 'Siste gjennomgang',
+      tag: 'Bekreftelse',
+      title: 'Siste gjennomgang',
       desc: 'En siste gjennomgang før dagen: vi bekrefter kjøreplan, adresser, kontaktpersoner og en reserveplan for været. Da er alt klart, og dere kan bare glede dere.',
       who: 'KACH Weddings tar kontakt.',
     },
     day: {
-      tag: 'Bryllupsdagen', title: 'Bryllupsdagen',
+      tag: 'Bryllupsdagen',
+      title: 'Bryllupsdagen',
       desc: 'Vi er der gjennom hele dagen og fanger historien deres slik den utspiller seg, uanstrengt og ekte.',
       who: '',
     },
     sneak: {
-      tag: 'Levering', title: 'Smakebit',
+      tag: 'Levering',
+      title: 'Smakebit',
       desc: 'Et lite utvalg bilder mens følelsen fortsatt sitter i kroppen, perfekt for de første takkehilsenene.',
       who: 'KACH Weddings sender.',
     },
     final: {
-      tag: 'Betaling', title: 'Sluttbetaling forfaller', desc: '', who: '',
+      tag: 'Betaling',
+      title: 'Sluttbetaling forfaller',
+      desc: '',
+      who: '',
     },
     gallery: {
-      tag: 'Levering', title: 'Ferdig galleri',
+      tag: 'Levering',
+      title: 'Ferdig galleri',
       desc: 'Det ferdige bildegalleriet leveres. Historien deres, fortalt fra start til slutt, klar til å lastes ned og deles.',
       who: 'KACH Weddings leverer i et nettgalleri dere kan laste ned fra.',
     },
     thanks: {
-      tag: 'Avslutning', title: 'Takk for tilliten',
+      tag: 'Avslutning',
+      title: 'Takk for tilliten',
       desc: 'Tusen takk for at jeg fikk dele dagen deres. Ble dere glade i bildene, setter jeg umåtelig stor pris på noen ord eller en anmeldelse. Det betyr alt for oss i KACH Weddings.',
       who: 'KACH Weddings tar kontakt.',
     },
@@ -135,8 +150,10 @@ export default {
       title: 'Parfotografering',
       eyebrowIncluded: 'Inkludert i pakken',
       eyebrowOptional: 'Valgfritt tillegg',
-      descIncluded: 'En egen fotoøkt for dere to, en rolig måte å bli trygg foran kamera på. Vi finner et fint tidspunkt sammen.',
-      descOptional: 'En egen fotoøkt for dere to i løpet av høsten eller våren før bryllupet, en rolig måte å bli trygg foran kamera på.',
+      descIncluded:
+        'En egen fotoøkt for dere to, en rolig måte å bli trygg foran kamera på. Vi finner et fint tidspunkt sammen.',
+      descOptional:
+        'En egen fotoøkt for dere to i løpet av høsten eller våren før bryllupet, en rolig måte å bli trygg foran kamera på.',
       noteOptional: 'Kommer i tillegg til pakkeprisen.',
       seasonsLabel: 'Aktuelle årstider',
       seasons: { autumn: 'Høst', spring: 'Vår', summer: 'Sommer' },
@@ -145,8 +162,10 @@ export default {
       title: 'Bryllupsalbum',
       eyebrowIncluded: 'Inkludert i pakken',
       eyebrowOptional: 'Valgfritt tillegg',
-      descIncluded: 'Når galleriet er klart, kan favorittene deres samles i et håndlaget album, historien deres i fysisk form.',
-      descOptional: 'Når galleriet er klart, kan favorittene deres samles i et håndlaget album, historien deres i fysisk form.',
+      descIncluded:
+        'Når galleriet er klart, kan favorittene deres samles i et håndlaget album, historien deres i fysisk form.',
+      descOptional:
+        'Når galleriet er klart, kan favorittene deres samles i et håndlaget album, historien deres i fysisk form.',
       noteOptional: 'Kommer i tillegg til pakkeprisen.',
     },
   },
@@ -156,7 +175,18 @@ export default {
   },
 
   csv: {
-    headers: ['Brudepar', 'Bryllupsdato', 'Sted', 'Fase', 'Tag', 'Dato', 'Ukedag', 'Tittel', 'Beskrivelse', 'Detalj'],
+    headers: [
+      'Brudepar',
+      'Bryllupsdato',
+      'Sted',
+      'Fase',
+      'Tag',
+      'Dato',
+      'Ukedag',
+      'Tittel',
+      'Beskrivelse',
+      'Detalj',
+    ],
     included: 'Inkludert',
     optional: 'Valgfritt tillegg',
     includedDetail: 'Inkludert i pakken',

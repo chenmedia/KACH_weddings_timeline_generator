@@ -11,13 +11,13 @@ function esc(s) {
 }
 
 function ymd(date) {
-  const p = n => String(n).padStart(2, '0');
+  const p = (n) => String(n).padStart(2, '0');
   return `${date.getFullYear()}${p(date.getMonth() + 1)}${p(date.getDate())}`;
 }
 
 function stamp() {
   const d = new Date();
-  const p = n => String(n).padStart(2, '0');
+  const p = (n) => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
 }
 
@@ -29,7 +29,10 @@ function fold(line) {
   let lineBytes = 0;
   for (const ch of line) {
     const b = _enc.encode(ch).length;
-    if (lineBytes + b > 75) { result += '\r\n '; lineBytes = 1; } // continuation, leading space = 1 octet
+    if (lineBytes + b > 75) {
+      result += '\r\n ';
+      lineBytes = 1;
+    } // continuation, leading space = 1 octet
     result += ch;
     lineBytes += b;
   }
@@ -37,9 +40,11 @@ function fold(line) {
 }
 
 // Build an all-day VEVENT for each dated milestone, plus the wedding day.
-export function downloadICS(state, locale) {
+// Build the .ics calendar text. Pure (no DOM) so it can be unit-tested.
+// Returns { content, filename } or null when there is no wedding date.
+export function buildICS(state, locale) {
   const data = getMilestones(state, locale);
-  if (!data) { alert(locale.alerts.pickDate); return; }
+  if (!data) return null;
 
   const couple = (state.couple || '').trim();
   const place = (state.place || '').trim();
@@ -58,7 +63,8 @@ export function downloadICS(state, locale) {
   data.rows.forEach((r, i) => {
     if (!r.date) return; // skip date-less (booking) items
     const start = r.date;
-    const end = new Date(start.getTime()); end.setDate(end.getDate() + 1); // DTEND exclusive
+    const end = new Date(start.getTime());
+    end.setDate(end.getDate() + 1); // DTEND exclusive
     const descParts = [r.desc, r.who].filter(Boolean);
     const summary = r.isDay && couple ? `${r.title} · ${couple}` : r.title;
 
@@ -84,7 +90,17 @@ export function downloadICS(state, locale) {
 
   lines.push('END:VCALENDAR');
 
-  const ics = lines.map(fold).join('\r\n');
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
-  downloadBlob(blob, `kach-weddings-tidslinje-${slug(couple)}.ics`);
+  return {
+    content: lines.map(fold).join('\r\n'),
+    filename: `kach-weddings-tidslinje-${slug(couple)}.ics`,
+  };
+}
+
+export function downloadICS(state, locale) {
+  const out = buildICS(state, locale);
+  if (!out) {
+    alert(locale.alerts.pickDate);
+    return;
+  }
+  downloadBlob(new Blob([out.content], { type: 'text/calendar;charset=utf-8;' }), out.filename);
 }

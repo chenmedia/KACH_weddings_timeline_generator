@@ -10,7 +10,7 @@ function el(tag, attrs = {}, children = []) {
     else if (k === 'for') n.htmlFor = v;
     else n.setAttribute(k, v);
   }
-  (Array.isArray(children) ? children : [children]).forEach(c => {
+  (Array.isArray(children) ? children : [children]).forEach((c) => {
     if (c == null) return;
     n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
   });
@@ -23,7 +23,8 @@ function textField(id, labelText, type, value, placeholder) {
   const wrap = el('div', { class: 'field' }, [el('label', { for: id, text: labelText }), input]);
   if (NUMERIC_RANGES[id]) {
     const r = NUMERIC_RANGES[id];
-    input.min = r.min; input.max = r.max;
+    input.min = r.min;
+    input.max = r.max;
     wrap.appendChild(el('div', { class: 'field-error', id: id + '-err', 'aria-live': 'polite' }));
   }
   return wrap;
@@ -38,7 +39,9 @@ export function buildControls(locale, state, handlers) {
   const grid = el('div', { class: 'grid' }, [
     el('div', { class: 'field full' }, [
       el('label', { for: 'couple', text: f.couple.label }),
-      Object.assign(el('input', { type: 'text', id: 'couple', value: state.couple || '' }), { placeholder: f.couple.ph }),
+      Object.assign(el('input', { type: 'text', id: 'couple', value: state.couple || '' }), {
+        placeholder: f.couple.ph,
+      }),
     ]),
     textField('wdate', f.wdate.label, 'date', state.wdate),
     textField('bdate', f.bdate.label, 'date', state.bdate),
@@ -48,10 +51,20 @@ export function buildControls(locale, state, handlers) {
     textField('sendDays', f.sendDays.label, 'number', state.sendDays),
     textField('termDays', f.termDays.label, 'number', state.termDays),
     textField('finalOverride', f.finalOverride.label, 'date', state.finalOverride),
-    el('div', { class: 'field full' }, el('div', { class: 'toggles' }, [
-      el('label', { class: 'toggle' }, [checkbox('tEngage', state.tEngage), document.createTextNode(' ' + c.toggles.engage)]),
-      el('label', { class: 'toggle' }, [checkbox('tAlbum', state.tAlbum), document.createTextNode(' ' + c.toggles.album)]),
-    ])),
+    el(
+      'div',
+      { class: 'field full' },
+      el('div', { class: 'toggles' }, [
+        el('label', { class: 'toggle' }, [
+          checkbox('tEngage', state.tEngage),
+          document.createTextNode(' ' + c.toggles.engage),
+        ]),
+        el('label', { class: 'toggle' }, [
+          checkbox('tAlbum', state.tAlbum),
+          document.createTextNode(' ' + c.toggles.album),
+        ]),
+      ]),
+    ),
   ]);
 
   // ----- actions -----
@@ -62,9 +75,9 @@ export function buildControls(locale, state, handlers) {
   };
   const toast = el('span', { class: 'toast', id: 'shareToast', role: 'status', 'aria-live': 'polite' });
   const customizeBtn = mkBtn('toggleEditor', c.buttons.customize, 'btn-ghost');
+  // The timeline updates live, so there is no explicit "update" button.
   const actions = el('div', { class: 'actions' }, [
-    mkBtn('update', c.buttons.update, 'btn-primary'),
-    mkBtn('share', c.buttons.share, 'btn-ghost'),
+    mkBtn('share', c.buttons.share, 'btn-primary'),
     mkBtn('csv', c.buttons.csv, 'btn-ghost'),
     mkBtn('ics', c.buttons.ics, 'btn-ghost'),
     mkBtn('pdf', c.buttons.pdf, 'btn-ghost'),
@@ -83,23 +96,36 @@ export function buildControls(locale, state, handlers) {
   ]);
 
   // ----- wire field inputs -----
-  FIELD_IDS.forEach(id => {
+  // State updates immediately (so exports use the latest values); the re-render
+  // and save are debounced so typing a name doesn't rebuild the timeline per key.
+  const debouncedChange = debounce(handlers.onChange, 150);
+  FIELD_IDS.forEach((id) => {
     const input = section.querySelector('#' + id);
     if (!input) return;
-    input.addEventListener('input', () => { state[id] = input.value; handlers.onChange(); });
+    input.addEventListener('input', () => {
+      state[id] = input.value;
+      debouncedChange();
+    });
     if (NUMERIC_RANGES[id]) {
-      input.addEventListener('change', () => { clampAndValidate(section, state, locale); handlers.onChange(); });
+      input.addEventListener('change', () => {
+        clampAndValidate(section, state, locale);
+        handlers.onChange();
+      });
     }
   });
-  TOGGLE_IDS.forEach(id => {
+  TOGGLE_IDS.forEach((id) => {
     const input = section.querySelector('#' + id);
     if (!input) return;
-    input.addEventListener('change', () => { state[id] = input.checked; handlers.onChange(); });
+    input.addEventListener('change', () => {
+      state[id] = input.checked;
+      handlers.onChange();
+    });
   });
 
   customizeBtn.addEventListener('click', () => {
     const hidden = editor.hasAttribute('hidden');
-    if (hidden) editor.removeAttribute('hidden'); else editor.setAttribute('hidden', '');
+    if (hidden) editor.removeAttribute('hidden');
+    else editor.setAttribute('hidden', '');
   });
 
   clampAndValidate(section, state, locale, /* silent */ true);
@@ -112,17 +138,25 @@ function checkbox(id, checked) {
   return cb;
 }
 
+function debounce(fn, ms) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
+
 function clampAndValidate(section, state, locale, silent) {
   const { state: clamped, warnings } = validateState(state, locale);
-  const warnIds = new Set(warnings.map(w => w.id));
-  Object.keys(NUMERIC_RANGES).forEach(id => {
+  const warnIds = new Set(warnings.map((w) => w.id));
+  Object.keys(NUMERIC_RANGES).forEach((id) => {
     const input = section.querySelector('#' + id);
     const errEl = section.querySelector('#' + id + '-err');
     if (!input) return;
     // reflect clamped value back into the field and state
     if (!silent && input.value !== '' && input.value !== clamped[id]) input.value = clamped[id];
     state[id] = input.value === '' ? clamped[id] : input.value;
-    const warn = warnings.find(w => w.id === id);
+    const warn = warnings.find((w) => w.id === id);
     if (errEl) errEl.textContent = warn ? warn.message : '';
     input.setAttribute('aria-invalid', warnIds.has(id) ? 'true' : 'false');
   });
@@ -138,8 +172,8 @@ function buildEditor(locale, state, handlers) {
   wrap.appendChild(el('div', { class: 'controls-title', text: e.title }));
   wrap.appendChild(el('div', { class: 'editor-intro', text: e.intro }));
 
-  PHASES.forEach(phase => {
-    phase.items.forEach(it => {
+  PHASES.forEach((phase) => {
+    phase.items.forEach((it) => {
       const ov = state.overrides[it.key] || (state.overrides[it.key] = {});
       const content = locale.items[it.key] || {};
 
@@ -169,12 +203,20 @@ function buildEditor(locale, state, handlers) {
         item.classList.toggle('is-hidden', ov.hidden);
         handlers.onChange();
       });
-      dateInput.addEventListener('change', () => { ov.date = dateInput.value || undefined; handlers.onChange(); });
-      noteArea.addEventListener('input', () => { ov.note = noteArea.value.trim() || undefined; handlers.onChange(); });
+      dateInput.addEventListener('change', () => {
+        ov.date = dateInput.value || undefined;
+        handlers.onChange();
+      });
+      noteArea.addEventListener('input', () => {
+        ov.note = noteArea.value.trim() || undefined;
+        handlers.onChange();
+      });
       resetLink.addEventListener('click', () => {
         delete state.overrides[it.key];
         state.overrides[it.key] = {};
-        showCb.checked = true; dateInput.value = ''; noteArea.value = '';
+        showCb.checked = true;
+        dateInput.value = '';
+        noteArea.value = '';
         item.classList.remove('is-hidden');
         handlers.onChange();
       });

@@ -17,7 +17,7 @@ export function parseISO(val) {
 
 // Format a Date back to yyyy-mm-dd (for inputs and .ics).
 export function toISO(d) {
-  const p = n => String(n).padStart(2, '0');
+  const p = (n) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
@@ -39,34 +39,46 @@ export function monthStartBefore(W, months) {
 // Movable (Easter/Pentecost-based): Maundy Thursday, Good Friday, Easter Sun + Mon,
 // Ascension, Whit Sun + Mon.
 export function easterSunday(year) {
-  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
-  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
-  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const a = year % 19,
+    b = Math.floor(year / 100),
+    c = year % 100;
+  const d = Math.floor(b / 4),
+    e = b % 4,
+    f = Math.floor((b + 8) / 25),
+    g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30,
+    i = Math.floor(c / 4),
+    k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7,
+    m = Math.floor((a + 11 * h + 22 * l) / 451);
   const month = Math.floor((h + l - 7 * m + 114) / 31);
   const day = ((h + l - 7 * m + 114) % 31) + 1;
   return new Date(year, month - 1, day);
 }
 
 const _holidayCache = {};
-function _key(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function _key(d) {
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
 
 export function holidaySet(year) {
   if (_holidayCache[year]) return _holidayCache[year];
   const s = new Set();
-  const add = dt => s.add(_key(dt));
-  add(new Date(year, 0, 1));   // Første nyttårsdag
-  add(new Date(year, 4, 1));   // Arbeidernes dag
-  add(new Date(year, 4, 17));  // Grunnlovsdag
+  const add = (dt) => s.add(_key(dt));
+  add(new Date(year, 0, 1)); // Første nyttårsdag
+  add(new Date(year, 4, 1)); // Arbeidernes dag
+  add(new Date(year, 4, 17)); // Grunnlovsdag
   add(new Date(year, 11, 25)); // Første juledag
   add(new Date(year, 11, 26)); // Andre juledag
   const e = easterSunday(year);
-  [-3, -2, 0, 1, 39, 49, 50].forEach(off => add(addDays(e, off)));
+  [-3, -2, 0, 1, 39, 49, 50].forEach((off) => add(addDays(e, off)));
   _holidayCache[year] = s;
   return s;
 }
 
-export function isHoliday(d) { return holidaySet(d.getFullYear()).has(_key(d)); }
+export function isHoliday(d) {
+  return holidaySet(d.getFullYear()).has(_key(d));
+}
 
 // Move forward to the first date that is not a public holiday.
 export function bumpForward(d) {

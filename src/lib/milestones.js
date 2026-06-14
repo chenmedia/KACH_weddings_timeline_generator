@@ -1,17 +1,15 @@
-import { PHASES } from '../config.js';
-import {
-  addDays, parseISO, toISO, fmtDate, fmtWeekday,
-  monthStartBefore, bumpForward,
-} from './dates.js';
+import { PHASES, TIMING } from '../config.js';
+import { addDays, parseISO, toISO, fmtDate, fmtWeekday, monthStartBefore, bumpForward } from './dates.js';
 
 // Compute the concrete date for a milestone, or null for date-less items.
 function computeDate(item, ctx) {
   const { W, sendDays, termDays, delDays, finalOverride } = ctx;
   if (item.type === 'booking' || item.type === 'season' || item.type === 'open') return null;
   if (item.isDay) return W; // the wedding day is never moved
-  // Run-of-day form always goes out on the 1st, ~3 months before — call one week later.
-  if (item.key === 'timelineQ') return bumpForward(monthStartBefore(W, 3));
-  if (item.key === 'plancall') return bumpForward(addDays(monthStartBefore(W, 3), 7));
+  // Run-of-day form always goes out on the 1st, N months before — call one week later.
+  const formStart = monthStartBefore(W, TIMING.questionnaireMonthsBefore);
+  if (item.key === 'timelineQ') return bumpForward(formStart);
+  if (item.key === 'plancall') return bumpForward(addDays(formStart, TIMING.planCallDaysAfterQuestionnaire));
   if (item.type === 'final') {
     if (finalOverride) return parseISO(finalOverride); // custom: never moved
     return bumpForward(addDays(W, sendDays + termDays));
@@ -27,7 +25,8 @@ export function getMilestones(state, locale) {
   const W = parseISO(state.wdate);
   if (!W) return null;
 
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const sendDays = Number(state.sendDays) || 0;
   const termDays = Number(state.termDays) || 0;
   const delDays = (Number(state.delw) || 4) * 7;
@@ -36,14 +35,17 @@ export function getMilestones(state, locale) {
   const ctx = { W, sendDays, termDays, delDays, finalOverride };
 
   const rows = [];
-  PHASES.forEach(phase => {
-    phase.items.forEach(it => {
+  PHASES.forEach((phase) => {
+    phase.items.forEach((it) => {
       const ov = overrides[it.key] || {};
       if (ov.hidden) return;
 
       const content = locale.items[it.key] || {};
       let d = computeDate(it, ctx);
-      if (ov.date) { const od = parseISO(ov.date); if (od) d = od; }
+      if (ov.date) {
+        const od = parseISO(ov.date);
+        if (od) d = od;
+      }
 
       const isBooking = it.type === 'booking';
       const isSoft = it.type === 'season' || it.type === 'open';
@@ -73,7 +75,10 @@ export function getMilestones(state, locale) {
       }
 
       // Per-couple note override replaces the body text.
-      if (ov.note) { descText = ov.note; whoText = ''; }
+      if (ov.note) {
+        descText = ov.note;
+        whoText = '';
+      }
 
       rows.push({
         key: it.key,
@@ -116,8 +121,12 @@ export function parfotoAside(state, locale) {
     const W = parseISO(state.wdate);
     if (W) {
       let B = parseISO(state.bdate);
-      if (!B) { B = new Date(); B.setHours(0, 0, 0, 0); } // no booking date → use today
-      const cutoff = new Date(W.getFullYear() - 1, 5, 1); // 1 June the year before the wedding
+      if (!B) {
+        B = new Date();
+        B.setHours(0, 0, 0, 0);
+      } // no booking date → use today
+      const cut = TIMING.coupleSessionSummerCutoff;
+      const cutoff = new Date(W.getFullYear() - cut.yearsBeforeWedding, cut.monthIndex, cut.day);
       if (B < cutoff) seasons.unshift(a.seasons.summer); // early booking → summer also viable
     }
     out.seasons = seasons;

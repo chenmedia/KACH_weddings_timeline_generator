@@ -8,10 +8,12 @@ const LANG_KEY = 'kachweddings-lang';
 let current = DEFAULT_LANG;
 
 export function availableLangs() {
-  return SUPPORTED_LANGS.map(code => ({ code, label: LOCALES[code].label }));
+  return SUPPORTED_LANGS.map((code) => ({ code, label: LOCALES[code].label }));
 }
 
-export function getLang() { return current; }
+export function getLang() {
+  return current;
+}
 
 // Resolve initial language: explicit URL param > saved choice > browser > default.
 export function resolveInitialLang(urlLang) {
@@ -19,7 +21,9 @@ export function resolveInitialLang(urlLang) {
   try {
     const saved = localStorage.getItem(LANG_KEY);
     if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
-  } catch (e) { /* ignore */ }
+  } catch (e) {
+    /* ignore */
+  }
   const nav = (navigator.language || '').slice(0, 2).toLowerCase();
   if (SUPPORTED_LANGS.includes(nav)) return nav;
   return DEFAULT_LANG;
@@ -28,9 +32,17 @@ export function resolveInitialLang(urlLang) {
 export function setLang(code, persist = true) {
   if (!SUPPORTED_LANGS.includes(code)) return;
   current = code;
-  if (persist) { try { localStorage.setItem(LANG_KEY, code); } catch (e) { /* ignore */ } }
+  if (persist) {
+    try {
+      localStorage.setItem(LANG_KEY, code);
+    } catch (e) {
+      /* ignore */
+    }
+  }
   document.documentElement.lang = code;
 }
 
 // The active locale object.
-export function t() { return LOCALES[current]; }
+export function t() {
+  return LOCALES[current];
+}

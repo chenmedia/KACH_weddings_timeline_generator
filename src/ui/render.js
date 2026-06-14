@@ -2,16 +2,20 @@ import { getMilestones, parfotoAside, albumAside } from '../lib/milestones.js';
 import { ASIDE_AFTER_PHASE, ASIDE_AFTER_ITEM, SITE_URL } from '../config.js';
 
 function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function asideHTML(a) {
   const note = a.note ? `<div class="a-note">${esc(a.note)}</div>` : '';
   let seasons = '';
   if (a.seasons && a.seasons.length) {
-    seasons = `<div class="a-seasons"><span class="a-seasons-label">${esc(a.seasonsLabel)}</span>`
-      + a.seasons.map(s => `<span class="a-season">${esc(s)}</span>`).join('')
-      + '</div>';
+    seasons =
+      `<div class="a-seasons"><span class="a-seasons-label">${esc(a.seasonsLabel)}</span>` +
+      a.seasons.map((s) => `<span class="a-season">${esc(s)}</span>`).join('') +
+      '</div>';
   }
   return `<div class="aside${a.included ? '' : ' is-extra'}">
     <div class="a-eyebrow">${esc(a.eyebrow)}</div>
@@ -25,7 +29,10 @@ function asideHTML(a) {
 // Render the on-screen timeline into `out`.
 export function renderTimeline(state, locale, out) {
   const data = getMilestones(state, locale);
-  if (!data) { out.innerHTML = `<p class="empty">${esc(locale.timeline.empty)}</p>`; return; }
+  if (!data) {
+    out.innerHTML = `<p class="empty">${esc(locale.timeline.empty)}</p>`;
+    return;
+  }
 
   const couple = (state.couple || '').trim();
   const place = (state.place || '').trim();
@@ -43,7 +50,7 @@ export function renderTimeline(state, locale, out) {
 
   html += '<div class="timeline">';
   let lastPhase = null;
-  data.rows.forEach(r => {
+  data.rows.forEach((r) => {
     if (r.phaseKey !== lastPhase) {
       html += `<h3 class="phase-label">${esc(r.phase)}</h3>`;
       lastPhase = r.phaseKey;

@@ -1,16 +1,19 @@
 import './styles.css';
-import { SITE_URL } from './config.js';
 import { t, getLang, setLang, resolveInitialLang, availableLangs } from './i18n.js';
 import {
-  defaultState, loadState, saveState, clearState,
-  decodeStateFromParams, buildShareUrl,
+  defaultState,
+  loadState,
+  saveState,
+  clearState,
+  decodeStateFromParams,
+  buildShareUrl,
 } from './lib/state.js';
 import { buildControls } from './ui/controls.js';
 import { renderTimeline } from './ui/render.js';
-import { downloadCSV } from './exporters/csv.js';
-import { downloadICS } from './exporters/ics.js';
-import { exportPDF } from './exporters/pdf.js';
 import { initAnalytics, track } from './analytics.js';
+
+// Exporters are loaded on demand (dynamic import) so the initial bundle — and
+// the couple's read-only view, which never exports — stays small.
 
 const root = document.getElementById('app'); // this is the .wrap element
 let state;
@@ -29,18 +32,52 @@ function onChange() {
 function applyMeta() {
   const locale = t();
   document.title = locale.meta.title;
-  const desc = document.querySelector('meta[name="description"]');
-  if (desc) desc.setAttribute('content', locale.meta.description);
+  setMeta('name', 'description', locale.meta.description);
+  setMeta('property', 'og:title', locale.meta.title);
+  setMeta('property', 'og:description', locale.meta.description);
   document.documentElement.lang = getLang();
+
+  // Canonical + per-language alternates, resolved against the live origin so
+  // they are correct on any deploy domain without a build-time config.
+  const base = location.origin + location.pathname;
+  setMeta('property', 'og:url', base);
+  setLink('canonical', null, base);
+  setLink('alternate', 'x-default', base);
+  availableLangs().forEach(({ code }) => setLink('alternate', code, `${base}?lang=${code}`));
 }
 
+function setMeta(attr, key, content) {
+  let m = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!m) {
+    m = document.createElement('meta');
+    m.setAttribute(attr, key);
+    document.head.appendChild(m);
+  }
+  m.setAttribute('content', content);
+}
+
+function setLink(rel, hreflang, href) {
+  const sel = hreflang ? `link[rel="${rel}"][hreflang="${hreflang}"]` : `link[rel="${rel}"]:not([hreflang])`;
+  let l = /** @type {HTMLLinkElement|null} */ (document.head.querySelector(sel));
+  if (!l) {
+    l = document.createElement('link');
+    l.rel = rel;
+    if (hreflang) l.hreflang = hreflang;
+    document.head.appendChild(l);
+  }
+  l.href = href;
+}
+
+let toastTimer;
 function showToast(msg) {
   const toast = document.getElementById('shareToast');
-  if (!toast) { return; }
+  if (!toast) {
+    return;
+  }
   toast.textContent = msg;
   toast.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => toast.classList.remove('show'), 2600);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
 }
 
 async function copyShareLink() {
@@ -51,9 +88,13 @@ async function copyShareLink() {
       await navigator.clipboard.writeText(url);
     } else {
       const ta = document.createElement('textarea');
-      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); ta.remove();
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
     }
     showToast(c.shareCopied);
     track('Share link copied');
@@ -62,21 +103,39 @@ async function copyShareLink() {
   }
 }
 
-function onAction(name, button) {
+async function onAction(name, button) {
   const locale = t();
   switch (name) {
-    case 'update': render(); break;
-    case 'share': copyShareLink(); break;
-    case 'csv': downloadCSV(state, locale); track('Export CSV'); break;
-    case 'ics': downloadICS(state, locale); track('Export ICS'); break;
-    case 'pdf': exportPDF(state, locale, { refresh: render, button }); track('Export PDF'); break;
+    case 'share':
+      copyShareLink();
+      break;
+    case 'csv': {
+      const { downloadCSV } = await import('./exporters/csv.js');
+      downloadCSV(state, locale);
+      track('Export CSV');
+      break;
+    }
+    case 'ics': {
+      const { downloadICS } = await import('./exporters/ics.js');
+      downloadICS(state, locale);
+      track('Export ICS');
+      break;
+    }
+    case 'pdf': {
+      const { exportPDF } = await import('./exporters/pdf/index.js');
+      exportPDF(state, locale, { refresh: render, button });
+      track('Export PDF');
+      break;
+    }
     case 'reset':
       clearState();
       state = defaultState();
       buildUI();
       break;
-    case 'toggleEditor': /* handled inside controls */ break;
-    default: break;
+    case 'toggleEditor':
+      /* handled inside controls */ break;
+    default:
+      break;
   }
 }
 
@@ -124,7 +183,10 @@ function buildUI() {
 }
 
 function escapeHTML(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function init() {
