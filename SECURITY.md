@@ -35,8 +35,10 @@ When editing rendering code, preserve this invariant.
 
 `vercel.json` sets a Content-Security-Policy, `Strict-Transport-Security`,
 `Permissions-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, and
-`Referrer-Policy`. The CSP allows `https://plausible.io` so optional analytics
-keeps working; tighten or remove that if analytics is never used.
+`Referrer-Policy`. The CSP allows no external origins by default. **If you enable
+Plausible analytics, add `https://plausible.io` to both `script-src` and
+`connect-src`** in `vercel.json` (or your self-hosted Plausible origin),
+otherwise the script is blocked.
 
 ## Analytics
 

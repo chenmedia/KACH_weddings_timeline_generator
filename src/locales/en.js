@@ -106,7 +106,7 @@ export default {
       tag: 'Planning',
       title: 'Planning call',
       desc: 'We talk through the whole day: the run-of-day plan, your wish list, family photos and which images matter most to you.',
-      who: 'About a week after the form. We agree a time together.',
+      who: 'About a week after the form — we agree a time together.',
     },
     finalSync: {
       tag: 'Confirmation',
@@ -124,7 +124,7 @@ export default {
       tag: 'Delivery',
       title: 'Sneak peek',
       desc: 'A small selection of images while the feeling is still fresh — perfect for the first thank-you notes.',
-      who: 'KACH Weddings sends.',
+      who: 'KACH Weddings will send it.',
     },
     final: {
       tag: 'Payment',
