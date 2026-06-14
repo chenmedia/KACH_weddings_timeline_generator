@@ -26,6 +26,15 @@ export default {
     signInIntro: 'Logg inn for å lage og lagre tidslinjer.',
   },
 
+  share: {
+    title: 'Del med brudeparet',
+    enable: 'Lag en delbar lenke',
+    hint: 'Brudeparet kan se (men ikke endre) tidslinjen via denne lenken.',
+    copy: 'Kopier lenke',
+    copied: 'Lenken er kopiert',
+    failed: 'Kunne ikke kopiere – kopier fra feltet i stedet.',
+  },
+
   controls: {
     title: 'Sett opp tidslinjen',
     fields: {

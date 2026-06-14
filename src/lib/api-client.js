@@ -17,6 +17,8 @@ export const api = {
   create: (state) => authed('/api/timelines', { method: 'POST', body: JSON.stringify(state) }),
   update: (id, state) => authed(`/api/timelines/${id}`, { method: 'PUT', body: JSON.stringify(state) }),
   remove: (id) => authed(`/api/timelines/${id}`, { method: 'DELETE' }),
+  setShare: (id, shareEnabled) =>
+    authed(`/api/timelines/${id}`, { method: 'PATCH', body: JSON.stringify({ shareEnabled }) }),
   publicGet: (slug) =>
     fetch(`/api/public/timeline/${encodeURIComponent(slug)}`).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(String(r.status))),

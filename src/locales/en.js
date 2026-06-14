@@ -27,6 +27,15 @@ export default {
     signInIntro: 'Sign in to create and save timelines.',
   },
 
+  share: {
+    title: 'Share with the couple',
+    enable: 'Create a shareable link',
+    hint: 'The couple can view (but not edit) the timeline via this link.',
+    copy: 'Copy link',
+    copied: 'Link copied',
+    failed: 'Could not copy — copy it from the field instead.',
+  },
+
   controls: {
     title: 'Set up the timeline',
     fields: {

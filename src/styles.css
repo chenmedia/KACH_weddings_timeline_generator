@@ -685,3 +685,33 @@ footer .links {
   max-width: 480px;
   margin: 0 auto;
 }
+
+/* ---------- Share panel (authed) ---------- */
+.share-panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.share-panel .toggle {
+  margin-top: 4px;
+}
+.share-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.share-url {
+  flex: 1;
+  min-width: 240px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--field-border);
+  border-radius: 2px;
+  padding: 10px 12px;
+}

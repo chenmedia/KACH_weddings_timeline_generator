@@ -3,6 +3,7 @@ import { t, getLang, setLang, resolveInitialLang, availableLangs } from './i18n.
 import { defaultState, loadState, clearState, decodeStateFromParams, buildShareUrl } from './lib/state.js';
 import { LocalStorageSource, ApiSource } from './lib/state-source.js';
 import { buildControls } from './ui/controls.js';
+import { buildSharePanel } from './ui/share-panel.js';
 import { renderTimeline } from './ui/render.js';
 import { initAnalytics, track } from './analytics.js';
 import {
@@ -212,6 +213,9 @@ function renderEditorArea() {
     editorContainer.appendChild(divText('dash-empty', t().dashboard.selectPrompt));
     outputEl = null;
     return;
+  }
+  if (apiMode && currentTimelineId && !clientView) {
+    editorContainer.appendChild(buildSharePanel(t(), { timelineId: currentTimelineId, state }));
   }
   if (!clientView) {
     const { el } = buildControls(t(), state, { onChange, onAction });

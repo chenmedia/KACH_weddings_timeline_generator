@@ -4,7 +4,7 @@
 import { and, eq } from 'drizzle-orm';
 import { getDb, schema } from '../_lib/db.js';
 import { requireUser } from '../_lib/auth.js';
-import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
+import { ok, fail, methodNotAllowed, genSlug } from '../_lib/respond.js';
 import { stateToRow, overridesToRows, rowToState } from '../../src/lib/row-mapper.js';
 
 export default async function handler(req, res) {
@@ -23,7 +23,12 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const ovRows = await db.select().from(milestoneOverrides).where(eq(milestoneOverrides.timelineId, id));
-    return ok(res, { id, ...rowToState(row, ovRows) });
+    return ok(res, {
+      id,
+      ...rowToState(row, ovRows),
+      shareSlug: row.shareSlug,
+      shareEnabled: row.shareEnabled,
+    });
   }
 
   if (req.method === 'PUT') {
@@ -44,5 +49,18 @@ export default async function handler(req, res) {
     return ok(res, { deleted: true });
   }
 
-  return methodNotAllowed(res, ['GET', 'PUT', 'DELETE']);
+  if (req.method === 'PATCH') {
+    // Toggle the couple's read-only share link; mint a slug on first enable.
+    const enabled = !!(req.body && req.body.shareEnabled);
+    let slug = row.shareSlug;
+    const patch = { shareEnabled: enabled, updatedAt: new Date() };
+    if (enabled && !slug) {
+      slug = genSlug();
+      patch.shareSlug = slug;
+    }
+    await db.update(timelines).set(patch).where(eq(timelines.id, id));
+    return ok(res, { shareSlug: slug, shareEnabled: enabled });
+  }
+
+  return methodNotAllowed(res, ['GET', 'PUT', 'PATCH', 'DELETE']);
 }
