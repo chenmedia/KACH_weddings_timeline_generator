@@ -1,0 +1,8 @@
+dist
+node_modules
+public/fonts
+db/migrations
+package-lock.json
+*.png
+*.svg
+*.woff2
