@@ -21,20 +21,20 @@
     "db:migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
-    "@eslint/js": "^9.13.0",
+    "@eslint/js": "^10.0.1",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9.13.0",
-    "globals": "^15.11.0",
-    "jsdom": "^25.0.1",
-    "pg": "^8.21.0",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "pg": "^8.22.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.0",
-    "vitest": "^2.1.4"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
-    "@clerk/backend": "^3.7.0",
-    "@clerk/clerk-js": "^6.16.1",
+    "@clerk/backend": "^3.8.2",
+    "@clerk/clerk-js": "^6.20.0",
     "@neondatabase/serverless": "^1.1.0",
     "drizzle-orm": "^0.45.2"
   }
