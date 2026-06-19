@@ -129,10 +129,15 @@ Det som er på plass i denne fasen:
   `src/lib/state-source.js` (localStorage i dag, API når påslått). Dato­logikken i
   `milestones.js`/`dates.js` er fortsatt eneste kilde — beregnede datoer lagres
   aldri.
+- **Frontend koblet til:** Clerk-innlogging, fotograf-dashboard for lagrede
+  tidslinjer (`src/ui/dashboard.js`), del-panel for å slå brudepar-lenken av/på
+  (`src/ui/share-panel.js`), skrivebeskyttet `/c/:slug`-rute (håndtert i
+  `src/main.js`), og `main.js` → `state-source` (localStorage uten innlogging,
+  API når påslått).
 
-Slå på backend: sett variablene i `.env.example` (Neon, Clerk, `CRON_SECRET`),
-kjør `npm run db:migrate`, og koble frontend til (Clerk-innlogging, dashboard,
-`/c/:slug`-rute, `main.js` → `state-source`) — neste steg i Phase 1.
+Slå på backend: sett variablene i `.env.example` (Neon, Clerk, `CRON_SECRET`)
+og kjør `npm run db:migrate`. Uten miljøvariabler faller alt tilbake til
+localStorage og fungerer akkurat som før.
 
 ## Hoste på Vercel
 
