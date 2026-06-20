@@ -3,6 +3,9 @@
 // descriptor (see src/app/registry.js), and add it to the list below.
 import './styles.css';
 import { startApp } from './app/shell.js';
+import home from './features/home/index.js';
 import timeline from './features/timeline/index.js';
 
-startApp({ features: [timeline] });
+// Order matters: the first feature is the default route ('/'), so Home is the
+// post-login landing. New tools just get added to this list.
+startApp({ features: [home, timeline] });

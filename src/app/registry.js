@@ -5,6 +5,10 @@
 //     path: string,                         // app-route path, e.g. '/'
 //     requiresAuth: boolean,                // gated behind sign-in when auth is enabled
 //     navLabel: (locale) => string,         // label in the top nav
+//     title?: (locale) => string,           // tool-card title on the Home launcher
+//     summary?: (locale) => string,         // tool-card one-line description
+//     icon?: string,                        // inline-SVG string for the tool card
+//     status?: 'ready' | 'soon',            // 'soon' => shown disabled on Home
 //     mount(container, ctx): void,          // render the feature's app view
 //     mountPublic?(container, ctx, match),  // render an unauthenticated/public route
 //     matchPublic?(pathname, params) => match|null, // claim a public route

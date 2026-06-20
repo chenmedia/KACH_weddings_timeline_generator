@@ -60,11 +60,24 @@ function setLink(rel, hreflang, href) {
 }
 
 // ---------- shell chrome ----------
-function buildHeader() {
+function buildHeader(homeLink) {
   const header = el('header');
   header.innerHTML = `<h1 class="wordmark">KACH <span class="light">Weddings</span></h1>
     <div class="eyebrow"></div>`;
   header.querySelector('.eyebrow').textContent = t().header.eyebrow;
+  if (homeLink) {
+    const wm = header.querySelector('.wordmark');
+    wm.classList.add('is-link');
+    wm.setAttribute('role', 'link');
+    wm.setAttribute('tabindex', '0');
+    wm.addEventListener('click', () => navigate('/'));
+    wm.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navigate('/');
+      }
+    });
+  }
   header.appendChild(buildLangbar());
   return header;
 }
@@ -120,11 +133,11 @@ function makeCtx() {
 // ---------- top-level render ----------
 function render() {
   applyMeta();
-  root.innerHTML = '';
-  root.appendChild(buildHeader());
-
   const features = getFeatures();
   const route = resolveRoute(features);
+
+  root.innerHTML = '';
+  root.appendChild(buildHeader(route.kind === 'app')); // wordmark links Home in-app
   const main = el('div', { id: 'main' });
 
   if (route.kind === 'public' && route.feature) {

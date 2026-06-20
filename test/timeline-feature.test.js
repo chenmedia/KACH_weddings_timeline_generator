@@ -19,7 +19,7 @@ function ctx() {
 describe('timeline feature descriptor', () => {
   it('is a valid feature', () => {
     expect(timeline.id).toBe('timeline');
-    expect(timeline.path).toBe('/');
+    expect(timeline.path).toBe('/timeline');
     expect(typeof timeline.mount).toBe('function');
     expect(typeof timeline.mountPublic).toBe('function');
     expect(typeof timeline.reset).toBe('function');

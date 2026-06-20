@@ -13,6 +13,7 @@ import { t, getLang, setLang } from '../../i18n.js';
 import { track } from '../../analytics.js';
 import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
+import { icons } from '../../ui/icons.js';
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
 import { renderTimeline } from './render.js';
@@ -295,9 +296,13 @@ function reset() {
 // Feature descriptor consumed by the app shell / registry.
 const timelineFeature = {
   id: 'timeline',
-  path: '/',
+  path: '/timeline',
   requiresAuth: true,
   navLabel: (locale) => (locale.nav && locale.nav.timeline) || locale.dashboard.title,
+  title: (locale) => locale.tools.timeline.title,
+  summary: (locale) => locale.tools.timeline.summary,
+  icon: icons.timeline,
+  status: 'ready',
   mount,
   mountPublic,
   matchPublic,
