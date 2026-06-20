@@ -1,0 +1,7 @@
+/* Timeline feature styles.
+ *
+ * Convention: feature-specific CSS lives next to its feature. For now the
+ * timeline's rules remain in the shared src/styles.css (it predates the feature
+ * split and the cascade is tuned there); new features should put their styles in
+ * their own <feature>.css imported from the feature entry. This file is the
+ * anchor for that convention and the home for future timeline-only rules. */

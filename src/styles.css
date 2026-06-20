@@ -10,6 +10,15 @@
   --accent: #1a1816; /* monochrome accent (filled marker) */
   --serif: 'Cormorant Garamond', 'Georgia', serif;
   --sans: 'Montserrat', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  /* Spacing scale — use instead of ad-hoc pixels in new UI. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  /* Timeline rail gutter (narrowed on small screens — see media query). */
+  --rail: 48px;
 }
 
 * {
@@ -33,6 +42,57 @@ body {
 .wrap {
   max-width: 860px;
   margin: 0 auto;
+}
+
+/* ---------- Layout primitives (reusable, responsive by default) ----------
+ * Compose UI with these instead of bespoke fl/grid rules:
+ *   .stack    — vertical rhythm (override --stack-gap to tune)
+ *   .cluster  — wrapping row of items with a gap (buttons, badges, inputs)
+ *   .grid-auto— cards/list that reflow without breakpoints via auto-fit
+ * New features should reach for these first. */
+.stack > * + * {
+  margin-top: var(--stack-gap, var(--sp-4));
+}
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cluster-gap, var(--sp-3));
+}
+.grid-auto {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+
+/* Feature nav — rendered by the shell once more than one feature exists. */
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-bottom: 36px;
+}
+.app-nav .nav-item {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--field-border);
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+.app-nav .nav-item:hover {
+  border-color: var(--ink);
+}
+.app-nav .nav-item.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
 }
 
 /* ---------- Header / wordmark ---------- */
@@ -206,7 +266,7 @@ button {
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 2px;
-  padding: 13px 26px;
+  padding: 13px clamp(16px, 5vw, 26px);
   transition: 0.18s ease;
 }
 .btn-primary {
@@ -359,7 +419,7 @@ button {
 }
 .phase-label {
   position: relative;
-  padding-left: 48px;
+  padding-left: var(--rail);
   margin: 42px 0 18px;
   font-size: 11px;
   letter-spacing: 0.3em;
@@ -372,7 +432,7 @@ button {
 
 .item {
   position: relative;
-  padding: 0 0 34px 48px;
+  padding: 0 0 34px var(--rail);
 }
 .item .marker {
   position: absolute;
@@ -552,6 +612,30 @@ footer .links {
   }
 }
 
+@media (max-width: 400px) {
+  :root {
+    --rail: 34px;
+  }
+  .controls {
+    padding: 22px 18px 20px;
+  }
+  .dashboard {
+    padding: 20px 18px;
+  }
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ---------- Print / Save as PDF ---------- */
 @media print {
   body {
@@ -706,7 +790,7 @@ footer .links {
 }
 .share-url {
   flex: 1;
-  min-width: 240px;
+  min-width: min(240px, 100%);
   font-family: var(--sans);
   font-size: 13px;
   color: var(--ink);

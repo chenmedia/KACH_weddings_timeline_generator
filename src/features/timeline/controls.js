@@ -1,21 +1,6 @@
-import { PHASES } from '../config.js';
-import { FIELD_IDS, TOGGLE_IDS, NUMERIC_RANGES, validateState } from '../lib/state.js';
-
-function el(tag, attrs = {}, children = []) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') n.className = v;
-    else if (k === 'text') n.textContent = v;
-    else if (k === 'html') n.innerHTML = v;
-    else if (k === 'for') n.htmlFor = v;
-    else n.setAttribute(k, v);
-  }
-  (Array.isArray(children) ? children : [children]).forEach((c) => {
-    if (c == null) return;
-    n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  });
-  return n;
-}
+import { PHASES } from '../../config.js';
+import { FIELD_IDS, TOGGLE_IDS, NUMERIC_RANGES, validateState } from '../../lib/state.js';
+import { el } from '../../ui/dom.js';
 
 function textField(id, labelText, type, value, placeholder) {
   const input = el('input', { type, id, value: value || '' });

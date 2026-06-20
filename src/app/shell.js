@@ -1,0 +1,176 @@
+// App shell: header + language switcher + feature nav + content area, plus the
+// auth lifecycle and route dispatch. Feature-agnostic — it knows nothing about
+// timelines; it just mounts the active feature into the content container.
+import { t, getLang, setLang, resolveInitialLang, availableLangs } from '../i18n.js';
+import { initAnalytics, track } from '../analytics.js';
+import {
+  isAuthEnabled,
+  initAuth,
+  isSignedIn,
+  onAuthChange,
+  mountSignIn,
+  mountUserButton,
+  getToken,
+} from '../auth.js';
+import { el } from '../ui/dom.js';
+import { registerFeature, getFeatures } from './registry.js';
+import { resolveRoute, navigate, onRouteChange } from './router.js';
+
+const root = document.getElementById('app'); // the .wrap element
+
+let authEnabled = false;
+let authReady = false;
+
+// ---------- meta / SEO ----------
+function applyMeta() {
+  const locale = t();
+  document.title = locale.meta.title;
+  setMeta('name', 'description', locale.meta.description);
+  setMeta('property', 'og:title', locale.meta.title);
+  setMeta('property', 'og:description', locale.meta.description);
+  document.documentElement.lang = getLang();
+
+  const base = location.origin + location.pathname;
+  setMeta('property', 'og:url', base);
+  setLink('canonical', null, base);
+  setLink('alternate', 'x-default', base);
+  availableLangs().forEach(({ code }) => setLink('alternate', code, `${base}?lang=${code}`));
+}
+
+function setMeta(attr, key, content) {
+  let m = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!m) {
+    m = document.createElement('meta');
+    m.setAttribute(attr, key);
+    document.head.appendChild(m);
+  }
+  m.setAttribute('content', content);
+}
+
+function setLink(rel, hreflang, href) {
+  const sel = hreflang ? `link[rel="${rel}"][hreflang="${hreflang}"]` : `link[rel="${rel}"]:not([hreflang])`;
+  let l = /** @type {HTMLLinkElement|null} */ (document.head.querySelector(sel));
+  if (!l) {
+    l = document.createElement('link');
+    l.rel = rel;
+    if (hreflang) l.hreflang = hreflang;
+    document.head.appendChild(l);
+  }
+  l.href = href;
+}
+
+// ---------- shell chrome ----------
+function buildHeader() {
+  const header = el('header');
+  header.innerHTML = `<h1 class="wordmark">KACH <span class="light">Weddings</span></h1>
+    <div class="eyebrow"></div>`;
+  header.querySelector('.eyebrow').textContent = t().header.eyebrow;
+  header.appendChild(buildLangbar());
+  return header;
+}
+
+function buildLangbar() {
+  const bar = el('div', { class: 'langbar no-print' });
+  availableLangs().forEach(({ code, label }) => {
+    const b = el('button', { type: 'button', text: label });
+    b.setAttribute('aria-pressed', String(code === getLang()));
+    b.addEventListener('click', () => {
+      if (code === getLang()) return;
+      setLang(code);
+      render();
+      track('Language change', { lang: code });
+    });
+    bar.appendChild(b);
+  });
+  return bar;
+}
+
+function buildNav(features, active) {
+  const nav = el('nav', { class: 'app-nav no-print', 'aria-label': 'Features' });
+  features.forEach((f) => {
+    const b = el('button', {
+      type: 'button',
+      class: 'nav-item' + (f === active ? ' is-active' : ''),
+      text: f.navLabel ? f.navLabel(t()) : f.id,
+    });
+    b.addEventListener('click', () => navigate(f.path || '/'));
+    nav.appendChild(b);
+  });
+  return nav;
+}
+
+function renderSignIn(main) {
+  const d = t().dashboard;
+  const slot = el('div');
+  main.appendChild(
+    el('section', { class: 'signin-wrap' }, [
+      el('div', { class: 'controls-title', text: d.signInTitle }),
+      el('div', { class: 'editor-intro', text: d.signInIntro }),
+      slot,
+    ]),
+  );
+  mountSignIn(slot);
+}
+
+// context handed to features — no globals reached into.
+function makeCtx() {
+  return { authEnabled, isSignedIn, getToken, mountUserButton, navigate, requestRender: render };
+}
+
+// ---------- top-level render ----------
+function render() {
+  applyMeta();
+  root.innerHTML = '';
+  root.appendChild(buildHeader());
+
+  const features = getFeatures();
+  const route = resolveRoute(features);
+  const main = el('div', { id: 'main' });
+
+  if (route.kind === 'public' && route.feature) {
+    root.appendChild(main);
+    route.feature.mountPublic(main, makeCtx(), route.match);
+    return;
+  }
+
+  // app route — show nav only once there is more than one visible feature.
+  const navFeatures = features.filter((f) => !(authEnabled && f.requiresAuth) || isSignedIn());
+  if (navFeatures.length > 1) root.appendChild(buildNav(navFeatures, route.feature));
+  root.appendChild(main);
+
+  if (!route.feature) return;
+  if (authEnabled && !authReady) {
+    main.appendChild(el('div', { class: 'dash-empty', text: t().dashboard.loading }));
+    return;
+  }
+  if (authEnabled && route.feature.requiresAuth && !isSignedIn()) {
+    renderSignIn(main);
+    return;
+  }
+  route.feature.mount(main, makeCtx());
+}
+
+// ---------- bootstrap ----------
+export async function startApp({ features = [] } = {}) {
+  features.forEach(registerFeature);
+
+  // Initial language: ?lang= > saved > browser > default. (Share-link langs are
+  // applied by the owning feature in mountPublic.)
+  const urlLang = new URLSearchParams(location.search).get('lang');
+  setLang(resolveInitialLang(urlLang), true);
+
+  initAnalytics();
+  onRouteChange(render);
+
+  authEnabled = isAuthEnabled();
+  if (authEnabled) {
+    render(); // loading state
+    await initAuth();
+    authReady = true;
+    onAuthChange(() => {
+      getFeatures().forEach((f) => f.reset && f.reset());
+      render();
+    });
+  }
+  render();
+}
