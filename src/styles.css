@@ -111,6 +111,12 @@ header {
 .wordmark .light {
   font-weight: 300;
 }
+.wordmark.is-link {
+  cursor: pointer;
+}
+.wordmark.is-link:hover {
+  opacity: 0.8;
+}
 .eyebrow {
   font-family: var(--sans);
   font-size: 11px;

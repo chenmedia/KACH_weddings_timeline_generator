@@ -14,6 +14,33 @@ export default {
     eyebrow: 'Planning timeline for wedding photography',
   },
 
+  nav: {
+    home: 'Home',
+    timeline: 'Timeline',
+  },
+
+  tools: {
+    timeline: {
+      title: 'Timeline generator',
+      summary: 'Build an elegant photography timeline for each couple.',
+    },
+  },
+
+  home: {
+    intro: 'Your tools',
+    soon: 'Coming soon',
+    greeting: {
+      morning: 'Good morning',
+      afternoon: 'Good afternoon',
+      evening: 'Good evening',
+      night: 'Good night',
+    },
+    comingSoon: [
+      { title: 'Templates', summary: 'Reusable packages for faster setup.', icon: 'templates' },
+      { title: 'Payments', summary: 'Track deposits and payments per couple.', icon: 'payments' },
+    ],
+  },
+
   dashboard: {
     title: 'Couples',
     newBtn: 'New couple',

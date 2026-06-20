@@ -13,6 +13,33 @@ export default {
     eyebrow: 'Tidslinje for planlegging av bryllupsfotografering',
   },
 
+  nav: {
+    home: 'Hjem',
+    timeline: 'Tidslinje',
+  },
+
+  tools: {
+    timeline: {
+      title: 'Tidslinjegenerator',
+      summary: 'Lag en elegant fotograferingstidslinje for hvert brudepar.',
+    },
+  },
+
+  home: {
+    intro: 'Verktøyene dine',
+    soon: 'Kommer snart',
+    greeting: {
+      morning: 'God morgen',
+      afternoon: 'God ettermiddag',
+      evening: 'God kveld',
+      night: 'God natt',
+    },
+    comingSoon: [
+      { title: 'Maler', summary: 'Gjenbrukbare pakker for raskere oppsett.', icon: 'templates' },
+      { title: 'Betaling', summary: 'Følg depositum og betalinger per brudepar.', icon: 'payments' },
+    ],
+  },
+
   dashboard: {
     title: 'Brudepar',
     newBtn: 'Nytt brudepar',
