@@ -3,9 +3,10 @@
 import { and, eq } from 'drizzle-orm';
 import { getDb, schema } from '../../_lib/db.js';
 import { ok, fail, methodNotAllowed } from '../../_lib/respond.js';
+import { withErrorCapture } from '../../_lib/observability.js';
 import { rowToState } from '../../../src/lib/row-mapper.js';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
   const db = getDb();
   const { timelines, milestoneOverrides } = schema;
@@ -29,3 +30,5 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300');
   return ok(res, { state, lang: row.lang || 'nb' });
 }
+
+export default withErrorCapture(handler);

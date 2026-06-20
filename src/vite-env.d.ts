@@ -9,6 +9,12 @@ interface ImportMetaEnv {
   readonly VITE_PLAUSIBLE_SRC?: string;
   readonly VITE_PLAUSIBLE_SRI?: string;
   readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
+  readonly VITE_SENTRY_DSN?: string;
+  readonly VITE_SENTRY_RELEASE?: string;
+  readonly VITE_SENTRY_ENV?: string;
+  readonly PROD?: boolean;
+  readonly DEV?: boolean;
+  readonly MODE?: string;
 }
 
 interface ImportMeta {

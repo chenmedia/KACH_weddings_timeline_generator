@@ -8,8 +8,9 @@ import { and, lt, eq } from 'drizzle-orm';
 import { getDb, schema } from '../_lib/db.js';
 import { authorizeCron } from '../_lib/cron.js';
 import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
+import { withErrorCapture } from '../_lib/observability.js';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST' && req.method !== 'GET') return methodNotAllowed(res, ['POST', 'GET']);
   if (!authorizeCron(req)) return fail(res, 401, 'unauthorized');
 
@@ -34,3 +35,5 @@ export default async function handler(req, res) {
 
   return ok(res, { purged: purged.length, sharesDisabled: expired.length, cutoff: cutoffStr });
 }
+
+export default withErrorCapture(handler);

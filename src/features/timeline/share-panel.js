@@ -1,6 +1,7 @@
 // Authenticated-only panel to enable/disable the couple's read-only link and
 // copy it. Manages its own DOM; mutates the shared `state` (shareSlug/shareEnabled).
 import { api } from '../../lib/api-client.js';
+import { reportError } from '../../lib/observability.js';
 import { el } from '../../ui/dom.js';
 
 /**
@@ -26,6 +27,7 @@ export function buildSharePanel(locale, { timelineId, state }) {
         state.shareSlug = r.shareSlug;
       } catch (e) {
         console.error('share toggle failed', e);
+        reportError(e, { op: 'setShare' });
         cb.checked = !cb.checked;
       } finally {
         cb.disabled = false;

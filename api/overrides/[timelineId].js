@@ -4,9 +4,10 @@ import { and, eq } from 'drizzle-orm';
 import { getDb, schema } from '../_lib/db.js';
 import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
+import { withErrorCapture } from '../_lib/observability.js';
 import { overridesToRows } from '../../src/lib/row-mapper.js';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const uid = await requireUser(req, res);
   if (!uid) return;
   if (req.method !== 'PUT') return methodNotAllowed(res, ['PUT']);
@@ -26,3 +27,5 @@ export default async function handler(req, res) {
   if (rows.length) await db.insert(milestoneOverrides).values(rows);
   return ok(res, { count: rows.length });
 }
+
+export default withErrorCapture(handler);
