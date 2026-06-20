@@ -85,3 +85,45 @@ export class ApiSource {
 export function createStateSource(opts = {}) {
   return opts.apiEnabled ? new ApiSource(opts.api) : new LocalStorageSource();
 }
+
+/**
+ * Generic REST resource client over /api/<name>. Lets future features
+ * (templates, payments, …) get list/get/create/update/remove without
+ * reimplementing fetch + Clerk auth headers. The timeline feature uses this
+ * for its CRUD; ApiSource above remains the per-timeline save seam.
+ * @param {string} name resource path segment, e.g. 'timelines'
+ * @param {{ baseUrl?: string, getToken?: () => Promise<string|undefined> }} [opts]
+ */
+export function createResource(name, opts = {}) {
+  const baseUrl = opts.baseUrl || '/api';
+  const getToken = opts.getToken || (async () => undefined);
+  async function headers() {
+    const token = await getToken();
+    const h = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  }
+  const url = (id) => (id ? `${baseUrl}/${name}/${id}` : `${baseUrl}/${name}`);
+  async function req(u, init) {
+    const res = await fetch(u, init);
+    if (!res.ok) throw new Error(`${init?.method || 'GET'} ${u} failed: ${res.status}`);
+    return res.json().catch(() => ({}));
+  }
+  return {
+    async list() {
+      return req(url(), { headers: await headers() });
+    },
+    async get(id) {
+      return req(url(id), { headers: await headers() });
+    },
+    async create(data) {
+      return req(url(), { method: 'POST', headers: await headers(), body: JSON.stringify(data) });
+    },
+    async update(id, data) {
+      return req(url(id), { method: 'PUT', headers: await headers(), body: JSON.stringify(data) });
+    },
+    async remove(id) {
+      return req(url(id), { method: 'DELETE', headers: await headers() });
+    },
+  };
+}

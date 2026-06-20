@@ -1,12 +1,6 @@
-import { getMilestones, parfotoAside, albumAside } from '../lib/milestones.js';
-import { ASIDE_AFTER_PHASE, ASIDE_AFTER_ITEM, SITE_URL } from '../config.js';
-
-function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+import { getMilestones, parfotoAside, albumAside } from '../../lib/milestones.js';
+import { ASIDE_AFTER_PHASE, ASIDE_AFTER_ITEM, SITE_URL } from '../../config.js';
+import { esc } from '../../ui/dom.js';
 
 function asideHTML(a) {
   const note = a.note ? `<div class="a-note">${esc(a.note)}</div>` : '';

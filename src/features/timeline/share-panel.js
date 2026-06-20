@@ -1,19 +1,7 @@
 // Authenticated-only panel to enable/disable the couple's read-only link and
 // copy it. Manages its own DOM; mutates the shared `state` (shareSlug/shareEnabled).
-import { api } from '../lib/api-client.js';
-
-function el(tag, attrs = {}, children = []) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') n.className = v;
-    else if (k === 'text') n.textContent = v;
-    else n.setAttribute(k, v);
-  }
-  (Array.isArray(children) ? children : [children]).forEach((c) => {
-    if (c != null) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  });
-  return n;
-}
+import { api } from '../../lib/api-client.js';
+import { el } from '../../ui/dom.js';
 
 /**
  * @param {object} locale
@@ -70,7 +58,7 @@ export function buildSharePanel(locale, { timelineId, state }) {
         setTimeout(() => status.classList.remove('show'), 2600);
       });
 
-      wrap.appendChild(el('div', { class: 'share-row' }, [input, copyBtn, status]));
+      wrap.appendChild(el('div', { class: 'share-row cluster' }, [input, copyBtn, status]));
     }
   }
 

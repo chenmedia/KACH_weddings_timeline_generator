@@ -1,20 +1,8 @@
 // Photographer dashboard: lists the signed-in user's timelines with create,
 // select and delete. Presentational — all data ops go through the handlers.
-import { api } from '../lib/api-client.js';
-import { fmtDate, parseISO } from '../lib/dates.js';
-
-function el(tag, attrs = {}, children = []) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') n.className = v;
-    else if (k === 'text') n.textContent = v;
-    else n.setAttribute(k, v);
-  }
-  (Array.isArray(children) ? children : [children]).forEach((c) => {
-    if (c != null) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  });
-  return n;
-}
+import { api } from '../../lib/api-client.js';
+import { fmtDate, parseISO } from '../../lib/dates.js';
+import { el } from '../../ui/dom.js';
 
 /**
  * @param {object} locale
