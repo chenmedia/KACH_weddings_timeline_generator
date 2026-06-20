@@ -5,9 +5,10 @@ import { and, eq } from 'drizzle-orm';
 import { getDb, schema } from '../_lib/db.js';
 import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed, genSlug } from '../_lib/respond.js';
+import { withErrorCapture } from '../_lib/observability.js';
 import { stateToRow, overridesToRows, rowToState } from '../../src/lib/row-mapper.js';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const uid = await requireUser(req, res);
   if (!uid) return;
   const db = getDb();
@@ -64,3 +65,5 @@ export default async function handler(req, res) {
 
   return methodNotAllowed(res, ['GET', 'PUT', 'PATCH', 'DELETE']);
 }
+
+export default withErrorCapture(handler);
