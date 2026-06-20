@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/c/:path*", "destination": "/" }],
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/" }],
   "crons": [
     { "path": "/api/cron/retention", "schedule": "0 3 * * 1" },
     { "path": "/api/cron/storage-report", "schedule": "0 4 * * 1" }
