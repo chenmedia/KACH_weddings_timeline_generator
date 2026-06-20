@@ -1,19 +1,19 @@
 // Thin wrapper around Clerk's browser SDK. Auth is OPT-IN: with no publishable
 // key the module is inert and the app runs anonymously on localStorage.
 //
-// We load Clerk's hosted browser build (clerk.browser.js) from the Frontend API
-// rather than bundling `@clerk/clerk-js`. The bundled ESM build resolves its UI
-// components through a runtime dynamic import that Vite can't rewrite, so
-// mountSignIn() fails with "Clerk was not loaded with Ui components". The hosted
-// build loads its component chunks relative to itself on the FAPI, where they
-// exist — so the UI mounts reliably. Anonymous visitors still download nothing.
+// Clerk JS v6 split the SDK and its UI components into two hosted bundles served
+// from the Frontend API: clerk-js (sets window.Clerk) and @clerk/ui (sets
+// window.__internal_ClerkUICtor). Both must be loaded and the UI constructor
+// passed to clerk.load({ ui: { ClerkUI } }) — otherwise mountSignIn() throws
+// "Clerk was not loaded with Ui components". We load them from the FAPI rather
+// than bundling, so component chunks resolve against Clerk's own host.
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
 /** @type {any} */
 let _clerk = null;
 /** @type {Promise<any> | null} */
-let _scriptPromise = null;
+let _scriptsPromise = null;
 
 export function isAuthEnabled() {
   return !!PUBLISHABLE_KEY;
@@ -31,30 +31,42 @@ function frontendApiHost() {
   }
 }
 
-function loadClerkScript() {
-  if (_scriptPromise) return _scriptPromise;
-  _scriptPromise = new Promise((resolve, reject) => {
-    if (/** @type {any} */ (window).Clerk) return resolve(/** @type {any} */ (window).Clerk);
-    const host = frontendApiHost();
-    if (!host) return reject(new Error('Invalid Clerk publishable key'));
+function injectScript(src, attrs) {
+  return new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.async = true;
     s.crossOrigin = 'anonymous';
-    s.setAttribute('data-clerk-publishable-key', PUBLISHABLE_KEY);
-    s.src = `https://${host}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`;
-    s.addEventListener('load', () => resolve(/** @type {any} */ (window).Clerk));
-    s.addEventListener('error', () => reject(new Error('Failed to load Clerk')));
+    for (const [k, v] of Object.entries(attrs || {})) s.setAttribute(k, v);
+    s.src = src;
+    s.addEventListener('load', () => resolve(undefined));
+    s.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
     document.head.appendChild(s);
   });
-  return _scriptPromise;
+}
+
+function loadClerkScripts() {
+  if (_scriptsPromise) return _scriptsPromise;
+  _scriptsPromise = (async () => {
+    const host = frontendApiHost();
+    if (!host) throw new Error('Invalid Clerk publishable key');
+    const base = `https://${host}/npm`;
+    // SDK first (it owns window.Clerk), then the UI bundle.
+    await injectScript(`${base}/@clerk/clerk-js@6/dist/clerk.browser.js`, {
+      'data-clerk-publishable-key': PUBLISHABLE_KEY,
+    });
+    await injectScript(`${base}/@clerk/ui@1/dist/ui.browser.js`);
+    return /** @type {any} */ (window).Clerk;
+  })();
+  return _scriptsPromise;
 }
 
 /** Load Clerk once. Returns the instance, or null when auth is disabled. */
 export async function initAuth() {
   if (!PUBLISHABLE_KEY) return null;
   if (_clerk) return _clerk;
-  const clerk = await loadClerkScript();
-  await clerk.load({});
+  const clerk = await loadClerkScripts();
+  const ClerkUI = /** @type {any} */ (window).__internal_ClerkUICtor;
+  await clerk.load(ClerkUI ? { ui: { ClerkUI } } : {});
   _clerk = clerk;
   return clerk;
 }
