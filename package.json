@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@sentry/vite-plugin": "^3.6.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.13.0",
     "globals": "^15.11.0",
@@ -36,6 +37,8 @@
     "@clerk/backend": "^3.7.0",
     "@clerk/clerk-js": "^6.16.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@sentry/browser": "^8.55.2",
+    "@sentry/node": "^8.55.2",
     "drizzle-orm": "^0.45.2"
   }
 }

@@ -11,6 +11,7 @@ import {
 import { LocalStorageSource, ApiSource } from '../../lib/state-source.js';
 import { t, getLang, setLang } from '../../i18n.js';
 import { track } from '../../analytics.js';
+import { reportError } from '../../lib/observability.js';
 import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
 import { buildControls } from './controls.js';
@@ -46,7 +47,10 @@ function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(
     () => {
-      source.save(state).catch((err) => console.error('save failed', err));
+      source.save(state).catch((err) => {
+        console.error('save failed', err);
+        reportError(err, { op: 'save' });
+      });
     },
     apiMode ? 700 : 0,
   );
@@ -173,6 +177,7 @@ async function selectTimeline(id) {
     renderEditorArea();
   } catch (e) {
     console.error('load timeline failed', e);
+    reportError(e, { op: 'selectTimeline' });
   }
 }
 
@@ -182,6 +187,7 @@ async function newTimeline() {
     await selectTimeline(created.id);
   } catch (e) {
     console.error('create failed', e);
+    reportError(e, { op: 'newTimeline' });
   }
 }
 
@@ -198,6 +204,7 @@ async function deleteTimeline(id) {
     dashboardInstance?.refresh();
   } catch (e) {
     console.error('delete failed', e);
+    reportError(e, { op: 'deleteTimeline' });
   }
 }
 

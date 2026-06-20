@@ -11,7 +11,9 @@ import {
   mountSignIn,
   mountUserButton,
   getToken,
+  getUser,
 } from '../auth.js';
+import { initSentry, setUser } from '../lib/observability.js';
 import { el } from '../ui/dom.js';
 import { registerFeature, getFeatures } from './registry.js';
 import { resolveRoute, navigate, onRouteChange } from './router.js';
@@ -152,6 +154,7 @@ function render() {
 
 // ---------- bootstrap ----------
 export async function startApp({ features = [] } = {}) {
+  initSentry(); // inert unless VITE_SENTRY_DSN is set
   features.forEach(registerFeature);
 
   // Initial language: ?lang= > saved > browser > default. (Share-link langs are
@@ -167,7 +170,9 @@ export async function startApp({ features = [] } = {}) {
     render(); // loading state
     await initAuth();
     authReady = true;
+    setUser(getUser()?.id || null);
     onAuthChange(() => {
+      setUser(getUser()?.id || null);
       getFeatures().forEach((f) => f.reset && f.reset());
       render();
     });
