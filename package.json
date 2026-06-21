@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit -p jsconfig.json",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node scripts/migrate.js"
+    "db:migrate": "node scripts/migrate.js",
+    "test-account": "node scripts/set-test-account.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

@@ -184,8 +184,17 @@ export async function startApp({ features = [] } = {}) {
     await initAuth();
     authReady = true;
     setUser(getUser()?.id || null);
+    // Clerk fires this on every resource update (incl. mid sign-in, e.g. the
+    // email-code step). Only react to an actual signed-out<->signed-in flip:
+    // re-rendering on every event would tear down and re-mount the SignIn
+    // widget, which re-prepares the first factor and re-sends the code — a
+    // resend loop that trips Clerk's "Too many requests".
+    let prevSignedIn = isSignedIn();
     onAuthChange(() => {
-      setUser(getUser()?.id || null);
+      const signedIn = isSignedIn();
+      setUser(signedIn ? getUser()?.id || null : null);
+      if (signedIn === prevSignedIn) return;
+      prevSignedIn = signedIn;
       getFeatures().forEach((f) => f.reset && f.reset());
       render();
     });
