@@ -29,6 +29,9 @@ async function handler(req, res) {
       ...rowToState(row, ovRows),
       shareSlug: row.shareSlug,
       shareEnabled: row.shareEnabled,
+      shareExpiresAt: row.shareExpiresAt,
+      viewCount: row.viewCount || 0,
+      lastViewedAt: row.lastViewedAt,
     });
   }
 
@@ -51,16 +54,48 @@ async function handler(req, res) {
   }
 
   if (req.method === 'PATCH') {
-    // Toggle the couple's read-only share link; mint a slug on first enable.
-    const enabled = !!(req.body && req.body.shareEnabled);
+    // Partial patch of the couple's read-only share link: toggle on/off (mint a
+    // slug on first enable), set/clear an expiry, or revoke (rotate the slug so
+    // the old URL dies permanently).
+    const body = req.body || {};
     let slug = row.shareSlug;
-    const patch = { shareEnabled: enabled, updatedAt: new Date() };
-    if (enabled && !slug) {
+    let enabled = row.shareEnabled;
+    let expiresAt = row.shareExpiresAt;
+    const patch = { updatedAt: new Date() };
+
+    if (body.rotateSlug) {
+      // Revoke: new slug, disabled, no expiry — the previous /c/:slug stops working.
       slug = genSlug();
-      patch.shareSlug = slug;
+      enabled = false;
+      expiresAt = null;
+      Object.assign(patch, { shareSlug: slug, shareEnabled: false, shareExpiresAt: null });
+    } else {
+      if ('shareEnabled' in body) {
+        enabled = !!body.shareEnabled;
+        patch.shareEnabled = enabled;
+        if (enabled && !slug) {
+          slug = genSlug();
+          patch.shareSlug = slug;
+        }
+      }
+      if ('shareExpiresAt' in body) {
+        const v = body.shareExpiresAt;
+        if (v === null || v === '') {
+          expiresAt = null;
+          patch.shareExpiresAt = null;
+        } else {
+          const d = new Date(v);
+          if (isNaN(d.getTime()) || d.getTime() <= Date.now()) {
+            return fail(res, 400, 'shareExpiresAt must be a future date');
+          }
+          expiresAt = d;
+          patch.shareExpiresAt = d;
+        }
+      }
     }
+
     await db.update(timelines).set(patch).where(eq(timelines.id, id));
-    return ok(res, { shareSlug: slug, shareEnabled: enabled });
+    return ok(res, { shareSlug: slug, shareEnabled: enabled, shareExpiresAt: expiresAt });
   }
 
   return methodNotAllowed(res, ['GET', 'PUT', 'PATCH', 'DELETE']);

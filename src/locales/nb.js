@@ -62,6 +62,19 @@ export default {
     failed: 'Kunne ikke kopiere – kopier fra feltet i stedet.',
     scan: 'Skann for å åpne',
     urlLabel: 'Delbar lenke',
+    expiryLabel: 'Lenken utløper (valgfritt)',
+    expired: 'Utløpt',
+    neverViewed: 'Ikke åpnet ennå',
+    viewed: (n, date) => `Åpnet ${n} ${n === 1 ? 'gang' : 'ganger'} · sist ${date}`,
+    revoke: 'Tilbakekall lenke',
+    revokeTitle: 'Tilbakekall lenke',
+    revokeConfirm:
+      'Tilbakekalle lenken? Den gamle adressen slutter å virke, og en ny lages neste gang du deler.',
+    expirySet: 'Utløpsdato lagret',
+    expiryCleared: 'Utløpsdato fjernet',
+    expiryFailed: 'Kunne ikke lagre utløpsdatoen.',
+    revoked: 'Lenken er tilbakekalt',
+    revokeFailed: 'Kunne ikke tilbakekalle lenken.',
   },
 
   feedback: {

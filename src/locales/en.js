@@ -63,6 +63,19 @@ export default {
     failed: 'Could not copy — copy it from the field instead.',
     scan: 'Scan to open',
     urlLabel: 'Shareable link',
+    expiryLabel: 'Link expires (optional)',
+    expired: 'Expired',
+    neverViewed: 'Not opened yet',
+    viewed: (n, date) => `Opened ${n} time${n === 1 ? '' : 's'} · last ${date}`,
+    revoke: 'Revoke link',
+    revokeTitle: 'Revoke link',
+    revokeConfirm:
+      'Revoke this link? The old address stops working, and a new one is created next time you share.',
+    expirySet: 'Expiry date saved',
+    expiryCleared: 'Expiry date removed',
+    expiryFailed: 'Could not save the expiry date.',
+    revoked: 'Link revoked',
+    revokeFailed: 'Could not revoke the link.',
   },
 
   feedback: {

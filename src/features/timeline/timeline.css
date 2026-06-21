@@ -23,3 +23,34 @@
   margin-top: var(--sp-2);
   margin-bottom: 0;
 }
+
+/* Expiry control + view signal in the share panel. */
+.share-expiry-row {
+  --stack-gap: var(--sp-1);
+  margin-top: var(--sp-4);
+  align-items: flex-start;
+}
+.share-expiry-row .editor-intro {
+  margin-bottom: 0;
+}
+.share-expiry {
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--field-border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.share-expired-badge {
+  display: inline-block;
+  margin-top: var(--sp-1);
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9a3b2f;
+}
+.share-views {
+  margin-top: var(--sp-3);
+}
