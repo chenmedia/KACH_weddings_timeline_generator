@@ -62,6 +62,7 @@ export default {
     copied: 'Link copied',
     failed: 'Could not copy — copy it from the field instead.',
     scan: 'Scan to open',
+    urlLabel: 'Shareable link',
   },
 
   feedback: {
@@ -78,6 +79,12 @@ export default {
 
   controls: {
     title: 'Set up the timeline',
+    groups: {
+      setup: 'Couple & date',
+      payment: 'Delivery & final payment',
+      extras: "What's included",
+      actions: 'Timeline actions',
+    },
     fields: {
       couple: { label: "Couple's names (optional)", ph: 'e.g. Ingrid & Markus' },
       wdate: { label: 'Wedding date' },
@@ -120,6 +127,8 @@ export default {
   timeline: {
     defaultCouple: 'Your timeline',
     empty: 'Choose a wedding date to see the timeline.',
+    loadingPublic: 'Loading your timeline …',
+    notFound: 'This link is no longer available. Ask your photographer for an updated link.',
     finalWhen: (sendDays) =>
       sendDays === 0
         ? 'on the wedding day'

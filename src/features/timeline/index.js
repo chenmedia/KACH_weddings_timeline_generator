@@ -257,11 +257,11 @@ async function mountPublic(container, shellCtx, match) {
   // Couple read-only link /c/:slug.
   if (publicCache && publicCache.slug === match.slug) {
     state = publicCache.state;
-    render();
+    renderPublic();
     return;
   }
   state = null;
-  render(); // empty while loading
+  renderPublic('loading'); // distinct message while fetching
   try {
     const data = await api.publicGet(match.slug);
     state = data.state;
@@ -275,7 +275,20 @@ async function mountPublic(container, shellCtx, match) {
     state = null;
     publicCache = { slug: match.slug, state: null };
   }
-  render();
+  renderPublic();
+}
+
+// Render the couple-facing output: the timeline when loaded, otherwise a
+// purpose-built loading/unavailable message (never the editor's "pick a date"
+// empty state, which makes no sense to a couple opening a share link).
+function renderPublic(phase) {
+  if (!outputEl) return;
+  if (state) {
+    render();
+    return;
+  }
+  const msg = phase === 'loading' ? t().timeline.loadingPublic : t().timeline.notFound;
+  outputEl.innerHTML = `<p class="empty${phase === 'loading' ? ' is-loading' : ''}">${esc(msg)}</p>`;
 }
 
 function matchPublic(pathname, params) {

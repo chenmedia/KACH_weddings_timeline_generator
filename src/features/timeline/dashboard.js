@@ -13,7 +13,7 @@ import { t } from '../../i18n.js';
  */
 export function buildDashboard(locale, handlers) {
   const d = locale.dashboard;
-  const list = el('div', { class: 'dash-list' });
+  const list = el('ul', { class: 'dash-list', role: 'list' });
   const userBtn = el('div', { class: 'dash-user' });
 
   const newBtn = el('button', { class: 'btn-primary', type: 'button', text: d.newBtn });
@@ -40,21 +40,29 @@ export function buildDashboard(locale, handlers) {
         return;
       }
       timelines.forEach((tl) => {
+        const coupleName = tl.couple || locale.timeline.defaultCouple;
         const dateStr = tl.wdate ? fmtDate(parseISO(tl.wdate), locale.dateLocale) : '—';
         const open = el(
           'button',
           {
             class: 'dash-item' + (tl.id === activeId ? ' is-active' : ''),
             type: 'button',
+            'aria-current': tl.id === activeId ? 'true' : 'false',
           },
           [
-            el('span', { class: 'dash-couple', text: tl.couple || locale.timeline.defaultCouple }),
+            el('span', { class: 'dash-couple', text: coupleName }),
             el('span', { class: 'dash-meta', text: `${dateStr} · ${tl.status || ''}` }),
           ],
         );
         open.addEventListener('click', () => handlers.onSelect(tl.id));
 
-        const del = el('button', { class: 'linkbtn', type: 'button', text: d.delete });
+        // Accessible name disambiguates the per-row delete for screen readers.
+        const del = el('button', {
+          class: 'linkbtn dash-delete',
+          type: 'button',
+          text: d.delete,
+          'aria-label': `${d.delete} – ${coupleName}`,
+        });
         del.addEventListener('click', async (e) => {
           e.stopPropagation();
           const ok = await confirmDialog({
@@ -67,7 +75,7 @@ export function buildDashboard(locale, handlers) {
           if (ok) handlers.onDelete(tl.id);
         });
 
-        list.appendChild(el('div', { class: 'dash-row' }, [open, del]));
+        list.appendChild(el('li', { class: 'dash-row' }, [open, del]));
       });
     } catch {
       list.innerHTML = '';
