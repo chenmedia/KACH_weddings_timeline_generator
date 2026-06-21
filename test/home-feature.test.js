@@ -28,12 +28,16 @@ describe('home launcher mount', () => {
     home.mount(container, { navigate: (p) => calls.push(p) });
 
     expect(container.querySelector('.home-greeting')).toBeTruthy();
+    expect(container.querySelector('.home-lead')).toBeTruthy();
     const cards = container.querySelectorAll('.tool-card');
     expect(cards.length).toBeGreaterThanOrEqual(3); // X + 2 coming-soon teasers
     expect(container.querySelector('.tool-card.is-soon')).toBeTruthy();
 
+    // Ready tools render as primary cards with an "Open" affordance.
     const ready = container.querySelector('.tool-card:not(.is-soon)');
     expect(ready).toBeTruthy();
+    expect(ready.classList.contains('is-primary')).toBe(true);
+    expect(ready.querySelector('.tool-open')).toBeTruthy();
     ready.click();
     expect(calls).toContain('/x');
   });

@@ -26,6 +26,8 @@ export default {
   },
 
   home: {
+    lead: 'Alt du trenger for å planlegge bryllupsfotograferingen, på ett sted.',
+    open: 'Åpne',
     intro: 'Verktøyene dine',
     soon: 'Kommer snart',
     greeting: {

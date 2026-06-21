@@ -27,6 +27,8 @@ export default {
   },
 
   home: {
+    lead: 'Everything you need to plan your wedding photography, in one place.',
+    open: 'Open',
     intro: 'Your tools',
     soon: 'Coming soon',
     greeting: {
