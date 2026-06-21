@@ -1,5 +1,6 @@
 import { getMilestones } from '../lib/milestones.js';
 import { slug, downloadBlob } from '../lib/download.js';
+import { toast } from '../ui/feedback.js';
 
 // RFC 5545 escaping for text values.
 function esc(s) {
@@ -99,8 +100,9 @@ export function buildICS(state, locale) {
 export function downloadICS(state, locale) {
   const out = buildICS(state, locale);
   if (!out) {
-    alert(locale.alerts.pickDate);
+    toast(locale.alerts.pickDate, { type: 'error' });
     return;
   }
   downloadBlob(new Blob([out.content], { type: 'text/calendar;charset=utf-8;' }), out.filename);
+  toast(locale.feedback.exported, { type: 'success' });
 }

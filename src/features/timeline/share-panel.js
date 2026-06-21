@@ -3,6 +3,8 @@
 import { api } from '../../lib/api-client.js';
 import { reportError } from '../../lib/observability.js';
 import { el } from '../../ui/dom.js';
+import { toast } from '../../ui/feedback.js';
+import { qrDataUrl } from '../../ui/qr.js';
 
 /**
  * @param {object} locale
@@ -28,6 +30,7 @@ export function buildSharePanel(locale, { timelineId, state }) {
       } catch (e) {
         console.error('share toggle failed', e);
         reportError(e, { op: 'setShare' });
+        toast(locale.feedback.shareToggleFailed, { type: 'error' });
         cb.checked = !cb.checked;
       } finally {
         cb.disabled = false;
@@ -61,6 +64,23 @@ export function buildSharePanel(locale, { timelineId, state }) {
       });
 
       wrap.appendChild(el('div', { class: 'share-row cluster' }, [input, copyBtn, status]));
+
+      // QR code so the couple can open the link from a phone the photographer
+      // is holding. Rendered async; silently omitted if generation fails.
+      const qrImg = el('img', { class: 'share-qr', alt: s.scan, width: '120', height: '120' });
+      const qrFig = el('figure', { class: 'share-qr-fig' }, [
+        qrImg,
+        el('figcaption', { class: 'editor-intro', text: s.scan }),
+      ]);
+      wrap.appendChild(qrFig);
+      qrDataUrl(shareUrl())
+        .then((url) => {
+          qrImg.src = url;
+        })
+        .catch((e) => {
+          console.warn('QR generation failed', e);
+          qrFig.remove();
+        });
     }
   }
 

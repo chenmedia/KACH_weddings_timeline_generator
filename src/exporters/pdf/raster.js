@@ -22,8 +22,9 @@ export async function rasterPDFBytes(refresh) {
   if (!src) throw new Error('missing content');
   const width = 800;
   const clone = /** @type {HTMLElement} */ (src.cloneNode(true));
-  const ctrl = clone.querySelector('.controls');
-  if (ctrl) ctrl.remove();
+  // Strip everything the print stylesheet hides (nav, dashboard, share panel,
+  // controls, langbar …) so the PDF captures only the timeline + header.
+  clone.querySelectorAll('.no-print').forEach((n) => n.remove());
   clone.style.width = width + 'px';
   clone.style.maxWidth = width + 'px';
   clone.style.margin = '0';

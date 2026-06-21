@@ -1,6 +1,7 @@
 import { getMilestones, parfotoAside, albumAside } from '../lib/milestones.js';
 import { fmtDate } from '../lib/dates.js';
 import { slug, downloadBlob } from '../lib/download.js';
+import { toast } from '../ui/feedback.js';
 
 function csvCell(v) {
   return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
@@ -51,8 +52,9 @@ export function buildCSV(state, locale) {
 export function downloadCSV(state, locale) {
   const out = buildCSV(state, locale);
   if (!out) {
-    alert(locale.alerts.pickDate);
+    toast(locale.alerts.pickDate, { type: 'error' });
     return;
   }
   downloadBlob(new Blob([out.content], { type: 'text/csv;charset=utf-8;' }), out.filename);
+  toast(locale.feedback.exported, { type: 'success' });
 }

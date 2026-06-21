@@ -58,7 +58,6 @@ export function buildControls(locale, state, handlers) {
     b.addEventListener('click', () => handlers.onAction(name, b));
     return b;
   };
-  const toast = el('span', { class: 'toast', id: 'shareToast', role: 'status', 'aria-live': 'polite' });
   const customizeBtn = mkBtn('toggleEditor', c.buttons.customize, 'btn-ghost');
   // The timeline updates live, so there is no explicit "update" button.
   const actions = el('div', { class: 'actions' }, [
@@ -68,7 +67,6 @@ export function buildControls(locale, state, handlers) {
     mkBtn('pdf', c.buttons.pdf, 'btn-ghost'),
     customizeBtn,
     mkBtn('reset', c.buttons.reset, 'btn-ghost'),
-    toast,
   ]);
 
   const editor = buildEditor(locale, state, handlers);
