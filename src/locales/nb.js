@@ -61,6 +61,7 @@ export default {
     copied: 'Lenken er kopiert',
     failed: 'Kunne ikke kopiere – kopier fra feltet i stedet.',
     scan: 'Skann for å åpne',
+    urlLabel: 'Delbar lenke',
   },
 
   feedback: {
@@ -77,6 +78,12 @@ export default {
 
   controls: {
     title: 'Sett opp tidslinjen',
+    groups: {
+      setup: 'Brudepar og dato',
+      payment: 'Levering og sluttbetaling',
+      extras: 'Hva som er inkludert',
+      actions: 'Handlinger for tidslinjen',
+    },
     fields: {
       couple: { label: 'Brudeparets navn (valgfritt)', ph: 'f.eks. Ingrid & Markus' },
       wdate: { label: 'Bryllupsdato' },
@@ -119,6 +126,8 @@ export default {
   timeline: {
     defaultCouple: 'Deres tidslinje',
     empty: 'Velg en bryllupsdato for å se tidslinjen.',
+    loadingPublic: 'Laster tidslinjen din …',
+    notFound: 'Denne lenken er ikke lenger tilgjengelig. Be fotografen om en oppdatert lenke.',
     finalWhen: (sendDays) =>
       sendDays === 0
         ? 'på bryllupsdagen'

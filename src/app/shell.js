@@ -118,9 +118,9 @@ function renderSignIn(main) {
   const d = t().dashboard;
   const slot = el('div');
   main.appendChild(
-    el('section', { class: 'signin-wrap' }, [
-      el('div', { class: 'controls-title', text: d.signInTitle }),
-      el('div', { class: 'editor-intro', text: d.signInIntro }),
+    el('section', { class: 'signin-wrap', 'aria-label': d.signInTitle }, [
+      el('h2', { class: 'signin-title', text: d.signInTitle }),
+      el('p', { class: 'signin-intro', text: d.signInIntro }),
       slot,
     ]),
   );

@@ -172,6 +172,29 @@ header {
   color: var(--muted);
   margin-bottom: 22px;
 }
+/* Labelled field groups (fieldset/legend) that stage the controls form. */
+.ctrl-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.ctrl-group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0; /* allow grid children to shrink inside the fieldset */
+}
+.ctrl-legend {
+  display: block;
+  width: 100%;
+  padding: 0 0 12px;
+  margin-bottom: 18px;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--hairline);
+}
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -259,11 +282,28 @@ a:focus-visible {
   cursor: pointer;
 }
 .actions {
-  margin-top: 24px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
   align-items: center;
+}
+/* Exports read as one set; customise/reset sit apart on the trailing edge. */
+.action-cluster {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.action-secondary {
+  margin-left: auto;
+}
+@media (max-width: 560px) {
+  .action-secondary {
+    margin-left: 0;
+  }
 }
 button {
   font-family: var(--sans);
@@ -440,6 +480,11 @@ button {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+}
+.ed-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
 .ed-title {
   font-family: var(--serif);
@@ -825,6 +870,9 @@ footer .links {
   gap: 14px;
 }
 .dash-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
 }
@@ -845,17 +893,39 @@ footer .links {
   text-align: left;
   background: none;
   border: none;
-  padding: 14px 4px;
+  padding: 14px 12px;
   cursor: pointer;
   border-radius: 2px;
   text-transform: none;
   letter-spacing: normal;
+  /* transparent placeholder so the active accent doesn't shift layout */
+  box-shadow: inset 3px 0 0 transparent;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .dash-item:hover {
   background: #efece8;
 }
 .dash-item.is-active {
   background: #e7e3dd;
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+/* On pointer devices the delete affordance stays out of the way until the row
+ * is hovered or focused; on touch (no hover) it remains visible. */
+@media (hover: hover) {
+  .dash-delete {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .dash-row:hover .dash-delete,
+  .dash-row:focus-within .dash-delete,
+  .dash-delete:focus-visible {
+    opacity: 1;
+  }
+}
+.empty.is-loading {
+  opacity: 0.7;
 }
 .dash-couple {
   font-family: var(--serif);
@@ -880,9 +950,22 @@ footer .links {
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: 2px;
-  padding: 30px;
-  max-width: 480px;
-  margin: 0 auto;
+  padding: 36px 34px;
+  max-width: 460px;
+  margin: 12px auto 0;
+}
+.signin-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 28px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.signin-intro {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 10px 0 22px;
 }
 
 /* ---------- Share panel (authed) ---------- */

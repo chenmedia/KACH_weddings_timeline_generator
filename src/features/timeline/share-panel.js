@@ -41,11 +41,15 @@ export function buildSharePanel(locale, { timelineId, state }) {
     wrap.appendChild(el('div', { class: 'editor-intro', text: s.hint }));
 
     if (state.shareEnabled && state.shareSlug) {
-      const input = el('input', { type: 'text', readonly: 'readonly', class: 'share-url' });
+      const input = el('input', {
+        type: 'text',
+        readonly: 'readonly',
+        class: 'share-url',
+        'aria-label': s.urlLabel,
+      });
       input.value = shareUrl();
       input.addEventListener('focus', () => input.select());
 
-      const status = el('span', { class: 'toast', role: 'status', 'aria-live': 'polite' });
       const copyBtn = el('button', { class: 'btn-ghost', type: 'button', text: s.copy });
       copyBtn.addEventListener('click', async () => {
         try {
@@ -55,15 +59,13 @@ export function buildSharePanel(locale, { timelineId, state }) {
             input.select();
             document.execCommand('copy');
           }
-          status.textContent = s.copied;
+          toast(s.copied, { type: 'success' });
         } catch {
-          status.textContent = s.failed;
+          toast(s.failed, { type: 'error' });
         }
-        status.classList.add('show');
-        setTimeout(() => status.classList.remove('show'), 2600);
       });
 
-      wrap.appendChild(el('div', { class: 'share-row cluster' }, [input, copyBtn, status]));
+      wrap.appendChild(el('div', { class: 'share-row cluster' }, [input, copyBtn]));
 
       // QR code so the couple can open the link from a phone the photographer
       // is holding. Rendered async; silently omitted if generation fails.
