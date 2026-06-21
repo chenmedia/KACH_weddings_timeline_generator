@@ -6,12 +6,13 @@ import { withTimeout } from './util.js';
 import { rasterPDFBytes } from './raster.js';
 import { vectorPDFBytes } from './vector.js';
 import { showPdfOverlay } from './overlay.js';
+import { toast } from '../../ui/feedback.js';
 
 export async function exportPDF(state, locale, opts = {}) {
   const { refresh, button } = opts;
   const data = getMilestones(state, locale);
   if (!data) {
-    alert(locale.alerts.pickDate);
+    toast(locale.alerts.pickDate, { type: 'error' });
     return;
   }
   const couple = (state.couple || '').trim();
@@ -38,10 +39,11 @@ export async function exportPDF(state, locale, opts = {}) {
     button.textContent = prevLabel;
   }
   if (!bytes) {
-    alert(locale.pdf.error);
+    toast(locale.pdf.error, { type: 'error' });
     return;
   }
   deliverPDF(bytes, couple, locale);
+  toast(locale.feedback.exported, { type: 'success' });
 }
 
 function deliverPDF(bytes, couple, locale) {

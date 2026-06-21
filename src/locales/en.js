@@ -61,6 +61,19 @@ export default {
     copy: 'Copy link',
     copied: 'Link copied',
     failed: 'Could not copy — copy it from the field instead.',
+    scan: 'Scan to open',
+  },
+
+  feedback: {
+    saveFailed: 'Could not save your changes.',
+    loadFailed: 'Could not load the couple.',
+    createFailed: 'Could not create the couple.',
+    deleteFailed: 'Could not delete the couple.',
+    shareToggleFailed: 'Could not change the sharing status.',
+    exported: 'File downloaded',
+    retry: 'Retry',
+    deleteTitle: 'Delete couple',
+    cancel: 'Cancel',
   },
 
   controls: {

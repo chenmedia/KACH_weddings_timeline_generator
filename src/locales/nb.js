@@ -60,6 +60,19 @@ export default {
     copy: 'Kopier lenke',
     copied: 'Lenken er kopiert',
     failed: 'Kunne ikke kopiere – kopier fra feltet i stedet.',
+    scan: 'Skann for å åpne',
+  },
+
+  feedback: {
+    saveFailed: 'Kunne ikke lagre endringene.',
+    loadFailed: 'Kunne ikke laste brudeparet.',
+    createFailed: 'Kunne ikke opprette brudeparet.',
+    deleteFailed: 'Kunne ikke slette brudeparet.',
+    shareToggleFailed: 'Kunne ikke endre delingsstatus.',
+    exported: 'Filen er lastet ned',
+    retry: 'Prøv igjen',
+    deleteTitle: 'Slett brudepar',
+    cancel: 'Avbryt',
   },
 
   controls: {

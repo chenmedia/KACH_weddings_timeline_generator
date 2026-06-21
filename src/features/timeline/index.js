@@ -14,6 +14,7 @@ import { track } from '../../analytics.js';
 import { reportError } from '../../lib/observability.js';
 import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
+import { toast } from '../../ui/feedback.js';
 import { icons } from '../../ui/icons.js';
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
@@ -51,6 +52,11 @@ function scheduleSave() {
       source.save(state).catch((err) => {
         console.error('save failed', err);
         reportError(err, { op: 'save' });
+        toast(t().feedback.saveFailed, {
+          type: 'error',
+          actionLabel: t().feedback.retry,
+          onAction: scheduleSave,
+        });
       });
     },
     apiMode ? 700 : 0,
@@ -62,17 +68,7 @@ function onChange() {
   scheduleSave();
 }
 
-// ---------- toast + share + actions ----------
-let toastTimer;
-function showToast(msg) {
-  const toast = document.getElementById('shareToast');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
-}
-
+// ---------- share + actions ----------
 async function copyShareLink() {
   const url = buildShareUrl(state, getLang(), { clientView: true });
   const c = t().controls;
@@ -89,10 +85,10 @@ async function copyShareLink() {
       document.execCommand('copy');
       ta.remove();
     }
-    showToast(c.shareCopied);
+    toast(c.shareCopied, { type: 'success' });
     track('Share link copied');
   } catch {
-    showToast(c.shareFailed);
+    toast(c.shareFailed, { type: 'error' });
   }
 }
 
@@ -179,6 +175,7 @@ async function selectTimeline(id) {
   } catch (e) {
     console.error('load timeline failed', e);
     reportError(e, { op: 'selectTimeline' });
+    toast(t().feedback.loadFailed, { type: 'error' });
   }
 }
 
@@ -189,6 +186,7 @@ async function newTimeline() {
   } catch (e) {
     console.error('create failed', e);
     reportError(e, { op: 'newTimeline' });
+    toast(t().feedback.createFailed, { type: 'error' });
   }
 }
 
@@ -206,6 +204,7 @@ async function deleteTimeline(id) {
   } catch (e) {
     console.error('delete failed', e);
     reportError(e, { op: 'deleteTimeline' });
+    toast(t().feedback.deleteFailed, { type: 'error' });
   }
 }
 

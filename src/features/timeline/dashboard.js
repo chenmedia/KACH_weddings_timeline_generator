@@ -3,6 +3,8 @@
 import { api } from '../../lib/api-client.js';
 import { fmtDate, parseISO } from '../../lib/dates.js';
 import { el } from '../../ui/dom.js';
+import { confirmDialog } from '../../ui/feedback.js';
+import { t } from '../../i18n.js';
 
 /**
  * @param {object} locale
@@ -53,9 +55,16 @@ export function buildDashboard(locale, handlers) {
         open.addEventListener('click', () => handlers.onSelect(tl.id));
 
         const del = el('button', { class: 'linkbtn', type: 'button', text: d.delete });
-        del.addEventListener('click', (e) => {
+        del.addEventListener('click', async (e) => {
           e.stopPropagation();
-          if (confirm(d.deleteConfirm)) handlers.onDelete(tl.id);
+          const ok = await confirmDialog({
+            title: t().feedback.deleteTitle,
+            body: d.deleteConfirm,
+            confirmLabel: d.delete,
+            cancelLabel: t().feedback.cancel,
+            danger: true,
+          });
+          if (ok) handlers.onDelete(tl.id);
         });
 
         list.appendChild(el('div', { class: 'dash-row' }, [open, del]));

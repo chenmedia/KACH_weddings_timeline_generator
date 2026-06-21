@@ -3,11 +3,12 @@
 import { getMilestones, parfotoAside, albumAside } from '../../lib/milestones.js';
 import { fmtDate } from '../../lib/dates.js';
 import { pdfStringToBytes } from './util.js';
+import { toast } from '../../ui/feedback.js';
 
 export function vectorPDFBytes(state, locale) {
   const data = getMilestones(state, locale);
   if (!data) {
-    alert(locale.alerts.pickDate);
+    toast(locale.alerts.pickDate, { type: 'error' });
     return;
   }
   const couple = (state.couple || '').trim();
