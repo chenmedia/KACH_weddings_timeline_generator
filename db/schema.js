@@ -54,6 +54,8 @@ export const timelines = pgTable('timelines', {
   shareSlug: text('share_slug').unique(),
   shareEnabled: boolean('share_enabled').default(false),
   shareExpiresAt: timestamp('share_expires_at', { withTimezone: true }),
+  viewCount: integer('view_count').default(0),
+  lastViewedAt: timestamp('last_viewed_at', { withTimezone: true }),
   status: text('status').default('lead'), // lead|booked|shooting_done|delivered|archived
   lang: text('lang').default('nb'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

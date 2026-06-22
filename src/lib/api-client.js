@@ -19,6 +19,10 @@ export const api = {
   remove: (id) => authed(`/api/timelines/${id}`, { method: 'DELETE' }),
   setShare: (id, shareEnabled) =>
     authed(`/api/timelines/${id}`, { method: 'PATCH', body: JSON.stringify({ shareEnabled }) }),
+  setShareExpiry: (id, shareExpiresAt) =>
+    authed(`/api/timelines/${id}`, { method: 'PATCH', body: JSON.stringify({ shareExpiresAt }) }),
+  revokeShare: (id) =>
+    authed(`/api/timelines/${id}`, { method: 'PATCH', body: JSON.stringify({ rotateSlug: true }) }),
   publicGet: (slug) =>
     fetch(`/api/public/timeline/${encodeURIComponent(slug)}`).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
