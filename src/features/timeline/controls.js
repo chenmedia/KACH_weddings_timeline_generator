@@ -1,5 +1,6 @@
 import { PHASES } from '../../config.js';
 import { FIELD_IDS, TOGGLE_IDS, NUMERIC_RANGES, validateState } from '../../lib/state.js';
+import { THEMES, sanitizeThemeId } from '../../lib/themes.js';
 import { el } from '../../ui/dom.js';
 
 function textField(id, labelText, type, value, placeholder) {
@@ -39,7 +40,27 @@ export function buildControls(locale, state, handlers) {
   const placeField = textField('place', f.place.label, 'text', state.place, f.place.ph);
   placeField.classList.add('full'); // avoid a lonely half-width cell
 
+  // Visual template picker — re-skins the timeline (and its PDF export) live.
+  const themeSelect = el(
+    'select',
+    { id: 'themeId' },
+    THEMES.map((th) => {
+      const opt = el('option', { value: th.id, text: th.label[locale.code] || th.label.en });
+      if (th.id === sanitizeThemeId(state.themeId)) opt.selected = true;
+      return opt;
+    }),
+  );
+  themeSelect.addEventListener('change', () => {
+    state.themeId = sanitizeThemeId(themeSelect.value);
+    handlers.onChange();
+  });
+  const themeField = el('div', { class: 'field full' }, [
+    el('label', { for: 'themeId', text: c.themeLabel }),
+    themeSelect,
+  ]);
+
   const groups = el('div', { class: 'ctrl-groups' }, [
+    fieldGroup(c.groups.design, [themeField]),
     fieldGroup(c.groups.setup, [
       coupleField,
       textField('wdate', f.wdate.label, 'date', state.wdate),

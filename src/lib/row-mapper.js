@@ -42,6 +42,7 @@ export function rowToState(row, overrideRows = []) {
     finalOverride: toDateStr(row.final_override),
     tEngage: !!row.t_engage,
     tAlbum: !!row.t_album,
+    themeId: row.theme_id,
     overrides,
   });
 }
@@ -64,6 +65,7 @@ export function stateToRow(state) {
     final_override: s.finalOverride || null,
     t_engage: s.tEngage,
     t_album: s.tAlbum,
+    theme_id: s.themeId,
   };
 }
 

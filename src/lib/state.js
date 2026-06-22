@@ -2,6 +2,7 @@
 // localStorage persistence (with schema versioning), URL (shareable-link)
 // encoding/decoding, and sanitization of any untrusted input.
 import { PHASES } from '../config.js';
+import { DEFAULT_THEME_ID, sanitizeThemeId } from './themes.js';
 
 const STORAGE_KEY = 'kachweddings-tidslinje-v1';
 const STATE_VERSION = 2; // bump when the shape changes; add a case in migrate()
@@ -42,6 +43,7 @@ export function defaultState() {
     finalOverride: '',
     tEngage: false,
     tAlbum: false,
+    themeId: DEFAULT_THEME_ID, // visual template — see src/lib/themes.js
     overrides: {}, // { [itemKey]: { hidden?, date?, note? } }
   };
 }
@@ -58,6 +60,7 @@ export function sanitizeState(input) {
   TOGGLE_IDS.forEach((id) => {
     out[id] = input[id] === true || input[id] === '1' || input[id] === 1;
   });
+  out.themeId = sanitizeThemeId(input.themeId);
 
   out.overrides = {};
   const ov = input.overrides;
@@ -156,6 +159,7 @@ export function encodeStateToParams(state, lang) {
   TOGGLE_IDS.forEach((id) => {
     if (state[id]) p.set(id, '1');
   });
+  if (state.themeId && state.themeId !== def.themeId) p.set('theme', state.themeId);
   if (state.overrides && Object.keys(state.overrides).length) {
     try {
       p.set('ov', JSON.stringify(state.overrides));
@@ -180,6 +184,7 @@ export function decodeStateFromParams(params) {
   TOGGLE_IDS.forEach((id) => {
     raw[id] = params.get(id) === '1';
   });
+  if (params.has('theme')) raw.themeId = params.get('theme');
   if (params.has('ov')) {
     try {
       raw.overrides = JSON.parse(params.get('ov'));

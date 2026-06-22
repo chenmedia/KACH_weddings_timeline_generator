@@ -231,7 +231,20 @@ input::placeholder {
   color: #6b675f;
   opacity: 1;
 }
-input:focus {
+select {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--field-border);
+  border-radius: 2px;
+  padding: 11px 13px;
+  width: 100%;
+  cursor: pointer;
+}
+input:focus,
+select:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
   border-color: var(--ink);

@@ -1,0 +1,1 @@
+ALTER TABLE "timelines" ADD COLUMN "theme_id" text DEFAULT 'kach';

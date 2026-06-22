@@ -51,6 +51,7 @@ export const timelines = pgTable('timelines', {
   finalOverride: date('final_override'),
   tEngage: boolean('t_engage').default(false),
   tAlbum: boolean('t_album').default(false),
+  themeId: text('theme_id').default('kach'), // visual template — see src/lib/themes.js
   shareSlug: text('share_slug').unique(),
   shareEnabled: boolean('share_enabled').default(false),
   shareExpiresAt: timestamp('share_expires_at', { withTimezone: true }),

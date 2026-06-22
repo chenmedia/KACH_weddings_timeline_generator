@@ -23,7 +23,7 @@ export async function exportPDF(state, locale, opts = {}) {
   }
   let bytes = null;
   try {
-    bytes = await withTimeout(rasterPDFBytes(refresh), 4000);
+    bytes = await withTimeout(rasterPDFBytes(refresh, state.themeId), 4000);
   } catch (e) {
     bytes = null;
   }
