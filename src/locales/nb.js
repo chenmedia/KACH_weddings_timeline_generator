@@ -92,11 +92,13 @@ export default {
   controls: {
     title: 'Sett opp tidslinjen',
     groups: {
+      design: 'Design',
       setup: 'Brudepar og dato',
       payment: 'Levering og sluttbetaling',
       extras: 'Hva som er inkludert',
       actions: 'Handlinger for tidslinjen',
     },
+    themeLabel: 'Tidslinjemal',
     fields: {
       couple: { label: 'Brudeparets navn (valgfritt)', ph: 'f.eks. Ingrid & Markus' },
       wdate: { label: 'Bryllupsdato' },

@@ -93,11 +93,13 @@ export default {
   controls: {
     title: 'Set up the timeline',
     groups: {
+      design: 'Design',
       setup: 'Couple & date',
       payment: 'Delivery & final payment',
       extras: "What's included",
       actions: 'Timeline actions',
     },
+    themeLabel: 'Timeline template',
     fields: {
       couple: { label: "Couple's names (optional)", ph: 'e.g. Ingrid & Markus' },
       wdate: { label: 'Wedding date' },

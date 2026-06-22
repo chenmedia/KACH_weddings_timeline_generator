@@ -4,6 +4,7 @@ import { getMilestones, parfotoAside, albumAside } from '../../lib/milestones.js
 import { fmtDate } from '../../lib/dates.js';
 import { pdfStringToBytes } from './util.js';
 import { toast } from '../../ui/feedback.js';
+import { themeRgbUnit } from '../../lib/themes.js';
 
 export function vectorPDFBytes(state, locale) {
   const data = getMilestones(state, locale);
@@ -22,16 +23,19 @@ export function vectorPDFBytes(state, locale) {
   const cardX = M,
     cardW = PW - 2 * M;
 
+  // Palette follows the chosen template so the vector fallback matches the
+  // on-screen design and the raster PDF.
+  const tid = state.themeId;
   const C = {
-    ink: [0.102, 0.094, 0.086],
-    inkSoft: [0.227, 0.216, 0.2],
-    muted: [0.42, 0.404, 0.373],
-    hairline: [0.847, 0.831, 0.804],
-    rail: [0.788, 0.769, 0.737],
-    surface: [0.965, 0.957, 0.945],
-    field: [0.549, 0.529, 0.494],
+    ink: themeRgbUnit(tid, '--ink'),
+    inkSoft: themeRgbUnit(tid, '--ink-soft'),
+    muted: themeRgbUnit(tid, '--muted'),
+    hairline: themeRgbUnit(tid, '--hairline'),
+    rail: themeRgbUnit(tid, '--line'),
+    surface: themeRgbUnit(tid, '--surface'),
+    field: themeRgbUnit(tid, '--field-border'),
     white: [1, 1, 1],
-    bg: [0.925, 0.918, 0.902],
+    bg: themeRgbUnit(tid, '--bg'),
   };
 
   const mc = document.createElement('canvas').getContext('2d');

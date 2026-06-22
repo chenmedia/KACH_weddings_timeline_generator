@@ -1,6 +1,18 @@
 import { getMilestones, parfotoAside, albumAside } from '../../lib/milestones.js';
 import { ASIDE_AFTER_PHASE, ASIDE_AFTER_ITEM, SITE_URL } from '../../config.js';
 import { esc } from '../../ui/dom.js';
+import { themeVars } from '../../lib/themes.js';
+
+// Re-skin the output element by applying the chosen template's design tokens as
+// inline custom properties — they cascade over the :root defaults for everything
+// inside, and (being inline) survive the clone the PDF exporter makes. Painting
+// the element's own background keeps the markers (which use --bg) seamless and
+// gives an honest preview of the exported "sheet".
+export function applyTheme(out, themeId) {
+  const vars = themeVars(themeId);
+  for (const [k, v] of Object.entries(vars)) out.style.setProperty(k, v);
+  out.style.backgroundColor = vars['--bg'];
+}
 
 function asideHTML(a) {
   const note = a.note ? `<div class="a-note">${esc(a.note)}</div>` : '';
@@ -22,6 +34,7 @@ function asideHTML(a) {
 
 // Render the on-screen timeline into `out`.
 export function renderTimeline(state, locale, out) {
+  applyTheme(out, state.themeId);
   const data = getMilestones(state, locale);
   if (!data) {
     out.innerHTML = `<p class="empty">${esc(locale.timeline.empty)}</p>`;
