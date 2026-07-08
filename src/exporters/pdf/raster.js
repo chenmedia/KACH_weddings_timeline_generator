@@ -52,6 +52,9 @@ export async function rasterPDFBytes(refresh, themeId) {
     .pdfcap .item .desc{line-height:1.6}
     .pdfcap .aside{margin:12px 0 40px;padding:22px 26px}
     .pdfcap footer{margin-top:56px;padding-top:34px}
+    .pdfcap.app-shell{display:block}
+    .pdfcap .app-body{display:block}
+    .pdfcap .app-canvas{max-width:none;margin:0;padding:0}
   `;
 
   const holder = document.createElement('div');
