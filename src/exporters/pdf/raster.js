@@ -4,6 +4,7 @@
 import cssText from '../../styles.css?inline';
 import { withTimeout, pdfStringToBytes } from './util.js';
 import { embedFontsCSS } from './fonts.js';
+import { themeVars, hexToRgb, themeRgbUnit } from '../../lib/themes.js';
 
 function isUniform(data) {
   const r = data[0],
@@ -16,10 +17,15 @@ function isUniform(data) {
   return true;
 }
 
-export async function rasterPDFBytes(refresh) {
+export async function rasterPDFBytes(refresh, themeId) {
   if (typeof refresh === 'function') refresh();
   const src = document.querySelector('.wrap');
   if (!src) throw new Error('missing content');
+  // The paper colour follows the chosen template — page background, break
+  // detection and the page-fill operator all key off it (not a fixed grey).
+  const bgHex = themeVars(themeId)['--bg'];
+  const bgRgb = hexToRgb(bgHex);
+  const bgUnit = themeRgbUnit(themeId, '--bg').join(' ');
   const width = 800;
   const clone = /** @type {HTMLElement} */ (src.cloneNode(true));
   // Strip everything the print stylesheet hides (nav, dashboard, share panel,
@@ -46,10 +52,13 @@ export async function rasterPDFBytes(refresh) {
     .pdfcap .item .desc{line-height:1.6}
     .pdfcap .aside{margin:12px 0 40px;padding:22px 26px}
     .pdfcap footer{margin-top:56px;padding-top:34px}
+    .pdfcap.app-shell{display:block}
+    .pdfcap .app-body{display:block}
+    .pdfcap .app-canvas{max-width:none;margin:0;padding:0}
   `;
 
   const holder = document.createElement('div');
-  holder.style.cssText = `position:fixed;left:-99999px;top:0;width:${width}px;background:#ECEAE6;`;
+  holder.style.cssText = `position:fixed;left:-99999px;top:0;width:${width}px;background:${bgHex};`;
   const capStyle = document.createElement('style');
   capStyle.textContent = captureCSS;
   holder.appendChild(capStyle);
@@ -74,7 +83,7 @@ export async function rasterPDFBytes(refresh) {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">` +
     `<foreignObject x="0" y="0" width="100%" height="100%">` +
-    `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;background:#ECEAE6;">` +
+    `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;background:${bgHex};">` +
     `<style>${fontCSS}${cssText}${captureCSS}</style>${xml}</div></foreignObject></svg>`;
 
   const img = new Image();
@@ -92,7 +101,7 @@ export async function rasterPDFBytes(refresh) {
   cnv.width = W * scale;
   cnv.height = H * scale;
   const cx = cnv.getContext('2d');
-  cx.fillStyle = '#ECEAE6';
+  cx.fillStyle = bgHex;
   cx.fillRect(0, 0, cnv.width, cnv.height);
   cx.setTransform(scale, 0, 0, scale, 0, 0);
   cx.drawImage(img, 0, 0, W, H);
@@ -105,18 +114,19 @@ export async function rasterPDFBytes(refresh) {
   }
   if (isUniform(pix)) throw new Error('blank');
 
-  const breaks = findSafeBreaks(pix, cnv.width, cnv.height);
+  const breaks = findSafeBreaks(pix, cnv.width, cnv.height, bgRgb);
   const contentH = contentBottom(pix, cnv.width, cnv.height);
-  return imagePDFBytes(cnv, breaks, contentH, pix);
+  return imagePDFBytes(cnv, breaks, contentH, pix, { hex: bgHex, unit: bgUnit });
 }
 
-// Wide bands of pure background (#ECEAE6) are the only legal page-break rows.
-function findSafeBreaks(data, W, H) {
+// Wide bands of pure background (the theme's paper colour) are the only legal
+// page-break rows.
+function findSafeBreaks(data, W, H, bgRgb) {
   const x0 = Math.floor(W * 0.14),
     x1 = Math.floor(W * 0.92);
-  const R = 236,
-    G = 234,
-    B = 230,
+  const R = bgRgb[0],
+    G = bgRgb[1],
+    B = bgRgb[2],
     TOL = 7;
   const MIN_BAND = 50;
   const breaks = [];
@@ -199,11 +209,11 @@ function paginate(safe, H, pageHpx) {
   return bounds;
 }
 
-function imagePDFBytes(cnv, breaks, contentH, pix) {
+function imagePDFBytes(cnv, breaks, contentH, pix, bg) {
   const PW = 595.28,
     PH = 841.89,
     M = 0;
-  const BG = '0.9255 0.9176 0.9020';
+  const BG = bg.unit;
   const CWpt = PW - 2 * M,
     CHpt = PH - 2 * M;
   const Wpx = cnv.width;
@@ -229,7 +239,7 @@ function imagePDFBytes(cnv, breaks, contentH, pix) {
     tmp.width = Wpx;
     tmp.height = sh;
     const tctx = tmp.getContext('2d');
-    tctx.fillStyle = '#ECEAE6';
+    tctx.fillStyle = bg.hex;
     tctx.fillRect(0, 0, Wpx, sh);
     tctx.drawImage(cnv, 0, sy, Wpx, sh, 0, 0, Wpx, sh);
     const bin = atob(tmp.toDataURL('image/jpeg', 0.92).split(',')[1]);
@@ -241,7 +251,7 @@ function imagePDFBytes(cnv, breaks, contentH, pix) {
     tmp.width = Wpx;
     tmp.height = sh;
     const tctx = tmp.getContext('2d');
-    tctx.fillStyle = '#ECEAE6';
+    tctx.fillStyle = bg.hex;
     tctx.fillRect(0, 0, Wpx, sh);
     tctx.drawImage(cnv, 0, 0, Wpx, sh, 0, 0, Wpx, sh);
     slices.push({

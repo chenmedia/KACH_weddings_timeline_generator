@@ -95,6 +95,254 @@ body {
   color: #fff;
 }
 
+/* ---------- SaaS sidebar shell ----------
+ * Signed-in app routes render as a persistent left sidebar + scrollable content
+ * column (see src/app/shell.js). Public couple view and the sign-in screen keep
+ * the original stacked, centred layout. The sidebar is .no-print so it never
+ * reaches the PDF; the raster exporter also resets .app-shell geometry. */
+body.app-mode {
+  padding: 0;
+}
+.app-shell {
+  max-width: none;
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+}
+.sidebar {
+  flex: 0 0 248px;
+  width: 248px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: 28px 18px;
+  background: var(--surface);
+  border-right: 1px solid var(--hairline);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+.side-brand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 0.16em;
+  text-transform: none;
+  color: var(--ink);
+  line-height: 1;
+}
+.side-brand .light {
+  font-weight: 300;
+}
+.side-brand:hover {
+  opacity: 0.8;
+}
+.side-mark {
+  white-space: nowrap;
+}
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.side-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.side-item:hover {
+  background: #ece8e2;
+  color: var(--ink);
+}
+.side-item.is-active {
+  background: var(--ink);
+  color: #fff;
+}
+.side-ico {
+  display: inline-flex;
+  flex: 0 0 22px;
+}
+.side-ico svg {
+  display: block;
+}
+.side-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.side-foot .langbar {
+  margin: 0;
+  justify-content: flex-start;
+}
+.side-collapse {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--field-border);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--muted);
+}
+.side-collapse:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.side-collapse .side-ico {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+.app-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.app-canvas {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 44px 32px 96px;
+}
+.app-topbar {
+  display: none;
+}
+.side-backdrop {
+  display: none;
+}
+
+/* Collapsed icon-rail (desktop). Persisted per-browser. */
+.app-shell.is-collapsed .sidebar {
+  flex-basis: 76px;
+  width: 76px;
+  align-items: center;
+}
+.app-shell.is-collapsed .side-label,
+.app-shell.is-collapsed .side-brand .side-mark,
+.app-shell.is-collapsed .side-foot .langbar {
+  display: none;
+}
+.app-shell.is-collapsed .side-item {
+  justify-content: center;
+  padding: 10px;
+}
+.app-shell.is-collapsed .side-brand::before {
+  content: 'K';
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--ink);
+}
+.app-shell.is-collapsed .side-collapse .side-ico {
+  transform: rotate(180deg);
+}
+
+/* Mobile: sidebar becomes a slide-in drawer behind a hamburger. */
+@media (max-width: 720px) {
+  .app-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .burger {
+    background: none;
+    border: none;
+    padding: 6px;
+    color: var(--ink);
+    cursor: pointer;
+    display: inline-flex;
+  }
+  .topbar-mark {
+    font-family: var(--serif);
+    font-size: 18px;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+  }
+  .topbar-mark .light {
+    font-weight: 300;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    height: 100vh;
+    width: 264px;
+    flex-basis: 264px;
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+  }
+  .app-shell.is-drawer-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 0 10px 40px rgba(26, 24, 22, 0.3);
+  }
+  .app-shell.is-drawer-open .side-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(26, 24, 22, 0.4);
+  }
+  /* Desktop collapse is meaningless on mobile — always show full labels. */
+  .app-shell.is-collapsed .sidebar {
+    width: 264px;
+    flex-basis: 264px;
+    align-items: stretch;
+  }
+  .app-shell.is-collapsed .side-label,
+  .app-shell.is-collapsed .side-brand .side-mark,
+  .app-shell.is-collapsed .side-foot .langbar {
+    display: revert;
+  }
+  .app-shell.is-collapsed .side-item {
+    justify-content: flex-start;
+  }
+  .app-shell.is-collapsed .side-brand::before {
+    content: none;
+  }
+  .side-collapse {
+    display: none;
+  }
+  .app-canvas {
+    padding: 24px 18px 72px;
+  }
+}
+
 /* ---------- Header / wordmark ---------- */
 header {
   text-align: center;
@@ -231,7 +479,20 @@ input::placeholder {
   color: #6b675f;
   opacity: 1;
 }
-input:focus {
+select {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--field-border);
+  border-radius: 2px;
+  padding: 11px 13px;
+  width: 100%;
+  cursor: pointer;
+}
+input:focus,
+select:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
   border-color: var(--ink);

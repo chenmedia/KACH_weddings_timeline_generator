@@ -21,6 +21,7 @@
  * @property {string} finalOverride  Custom final-payment date or ''.
  * @property {boolean} tEngage       Couple session included.
  * @property {boolean} tAlbum        Album included.
+ * @property {string} themeId        Visual template id (see src/lib/themes.js).
  * @property {Object.<string, Override>} overrides
  * @property {number} [_v]           Stored schema version (persistence only).
  */

@@ -15,6 +15,13 @@
       "when": 1782040247061,
       "tag": "0001_parched_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782150829310,
+      "tag": "0002_tired_malice",
+      "breakpoints": true
     }
   ]
 }

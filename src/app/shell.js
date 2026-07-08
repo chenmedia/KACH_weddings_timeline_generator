@@ -15,10 +15,12 @@ import {
 } from '../auth.js';
 import { initSentry, setUser } from '../lib/observability.js';
 import { el } from '../ui/dom.js';
+import { icons } from '../ui/icons.js';
 import { registerFeature, getFeatures } from './registry.js';
 import { resolveRoute, navigate, onRouteChange } from './router.js';
 
 const root = document.getElementById('app'); // the .wrap element
+const SIDEBAR_KEY = 'kach-sidebar-collapsed';
 
 let authEnabled = false;
 let authReady = false;
@@ -100,18 +102,75 @@ function buildLangbar() {
   return bar;
 }
 
-function buildNav(features, active) {
-  const nav = el('nav', { class: 'app-nav no-print', 'aria-label': 'Features' });
+// ---------- left sidebar (SaaS shell) ----------
+function isCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setDrawerOpen(open) {
+  root.classList.toggle('is-drawer-open', open);
+}
+
+function toggleCollapse() {
+  const next = !root.classList.contains('is-collapsed');
+  root.classList.toggle('is-collapsed', next);
+  try {
+    localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+}
+
+// Brand + vertical feature nav + language switch. Collapses to an icon rail on
+// desktop and slides in as a drawer on mobile. no-print so it never reaches PDF.
+function buildSidebar(features, active) {
+  const brand = el('button', {
+    class: 'side-brand',
+    type: 'button',
+    'aria-label': 'KACH Weddings — home',
+  });
+  brand.innerHTML = '<span class="side-mark">KACH <span class="light">Weddings</span></span>';
+  brand.addEventListener('click', () => navigate('/'));
+
+  const nav = el('nav', { class: 'side-nav', 'aria-label': 'Features' });
   features.forEach((f) => {
     const b = el('button', {
       type: 'button',
-      class: 'nav-item' + (f === active ? ' is-active' : ''),
-      text: f.navLabel ? f.navLabel(t()) : f.id,
+      class: 'side-item' + (f === active ? ' is-active' : ''),
+      'aria-current': f === active ? 'page' : 'false',
+      title: f.navLabel ? f.navLabel(t()) : f.id,
     });
+    b.innerHTML =
+      `<span class="side-ico" aria-hidden="true">${f.icon || ''}</span>` +
+      `<span class="side-label">${f.navLabel ? f.navLabel(t()) : f.id}</span>`;
     b.addEventListener('click', () => navigate(f.path || '/'));
     nav.appendChild(b);
   });
-  return nav;
+
+  const collapse = el('button', {
+    class: 'side-collapse',
+    type: 'button',
+    'aria-label': 'Toggle menu width',
+  });
+  collapse.innerHTML = `<span class="side-ico" aria-hidden="true">${icons.chevron}</span>`;
+  collapse.addEventListener('click', toggleCollapse);
+
+  const foot = el('div', { class: 'side-foot' }, [buildLangbar(), collapse]);
+  return el('aside', { class: 'sidebar no-print', 'aria-label': 'Main navigation' }, [brand, nav, foot]);
+}
+
+// Slim mobile-only bar: hamburger + wordmark. Opens the drawer.
+function buildTopbar() {
+  const burger = el('button', { class: 'burger', type: 'button', 'aria-label': 'Open menu' });
+  burger.innerHTML = icons.menu;
+  burger.addEventListener('click', () => setDrawerOpen(!root.classList.contains('is-drawer-open')));
+  const mark = el('span', { class: 'topbar-mark' });
+  mark.innerHTML = 'KACH <span class="light">Weddings</span>';
+  return el('div', { class: 'app-topbar no-print' }, [burger, mark]);
 }
 
 function renderSignIn(main) {
@@ -133,26 +192,54 @@ function makeCtx() {
 }
 
 // ---------- top-level render ----------
+function resetLayout() {
+  document.body.classList.remove('app-mode');
+  root.classList.remove('app-shell', 'is-collapsed', 'is-drawer-open');
+}
+
 function render() {
   applyMeta();
   const features = getFeatures();
   const route = resolveRoute(features);
 
   root.innerHTML = '';
-  root.appendChild(buildHeader(route.kind === 'app')); // wordmark links Home in-app
   const main = el('div', { id: 'main' });
 
+  // Public couple view — clean page, no app chrome.
   if (route.kind === 'public' && route.feature) {
+    resetLayout();
+    root.appendChild(buildHeader(false));
     root.appendChild(main);
     route.feature.mountPublic(main, makeCtx(), route.match);
     return;
   }
 
-  // app route — show nav only once there is more than one visible feature.
   const navFeatures = features.filter((f) => !(authEnabled && f.requiresAuth) || isSignedIn());
-  if (navFeatures.length > 1) root.appendChild(buildNav(navFeatures, route.feature));
-  root.appendChild(main);
+  const canMount =
+    route.feature &&
+    !(authEnabled && !authReady) &&
+    !(authEnabled && route.feature.requiresAuth && !isSignedIn());
 
+  // Signed-in app with a mountable feature → SaaS sidebar shell.
+  if (canMount && navFeatures.length > 1) {
+    document.body.classList.add('app-mode');
+    root.classList.add('app-shell');
+    root.classList.toggle('is-collapsed', isCollapsed());
+    root.appendChild(buildSidebar(navFeatures, route.feature));
+    const backdrop = el('div', { class: 'side-backdrop no-print', 'aria-hidden': 'true' });
+    backdrop.addEventListener('click', () => setDrawerOpen(false));
+    root.appendChild(backdrop);
+    root.appendChild(
+      el('div', { class: 'app-body' }, [buildTopbar(), el('div', { class: 'app-canvas' }, [main])]),
+    );
+    route.feature.mount(main, makeCtx());
+    return;
+  }
+
+  // Otherwise stacked / centred: loading, sign-in, or single feature.
+  resetLayout();
+  root.appendChild(buildHeader(route.kind === 'app'));
+  root.appendChild(main);
   if (!route.feature) return;
   if (authEnabled && !authReady) {
     main.appendChild(el('div', { class: 'dash-empty', text: t().dashboard.loading }));

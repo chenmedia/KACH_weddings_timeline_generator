@@ -81,6 +81,7 @@ const homeFeature = {
   path: '/',
   requiresAuth: true,
   navLabel: (locale) => (locale.nav && locale.nav.home) || 'Home',
+  icon: icons.home,
   mount,
 };
 
