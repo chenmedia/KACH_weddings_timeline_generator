@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-/* global document */
-// Smoke test for the Home launcher: greeting, a card per ready feature, the
-// coming-soon teasers, and that a ready card navigates.
+/* global document, sessionStorage */
+// Smoke test for the Home overview: greeting + primary actions. "New couple"
+// flags a handoff and navigates to the Brudepar feature; "all couples" just
+// navigates. (Recent couples are DB-backed and covered elsewhere.)
 import { describe, it, expect } from 'vitest';
-import { registerFeature } from '../src/app/registry.js';
-import home from '../src/features/home/index.js';
+import home, { NEW_KEY } from '../src/features/home/index.js';
 
 describe('home feature descriptor', () => {
   it('is a valid feature at the root path', () => {
@@ -14,27 +14,19 @@ describe('home feature descriptor', () => {
   });
 });
 
-describe('home launcher mount', () => {
-  it('renders greeting + ready tool card + coming-soon teasers; ready card navigates', () => {
-    registerFeature({
-      id: 'x',
-      path: '/x',
-      title: () => 'X Tool',
-      summary: () => 'does x',
-      status: 'ready',
-    });
+describe('home overview mount', () => {
+  it('renders greeting + actions; "new couple" hands off and navigates to /timeline', () => {
     const calls = [];
     const container = document.createElement('div');
-    home.mount(container, { navigate: (p) => calls.push(p) });
+    // Anonymous ctx → no DB-backed recent list, just greeting + actions.
+    home.mount(container, { navigate: (p) => calls.push(p), authEnabled: false });
 
     expect(container.querySelector('.home-greeting')).toBeTruthy();
-    const cards = container.querySelectorAll('.tool-card');
-    expect(cards.length).toBeGreaterThanOrEqual(3); // X + 2 coming-soon teasers
-    expect(container.querySelector('.tool-card.is-soon')).toBeTruthy();
+    const buttons = container.querySelectorAll('.home-actions button');
+    expect(buttons.length).toBe(2);
 
-    const ready = container.querySelector('.tool-card:not(.is-soon)');
-    expect(ready).toBeTruthy();
-    ready.click();
-    expect(calls).toContain('/x');
+    buttons[0].click(); // "new couple"
+    expect(sessionStorage.getItem(NEW_KEY)).toBe('1');
+    expect(calls).toContain('/timeline');
   });
 });
