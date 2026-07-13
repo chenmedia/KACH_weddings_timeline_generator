@@ -15,8 +15,12 @@ export default {
   },
 
   nav: {
-    home: 'Home',
-    timeline: 'Timeline',
+    home: 'Overview',
+    timeline: 'Couples',
+    workspace: 'Workspace',
+    soon: 'Soon',
+    menu: 'Menu',
+    account: 'Account',
   },
 
   tools: {
@@ -29,6 +33,8 @@ export default {
   home: {
     intro: 'Your tools',
     soon: 'Coming soon',
+    recent: 'Recent couples',
+    allCouples: 'All couples',
     greeting: {
       morning: 'Good morning',
       afternoon: 'Good afternoon',

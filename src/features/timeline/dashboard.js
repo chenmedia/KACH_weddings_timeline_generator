@@ -14,18 +14,18 @@ import { t } from '../../i18n.js';
 export function buildDashboard(locale, handlers) {
   const d = locale.dashboard;
   const list = el('ul', { class: 'dash-list', role: 'list' });
-  const userBtn = el('div', { class: 'dash-user' });
 
   const newBtn = el('button', { class: 'btn-primary', type: 'button', text: d.newBtn });
   newBtn.addEventListener('click', () => handlers.onNew());
 
+  // Account moved to the sidebar foot (see shell.js); the dashboard header now
+  // carries just the title + primary "new couple" action.
   const head = el('div', { class: 'dash-head' }, [
     el('div', { class: 'controls-title', text: d.title }),
-    el('div', { class: 'dash-actions' }, [newBtn, userBtn]),
+    el('div', { class: 'dash-actions' }, [newBtn]),
   ]);
 
   const wrap = el('section', { class: 'dashboard no-print' }, [head, list]);
-  handlers.mountUserButton(userBtn);
 
   let activeId = null;
 

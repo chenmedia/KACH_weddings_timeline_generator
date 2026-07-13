@@ -6,6 +6,32 @@
  * their own <feature>.css imported from the feature entry. This file is the
  * anchor for that convention and the home for future timeline-only rules. */
 
+/* Master-detail workspace: couples list (left) beside the editor (right) on
+ * wide screens; stacks on narrow. The list is .no-print, so the PDF capture
+ * (which resets .tl-workspace to block) is unaffected. */
+.tl-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: var(--sp-6);
+  align-items: start;
+}
+.tl-workspace .dashboard {
+  margin-bottom: 0;
+  position: sticky;
+  top: var(--sp-5);
+}
+.tl-detail {
+  min-width: 0;
+}
+@media (max-width: 860px) {
+  .tl-workspace {
+    grid-template-columns: 1fr;
+  }
+  .tl-workspace .dashboard {
+    position: static;
+  }
+}
+
 /* QR code for the couple share link (rendered in the share panel). */
 .share-qr-fig {
   margin-top: var(--sp-4);
