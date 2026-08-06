@@ -1,13 +1,19 @@
-// Home feature — the post-login launcher for the KACH Weddings tool suite.
-// Renders an editorial greeting + a grid of tool cards built from the feature
-// registry, so every new tool appears here automatically. "Coming soon" teasers
-// are listed from the locale until they become real features.
+// Home feature — the post-login overview. Since the left sidebar now handles
+// tool navigation (and lists the roadmap), Home is a lightweight landing:
+// greeting, primary actions, and quick access to recent couples. Selecting a
+// couple (or "new") hands off to the Brudepar feature via a sessionStorage flag,
+// so no cross-feature routing coupling is needed.
 import './home.css';
 import { t } from '../../i18n.js';
 import { getUser } from '../../auth.js';
 import { el } from '../../ui/dom.js';
 import { icons } from '../../ui/icons.js';
-import { getFeatures } from '../../app/registry.js';
+import { api } from '../../lib/api-client.js';
+import { fmtDate, parseISO } from '../../lib/dates.js';
+
+const TIMELINE_PATH = '/timeline';
+export const OPEN_KEY = 'kach:openTimeline';
+export const NEW_KEY = 'kach:newTimeline';
 
 function greeting(locale) {
   const g = locale.home.greeting;
@@ -17,35 +23,28 @@ function greeting(locale) {
   return name ? `${part}, ${name}` : part;
 }
 
-// One tool tile. Ready tools are buttons (keyboard-focusable, navigate on
-// activate); coming-soon teasers are plain, non-interactive elements so they
-// stay out of the tab order — the section heading already conveys their status.
-// The icon + arrow are decorative, hidden from assistive tech.
-function toolCard({ title, summary, icon, soon, onClick = null }) {
-  const body = el('span', { class: 'tool-body' }, [
-    el('span', { class: 'tool-title', text: title }),
-    el('span', { class: 'tool-summary', text: summary || '' }),
-  ]);
-  const media = el('span', { class: 'tool-icon', html: icon || '', 'aria-hidden': 'true' });
-
-  const card = soon
-    ? el('div', { class: 'tool-card is-soon' }, [media, body])
-    : el('button', { type: 'button', class: 'tool-card' }, [
-        media,
-        body,
-        el('span', { class: 'tool-arrow', html: icons.arrow, 'aria-hidden': 'true' }),
-      ]);
-  if (!soon && onClick) card.addEventListener('click', onClick);
-
-  return el('li', { class: 'tool-cell' }, [card]);
+function setFlag(key, val) {
+  try {
+    sessionStorage.setItem(key, val);
+  } catch {
+    /* ignore */
+  }
 }
 
-// A labelled group of tool cards, rendered as a real list for screen readers.
-function toolSection(label, cards) {
-  return el('section', { class: 'tool-section' }, [
-    el('h3', { class: 'tool-section-title', text: label }),
-    el('ul', { class: 'tool-grid', role: 'list' }, cards),
+// A recent-couple card: opens that couple's editor in the Brudepar feature.
+function coupleCard(locale, tl, onOpen) {
+  const name = tl.couple || locale.timeline.defaultCouple;
+  const date = tl.wdate ? fmtDate(parseISO(tl.wdate), locale.dateLocale) : '—';
+  const card = el('button', { type: 'button', class: 'tool-card' }, [
+    el('span', { class: 'tool-icon', html: icons.timeline, 'aria-hidden': 'true' }),
+    el('span', { class: 'tool-body' }, [
+      el('span', { class: 'tool-title', text: name }),
+      el('span', { class: 'tool-summary', text: date }),
+    ]),
+    el('span', { class: 'tool-arrow', html: icons.arrow, 'aria-hidden': 'true' }),
   ]);
+  card.addEventListener('click', () => onOpen(tl.id));
+  return el('li', { class: 'tool-cell' }, [card]);
 }
 
 function mount(container, ctx) {
@@ -53,27 +52,49 @@ function mount(container, ctx) {
   const wrap = el('section', { class: 'home no-print', 'aria-label': locale.home.intro });
   wrap.appendChild(el('h2', { class: 'home-greeting', text: greeting(locale) }));
 
-  // Real, registered tools (anything with a title; home excludes itself).
-  const ready = getFeatures()
-    .filter((f) => f.id !== 'home' && typeof f.title === 'function')
-    .map((f) =>
-      toolCard({
-        title: f.title(locale),
-        summary: f.summary ? f.summary(locale) : '',
-        icon: f.icon,
-        soon: f.status === 'soon',
-        onClick: () => ctx.navigate(f.path || '/'),
-      }),
-    );
-  if (ready.length) wrap.appendChild(toolSection(locale.home.intro, ready));
+  const goNew = () => {
+    setFlag(NEW_KEY, '1');
+    ctx.navigate(TIMELINE_PATH);
+  };
+  const goList = () => ctx.navigate(TIMELINE_PATH);
 
-  // Teasers for tools not built yet (promoted to real features later).
-  const soon = (locale.home.comingSoon || []).map((c) =>
-    toolCard({ title: c.title, summary: c.summary, icon: icons[c.icon] || '', soon: true }),
-  );
-  if (soon.length) wrap.appendChild(toolSection(locale.home.soon, soon));
+  const newBtn = el('button', { class: 'btn-primary', type: 'button', text: locale.dashboard.newBtn });
+  newBtn.addEventListener('click', goNew);
+  const allBtn = el('button', { class: 'btn-ghost', type: 'button', text: locale.home.allCouples });
+  allBtn.addEventListener('click', goList);
+  wrap.appendChild(el('div', { class: 'home-actions cluster' }, [newBtn, allBtn]));
 
   container.appendChild(wrap);
+
+  // Recent couples — DB-backed, so only in the authenticated app. Anonymous
+  // localStorage mode has a single implicit timeline and no list.
+  if (ctx.authEnabled && ctx.isSignedIn && ctx.isSignedIn()) {
+    const grid = el('ul', { class: 'tool-grid', role: 'list' });
+    const section = el('section', { class: 'tool-section' }, [
+      el('h3', { class: 'tool-section-title', text: locale.home.recent }),
+      grid,
+    ]);
+    wrap.appendChild(section);
+    const openCouple = (id) => {
+      setFlag(OPEN_KEY, id);
+      ctx.navigate(TIMELINE_PATH);
+    };
+    grid.appendChild(el('li', { class: 'dash-empty', text: locale.dashboard.loading }));
+    api
+      .list()
+      .then(({ timelines }) => {
+        grid.innerHTML = '';
+        if (!timelines.length) {
+          grid.appendChild(el('li', { class: 'dash-empty', text: locale.dashboard.empty }));
+          return;
+        }
+        timelines.slice(0, 6).forEach((tl) => grid.appendChild(coupleCard(locale, tl, openCouple)));
+      })
+      .catch(() => {
+        grid.innerHTML = '';
+        grid.appendChild(el('li', { class: 'dash-empty', text: locale.dashboard.error }));
+      });
+  }
 }
 
 const homeFeature = {

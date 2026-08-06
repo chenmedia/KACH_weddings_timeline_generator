@@ -19,6 +19,14 @@
   --sp-6: 32px;
   /* Timeline rail gutter (narrowed on small screens — see media query). */
   --rail: 48px;
+  /* Interaction surfaces — use instead of ad-hoc greys so hover/active states
+   * stay consistent and don't drift. (App chrome only; the timeline output is
+   * re-skinned per-theme separately.) */
+  --hover: #ece8e2;
+  --active: #e7e3dd;
+  /* Radius scale — --radius-sm for inputs/buttons, --radius-md for cards/panels. */
+  --radius-sm: 2px;
+  --radius-md: 6px;
 }
 
 * {
@@ -103,6 +111,10 @@ body {
 body.app-mode {
   padding: 0;
 }
+/* Lock background scroll while the mobile nav drawer is open. */
+body.drawer-lock {
+  overflow: hidden;
+}
 .app-shell {
   max-width: none;
   margin: 0;
@@ -175,7 +187,7 @@ body.app-mode {
     color 0.15s ease;
 }
 .side-item:hover {
-  background: #ece8e2;
+  background: var(--hover);
   color: var(--ink);
 }
 .side-item.is-active {
@@ -193,6 +205,38 @@ body.app-mode {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.side-group + .side-group {
+  margin-top: var(--sp-5);
+}
+.side-group-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+.side-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.side-item.is-soon {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.75;
+}
+.side-item.is-soon:hover {
+  background: transparent;
+  color: var(--muted);
+}
+.side-account {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 8px;
+  min-height: 32px;
 }
 .side-foot {
   display: flex;
@@ -248,6 +292,7 @@ body.app-mode {
   align-items: center;
 }
 .app-shell.is-collapsed .side-label,
+.app-shell.is-collapsed .side-group-label,
 .app-shell.is-collapsed .side-brand .side-mark,
 .app-shell.is-collapsed .side-foot .langbar {
   display: none;
@@ -255,6 +300,9 @@ body.app-mode {
 .app-shell.is-collapsed .side-item {
   justify-content: center;
   padding: 10px;
+}
+.app-shell.is-collapsed .side-account {
+  justify-content: center;
 }
 .app-shell.is-collapsed .side-brand::before {
   content: 'K';
@@ -325,6 +373,7 @@ body.app-mode {
     align-items: stretch;
   }
   .app-shell.is-collapsed .side-label,
+  .app-shell.is-collapsed .side-group-label,
   .app-shell.is-collapsed .side-brand .side-mark,
   .app-shell.is-collapsed .side-foot .langbar {
     display: revert;
@@ -1166,10 +1215,10 @@ footer .links {
     box-shadow 0.15s ease;
 }
 .dash-item:hover {
-  background: #efece8;
+  background: var(--hover);
 }
 .dash-item.is-active {
-  background: #e7e3dd;
+  background: var(--active);
   box-shadow: inset 3px 0 0 var(--ink);
 }
 /* On pointer devices the delete affordance stays out of the way until the row

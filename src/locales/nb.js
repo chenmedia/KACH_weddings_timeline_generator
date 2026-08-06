@@ -14,8 +14,12 @@ export default {
   },
 
   nav: {
-    home: 'Hjem',
-    timeline: 'Tidslinje',
+    home: 'Oversikt',
+    timeline: 'Brudepar',
+    workspace: 'Arbeidsområde',
+    soon: 'Snart',
+    menu: 'Meny',
+    account: 'Konto',
   },
 
   tools: {
@@ -28,6 +32,8 @@ export default {
   home: {
     intro: 'Verktøyene dine',
     soon: 'Kommer snart',
+    recent: 'Siste brudepar',
+    allCouples: 'Alle brudepar',
     greeting: {
       morning: 'God morgen',
       afternoon: 'God ettermiddag',

@@ -111,13 +111,59 @@ function isCollapsed() {
   }
 }
 
+// ---------- mobile drawer state (with a11y: Esc, focus-trap, scroll-lock) ----------
+let drawerKeyHandler = null;
+let drawerLastFocus = null;
+
+function trapTab(e, container) {
+  const items = /** @type {any} */ (
+    container.querySelectorAll(
+      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )
+  );
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
+
 function setDrawerOpen(open) {
   root.classList.toggle('is-drawer-open', open);
+  document.body.classList.toggle('drawer-lock', open); // scroll-lock behind the drawer
+  const sidebar = root.querySelector('.sidebar');
+  const burger = root.querySelector('.burger');
+  if (burger) burger.setAttribute('aria-expanded', String(open));
+  if (open) {
+    drawerLastFocus = document.activeElement;
+    const focusable = /** @type {any} */ (sidebar && sidebar.querySelector('button, a[href], [tabindex]'));
+    if (focusable) focusable.focus();
+    drawerKeyHandler = (e) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+      else if (e.key === 'Tab' && sidebar) trapTab(e, sidebar);
+    };
+    document.addEventListener('keydown', drawerKeyHandler);
+  } else {
+    if (drawerKeyHandler) {
+      document.removeEventListener('keydown', drawerKeyHandler);
+      drawerKeyHandler = null;
+    }
+    const prev = /** @type {any} */ (drawerLastFocus);
+    if (prev && prev.focus) prev.focus();
+    drawerLastFocus = null;
+  }
 }
 
 function toggleCollapse() {
   const next = !root.classList.contains('is-collapsed');
   root.classList.toggle('is-collapsed', next);
+  const btn = root.querySelector('.side-collapse');
+  if (btn) btn.setAttribute('aria-expanded', String(!next)); // expanded = not collapsed
   try {
     localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0');
   } catch {
@@ -125,47 +171,96 @@ function toggleCollapse() {
   }
 }
 
-// Brand + vertical feature nav + language switch. Collapses to an icon rail on
+// One nav row. Active item gets aria-current=page (omitted otherwise); disabled
+// "soon" teasers stay out of the tab order.
+function sideItem({ label, icon, active = false, soon = false, onClick = null }) {
+  const attrs = {
+    type: 'button',
+    class: 'side-item' + (active ? ' is-active' : '') + (soon ? ' is-soon' : ''),
+    title: label,
+  };
+  if (active) attrs['aria-current'] = 'page';
+  if (soon) attrs.disabled = '';
+  const b = el('button', attrs);
+  b.innerHTML =
+    `<span class="side-ico" aria-hidden="true">${icon || ''}</span>` +
+    `<span class="side-label">${label}</span>`;
+  if (!soon && onClick) b.addEventListener('click', onClick);
+  return b;
+}
+
+function sideGroup(label, items) {
+  return el('div', { class: 'side-group' }, [
+    el('div', { class: 'side-group-label', 'aria-hidden': 'true', text: label }),
+    el('div', { class: 'side-group-items', role: 'list' }, items),
+  ]);
+}
+
+// Brand + grouped feature nav + account/language. Collapses to an icon rail on
 // desktop and slides in as a drawer on mobile. no-print so it never reaches PDF.
 function buildSidebar(features, active) {
+  const locale = t();
   const brand = el('button', {
     class: 'side-brand',
     type: 'button',
-    'aria-label': 'KACH Weddings — home',
+    'aria-label': `KACH Weddings — ${locale.nav.home}`,
   });
   brand.innerHTML = '<span class="side-mark">KACH <span class="light">Weddings</span></span>';
   brand.addEventListener('click', () => navigate('/'));
 
-  const nav = el('nav', { class: 'side-nav', 'aria-label': 'Features' });
-  features.forEach((f) => {
-    const b = el('button', {
-      type: 'button',
-      class: 'side-item' + (f === active ? ' is-active' : ''),
-      'aria-current': f === active ? 'page' : 'false',
-      title: f.navLabel ? f.navLabel(t()) : f.id,
-    });
-    b.innerHTML =
-      `<span class="side-ico" aria-hidden="true">${f.icon || ''}</span>` +
-      `<span class="side-label">${f.navLabel ? f.navLabel(t()) : f.id}</span>`;
-    b.addEventListener('click', () => navigate(f.path || '/'));
-    nav.appendChild(b);
-  });
+  const workspace = features.map((f) =>
+    sideItem({
+      label: f.navLabel ? f.navLabel(locale) : f.id,
+      icon: f.icon,
+      active: f === active,
+      onClick: () => navigate(f.path || '/'),
+    }),
+  );
+  const nav = el('nav', { class: 'side-nav', 'aria-label': locale.nav.menu }, [
+    sideGroup(locale.nav.workspace, workspace),
+  ]);
+
+  // Not-yet-built tools as disabled teasers (from the locale), so the roadmap is
+  // visible without faking navigation.
+  const soon = (locale.home.comingSoon || []).map((c) =>
+    sideItem({ label: c.title, icon: icons[c.icon] || '', soon: true }),
+  );
+  if (soon.length) nav.appendChild(sideGroup(locale.nav.soon, soon));
 
   const collapse = el('button', {
     class: 'side-collapse',
     type: 'button',
-    'aria-label': 'Toggle menu width',
+    'aria-label': locale.nav.menu,
+    'aria-expanded': String(!isCollapsed()),
   });
   collapse.innerHTML = `<span class="side-ico" aria-hidden="true">${icons.chevron}</span>`;
   collapse.addEventListener('click', toggleCollapse);
 
-  const foot = el('div', { class: 'side-foot' }, [buildLangbar(), collapse]);
-  return el('aside', { class: 'sidebar no-print', 'aria-label': 'Main navigation' }, [brand, nav, foot]);
+  // Account (Clerk user button) at the foot, SaaS-style — only when signed in.
+  const footChildren = [];
+  if (authEnabled && isSignedIn()) {
+    const account = el('div', { class: 'side-account', 'aria-label': locale.nav.account });
+    mountUserButton(account);
+    footChildren.push(account);
+  }
+  footChildren.push(buildLangbar(), collapse);
+
+  return el('aside', { class: 'sidebar no-print', id: 'app-sidebar', 'aria-label': locale.nav.menu }, [
+    brand,
+    nav,
+    el('div', { class: 'side-foot' }, footChildren),
+  ]);
 }
 
 // Slim mobile-only bar: hamburger + wordmark. Opens the drawer.
 function buildTopbar() {
-  const burger = el('button', { class: 'burger', type: 'button', 'aria-label': 'Open menu' });
+  const burger = el('button', {
+    class: 'burger',
+    type: 'button',
+    'aria-label': t().nav.menu,
+    'aria-controls': 'app-sidebar',
+    'aria-expanded': 'false',
+  });
   burger.innerHTML = icons.menu;
   burger.addEventListener('click', () => setDrawerOpen(!root.classList.contains('is-drawer-open')));
   const mark = el('span', { class: 'topbar-mark' });

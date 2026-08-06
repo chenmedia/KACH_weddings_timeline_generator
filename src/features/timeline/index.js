@@ -214,7 +214,14 @@ function mount(container, shellCtx) {
   clientView = false;
 
   if (!ctx.authEnabled) {
-    // Anonymous localStorage mode — identical to the pre-backend app.
+    // Anonymous localStorage mode — identical to the pre-backend app. Drop any
+    // stray Home-overview handoff flags (no couples list to act on here).
+    try {
+      sessionStorage.removeItem('kach:newTimeline');
+      sessionStorage.removeItem('kach:openTimeline');
+    } catch {
+      /* ignore */
+    }
     apiMode = false;
     source = new LocalStorageSource();
     const decoded = decodeStateFromParams(new URLSearchParams(location.search));
@@ -224,15 +231,32 @@ function mount(container, shellCtx) {
     return;
   }
 
-  // Authenticated: dashboard + DB-backed editor.
+  // Authenticated: master-detail — couples list (left) + editor (right).
   const dash = makeDashboard();
   dashboardInstance = dash;
   if (currentTimelineId) dash.setActive(currentTimelineId);
-  container.appendChild(dash.el);
-  editorContainer = el('div');
-  container.appendChild(editorContainer);
+  editorContainer = el('div', { class: 'tl-detail' });
+  container.appendChild(el('div', { class: 'tl-workspace' }, [dash.el, editorContainer]));
   renderEditorArea();
   dash.refresh();
+  handleHandoff();
+}
+
+// Honour a handoff from the Home overview: open a specific couple, or start a
+// new one. Flags are one-shot (cleared on read) so a refresh doesn't repeat.
+function handleHandoff() {
+  let wantNew = false;
+  let openId = null;
+  try {
+    wantNew = sessionStorage.getItem('kach:newTimeline') === '1';
+    openId = sessionStorage.getItem('kach:openTimeline');
+    sessionStorage.removeItem('kach:newTimeline');
+    sessionStorage.removeItem('kach:openTimeline');
+  } catch {
+    /* ignore */
+  }
+  if (wantNew) newTimeline();
+  else if (openId) selectTimeline(openId);
 }
 
 async function mountPublic(container, shellCtx, match) {
