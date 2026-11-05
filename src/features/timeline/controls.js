@@ -218,7 +218,7 @@ function buildEditor(locale, state, handlers) {
         class: 'linkbtn',
         type: 'button',
         text: e.resetItem,
-        'aria-label': `${e.resetItem} – ${title}`,
+        'aria-label': `${e.resetItem} - ${title}`,
       });
 
       const head = el('div', { class: 'ed-head' }, [

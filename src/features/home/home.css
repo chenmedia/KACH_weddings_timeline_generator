@@ -19,7 +19,6 @@
 }
 
 .home-kicker,
-.overview-title,
 .home-season-summary dt,
 .overview-stage {
   color: var(--muted);
@@ -135,8 +134,69 @@
   line-height: 1;
 }
 
+.overview-actions-section {
+  margin-top: clamp(48px, 6vw, 74px);
+}
+
+.overview-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 20px;
+}
+
 .overview-title {
-  margin: clamp(48px, 6vw, 74px) 0 16px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.overview-section-heading p {
+  max-width: 50ch;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.overview-filters {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+}
+
+.overview-filters button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.overview-filters button:hover {
+  color: var(--ink);
+}
+
+.overview-filters button.is-active {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.overview-filter-empty {
+  padding: 32px 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .overview-list {
@@ -278,16 +338,30 @@
   }
 
   .home-hero-copy {
+    padding-top: 16px;
     padding-bottom: 0;
   }
 
   .home-greeting {
     max-width: 11ch;
-    font-size: clamp(48px, 14vw, 70px);
+    font-size: clamp(46px, 12vw, 62px);
+    line-height: 0.96;
+  }
+
+  .home-intro {
+    margin-top: 16px;
+  }
+
+  .home-actions {
+    margin-top: 24px;
   }
 
   .home-image {
-    min-height: 430px;
+    min-height: 280px;
+  }
+
+  .home-overview {
+    margin-top: 36px;
   }
 
   .home-season-summary {
@@ -334,11 +408,26 @@
     flex: 1 1 150px;
     min-height: 44px;
   }
+
+  .overview-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .overview-filters {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .overview-filters button {
+    flex: 1 0 auto;
+  }
 }
 
 @media (max-width: 420px) {
   .home-image {
-    min-height: 360px;
+    min-height: 230px;
   }
 
   .home-actions > button {

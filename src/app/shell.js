@@ -204,7 +204,7 @@ function buildSidebar(features, active) {
   const brand = el('button', {
     class: 'side-brand',
     type: 'button',
-    'aria-label': `KACH Weddings — ${locale.nav.home}`,
+    'aria-label': `KACH Weddings - ${locale.nav.home}`,
   });
   brand.innerHTML = '<span class="side-mark">KACH <span class="light">Weddings</span></span>';
   brand.addEventListener('click', () => navigate('/'));

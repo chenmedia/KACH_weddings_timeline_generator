@@ -103,7 +103,7 @@ export function validateState(state, t) {
 
 function rangeMsg(t, id, r) {
   const label = (t && t.controls.fields[id] && t.controls.fields[id].label) || id;
-  return `${label}: ${r.min}–${r.max}`;
+  return `${label}: ${r.min}-${r.max}`;
 }
 
 // ---------- localStorage (versioned) ----------

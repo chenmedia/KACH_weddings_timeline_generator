@@ -59,7 +59,7 @@ function trapTab(event, container) {
 
 function accountDetails(identity, copy) {
   return el('dl', { class: 'account-details' }, [
-    el('div', {}, [el('dt', { text: copy.email }), el('dd', { text: identity.email || '—' })]),
+    el('div', {}, [el('dt', { text: copy.email }), el('dd', { text: identity.email || '-' })]),
     el('div', {}, [el('dt', { text: copy.workspace }), el('dd', { text: 'KACH Weddings' })]),
     el('div', {}, [el('dt', { text: copy.access }), el('dd', { text: copy.accessValue })]),
   ]);
