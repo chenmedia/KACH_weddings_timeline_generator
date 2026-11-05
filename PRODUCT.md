@@ -40,7 +40,7 @@ The product joins practical wedding-day planning with a relationship workflow th
 
 ## Brand Commitments
 
-The product remains KACH Weddings: elegant, minimal, warm, editorial, calm, and personal. The existing self-hosted Cormorant Garamond and Montserrat families, neutral palette, sharp controls, and restrained interaction system are incumbent authority. Operational clarity takes priority over decorative composition.
+The product remains KACH Weddings: elegant, minimal, warm, editorial, calm, and personal. The existing self-hosted Cormorant Garamond and Montserrat families, neutral palette, and restrained interaction system are incumbent authority. GetFOCL is a reference for product focus, compact task flows, and low-noise application chrome—not a visual identity to copy. KACH/Chen Media photography, warmer editorial typography, and quieter geometry keep the product recognizably ours. Operational clarity takes priority over decorative composition.
 
 ## Evidence on Hand
 
