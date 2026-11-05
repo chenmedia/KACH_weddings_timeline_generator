@@ -7,7 +7,7 @@ import { getUser } from '../../auth.js';
 import { el } from '../../ui/dom.js';
 import { api } from '../../lib/api-client.js';
 import { fmtDate, parseISO } from '../../lib/dates.js';
-import { pathForWedding } from '../../lib/wedding-context.js';
+import { pathForWedding, pathForWeddingTab } from '../../lib/wedding-context.js';
 import { icons } from '../../ui/icons.js';
 import { CLIENT_JOURNEY_ENABLED } from '../../runtime-config.js';
 
@@ -22,14 +22,6 @@ function greeting(locale) {
   const part = h < 5 ? g.night : h < 12 ? g.morning : h < 18 ? g.afternoon : g.evening;
   const name = getUser()?.firstName;
   return name ? `${part}, ${name}` : part;
-}
-
-function setFlag(key, val) {
-  try {
-    sessionStorage.setItem(key, val);
-  } catch {
-    /* ignore */
-  }
 }
 
 function formatDate(value, locale) {
@@ -52,7 +44,7 @@ function actionRow(locale, wedding, ctx, index) {
     class: 'btn-ghost overview-secondary',
     text: copy.editTimeline,
   });
-  timelineButton.addEventListener('click', () => ctx.navigate(pathForWedding(TIMELINE_PATH, wedding.id)));
+  timelineButton.addEventListener('click', () => ctx.navigate(pathForWeddingTab(wedding.id, 'timeline')));
 
   const timing = wedding.nextActionTiming || 'upcoming';
   const dueLabel = wedding.nextActionDate
@@ -162,13 +154,12 @@ function mount(container, ctx) {
   const wrap = el('section', { class: 'home no-print', 'aria-label': locale.home.intro });
 
   const goNew = () => {
-    setFlag(NEW_KEY, '1');
-    ctx.navigate(TIMELINE_PATH);
+    ctx.navigate(`${JOURNEY_PATH}?new=1&tab=timeline`);
   };
   const newBtn = el('button', { class: 'btn-primary', type: 'button', text: locale.dashboard.newBtn });
   newBtn.addEventListener('click', goNew);
   const allBtn = el('button', { class: 'btn-ghost', type: 'button', text: locale.home.allCouples });
-  allBtn.addEventListener('click', () => ctx.navigate(TIMELINE_PATH));
+  allBtn.addEventListener('click', () => ctx.navigate(JOURNEY_PATH));
   wrap.appendChild(
     el('section', { class: 'home-hero' }, [
       el('div', { class: 'home-hero-copy' }, [

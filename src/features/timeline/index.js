@@ -16,7 +16,13 @@ import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
 import { toast } from '../../ui/feedback.js';
 import { icons } from '../../ui/icons.js';
-import { pathForWedding, replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
+import { CLIENT_JOURNEY_ENABLED } from '../../runtime-config.js';
+import {
+  pathForWedding,
+  pathForWeddingTab,
+  replaceSelectedWedding,
+  selectedWeddingFromUrl,
+} from '../../lib/wedding-context.js';
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
 import { renderTimeline } from './render.js';
@@ -254,6 +260,23 @@ function mount(container, shellCtx) {
   ctx = shellCtx;
   clientView = false;
 
+  // The signed-in editor now lives inside the unified client journey. Keep the
+  // legacy route as a redirect so bookmarks and old dashboard links still work.
+  if (CLIENT_JOURNEY_ENABLED && ctx.authEnabled && ctx.isSignedIn?.()) {
+    let wantsNew = false;
+    try {
+      wantsNew = sessionStorage.getItem('kach:newTimeline') === '1';
+      sessionStorage.removeItem('kach:newTimeline');
+      sessionStorage.removeItem('kach:openTimeline');
+    } catch {
+      /* ignore */
+    }
+    ctx.navigate(
+      wantsNew ? '/journey?new=1&tab=timeline' : pathForWeddingTab(selectedWeddingFromUrl(), 'timeline'),
+    );
+    return;
+  }
+
   if (!ctx.authEnabled) {
     // Anonymous localStorage mode — identical to the pre-backend app. Drop any
     // stray Home-overview handoff flags (no couples list to act on here).
@@ -400,6 +423,7 @@ const timelineFeature = {
   summary: (locale) => locale.tools.timeline.summary,
   icon: icons.timeline,
   status: 'ready',
+  hideFromNav: true,
   mount,
   mountPublic,
   matchPublic,

@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   pathForWedding,
+  pathForWeddingTab,
   replaceSelectedWedding,
   selectedWeddingFromUrl,
 } from '../src/lib/wedding-context.js';
@@ -14,6 +15,7 @@ describe('selected wedding URL context', () => {
     const path = pathForWedding('/journey', ID);
     expect(path).toBe(`/journey?wedding=${ID}`);
     expect(selectedWeddingFromUrl(`?wedding=${ID}`)).toBe(ID);
+    expect(pathForWeddingTab(ID, 'timeline')).toBe(`/journey?wedding=${ID}&tab=timeline`);
   });
 
   it('rejects malformed identifiers', () => {

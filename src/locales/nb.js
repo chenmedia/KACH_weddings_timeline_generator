@@ -15,7 +15,7 @@ export default {
 
   nav: {
     home: 'Oversikt',
-    journey: 'Klientreise',
+    journey: 'Klientreiser',
     timeline: 'Brudepar',
     workspace: 'Arbeidsområde',
     soon: 'Snart',
@@ -43,8 +43,8 @@ export default {
 
   tools: {
     journey: {
-      title: 'Klientreise',
-      summary: 'Følg hvert brudepar fra signert avtale til første bryllupsdag.',
+      title: 'Klientreiser',
+      summary: 'Alt om hvert brudepar, fra signert avtale til tidslinje og første bryllupsdag.',
     },
     timeline: {
       title: 'Tidslinjegenerator',
@@ -139,7 +139,7 @@ export default {
         'Hvert brudepar skal føle seg like godt ivaretatt seks måneder etter bestilling som dagen de signerte.',
       heroAlt: 'Et KACH Weddings-brudepar i et skoglandskap',
       heroKicker: 'Velkomstopplevelsen',
-      editCouple: 'Rediger brudepar',
+      editCouple: 'Åpne bryllupsdagen',
       clientSummary: 'Klientoversikt',
       nextThoughtfulAction: 'Neste gjennomtenkte handling',
       viewJourney: 'Se klientreisen',
@@ -161,8 +161,21 @@ export default {
     },
     tabs: {
       journey: 'Klientreise',
+      timeline: 'Bryllupsdagen',
+      sharing: 'Deling',
       referrals: 'Referral moments',
       templates: 'Maler og FOCL',
+    },
+    timelineWorkspace: {
+      kicker: 'Bryllupsdagen',
+      title: 'Tidslinjen, bygget inn i klientreisen.',
+      intro:
+        'Planlegg fotograferingen, juster leveringsdatoer og se brudeparets ferdige tidslinje uten å forlate arbeidsflaten.',
+    },
+    sharingWorkspace: {
+      kicker: 'Brudeparvisning',
+      title: 'Del én rolig og oppdatert tidslinje.',
+      intro: 'Aktiver brudeparlenken, kopier adressen eller QR-koden og følg med på om tidslinjen er åpnet.',
     },
     stages: {
       welcome: 'Velkommen',

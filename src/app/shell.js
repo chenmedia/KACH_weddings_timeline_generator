@@ -322,7 +322,9 @@ function render() {
     return;
   }
 
-  const navFeatures = features.filter((f) => !(authEnabled && f.requiresAuth) || isSignedIn());
+  const navFeatures = features.filter(
+    (f) => !f.hideFromNav && (!(authEnabled && f.requiresAuth) || isSignedIn()),
+  );
   const canMount =
     route.feature &&
     !(authEnabled && !authReady) &&
