@@ -65,6 +65,28 @@ function accountDetails(identity, copy) {
   ]);
 }
 
+function placeAccountMenu(menu, trigger) {
+  const viewportGap = 16;
+  const anchorGap = 10;
+  const triggerRect = trigger.getBoundingClientRect();
+  const sidebarRect = trigger.closest('.sidebar')?.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  const menuWidth = menuRect.width || Math.min(296, window.innerWidth - viewportGap * 2);
+  const menuHeight = menuRect.height || menu.scrollHeight;
+  const isIconRail = Boolean(sidebarRect && sidebarRect.width < 120);
+
+  let left = isIconRail ? Math.max(triggerRect.right, sidebarRect.right) + 12 : triggerRect.left;
+  left = Math.max(viewportGap, Math.min(left, window.innerWidth - menuWidth - viewportGap));
+
+  const opensAbove = triggerRect.top - anchorGap - menuHeight >= viewportGap;
+  let top = opensAbove ? triggerRect.top - anchorGap - menuHeight : triggerRect.bottom + anchorGap;
+  top = Math.max(viewportGap, Math.min(top, window.innerHeight - menuHeight - viewportGap));
+
+  menu.classList.toggle('is-rail-menu', isIconRail);
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
+}
+
 function openProfilePanel({ identity, copy, trigger, onSignOut }) {
   closeAccountSurface();
   const backdrop = el('div', { class: 'account-backdrop', 'aria-hidden': 'true' });
@@ -180,13 +202,15 @@ export function buildAccountControl({ user, locale, onSignOut }) {
       profileButton,
       signOutButton,
     );
-    wrapper.appendChild(menu);
+    document.body.appendChild(menu);
+    placeAccountMenu(menu, trigger);
     wrapper.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
 
     const onOutside = (event) => {
-      if (!wrapper.contains(event.target)) closeAccountSurface();
+      if (!wrapper.contains(event.target) && !menu.contains(event.target)) closeAccountSurface();
     };
+    const reposition = () => placeAccountMenu(menu, trigger);
     const onKeydown = (event) => {
       if (event.key === 'Escape') closeAccountSurface({ restoreFocus: true });
     };
@@ -196,11 +220,15 @@ export function buildAccountControl({ user, locale, onSignOut }) {
       trigger.setAttribute('aria-expanded', 'false');
       document.removeEventListener('pointerdown', onOutside);
       document.removeEventListener('keydown', onKeydown);
+      document.removeEventListener('scroll', reposition, true);
+      window.removeEventListener('resize', reposition);
       if (restoreFocus && trigger.isConnected) trigger.focus();
     };
     activeCleanup = cleanup;
     document.addEventListener('pointerdown', onOutside);
     document.addEventListener('keydown', onKeydown);
+    document.addEventListener('scroll', reposition, true);
+    window.addEventListener('resize', reposition);
 
     profileButton.addEventListener('click', () => {
       openProfilePanel({ identity, copy, trigger, onSignOut });
