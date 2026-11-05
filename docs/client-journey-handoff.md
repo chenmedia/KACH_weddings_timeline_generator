@@ -180,7 +180,7 @@ src/features/journey/
 Register the feature in `src/main.js` after `timeline`:
 
 ```js
-startApp({ features: [home, timeline, journey] });
+startApp({ features: [home, journey, timeline] });
 ```
 
 Feature descriptor:
@@ -201,6 +201,21 @@ Feature descriptor:
 ```
 
 The feature must be photographer-only. It needs no public route.
+
+## Home dashboard integration
+
+Do not create a second dashboard route. Evolve the existing `src/features/home/` feature into the cross-wedding operational Overview described in the product spec.
+
+- Add `GET /api/weddings/dashboard` as one derived summary projection; do not issue one journey request per wedding.
+- Keep the greeting, **New couple**, **All couples**, and established empty/loading/error patterns.
+- Replace recent-couple/tool-launcher cards with one prioritized **Next actions** list and a quiet season summary.
+- Make **Open journey** the primary row action and **Edit timeline** secondary.
+- Use `?wedding=<timelineId>` as the bookmarkable selected-couple context across Home, Journey, and Timeline.
+- Keep the current sessionStorage handoff flags temporarily for backward compatibility, but do not use them for new dashboard navigation.
+- Render semantic rows with separate actions; never nest buttons.
+- Base implementation on the repository's current sidebar shell. Production currently exposes an older top-nav/launcher shell, so verify the actual result in the Vercel preview.
+
+The Home summary is derived from the Wedding Project plus journey state. It is not a new persistence layer and must not contain duplicated milestone dates.
 
 ## Screen structure
 
