@@ -89,6 +89,9 @@ export default {
     selectPrompt: 'Select a couple from the list, or create a new one.',
     signInTitle: 'Sign in',
     signInIntro: 'Sign in to create and save timelines.',
+    signInKicker: 'KACH Weddings studio',
+    signInNote: 'A private workspace for KACH Weddings planning.',
+    signInImageAlt: 'A newly married KACH Weddings couple outdoors',
   },
 
   journey: {
