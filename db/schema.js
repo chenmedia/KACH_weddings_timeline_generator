@@ -147,6 +147,44 @@ export const timelineComments = pgTable(
   (t) => ({ timelineCreatedIdx: index().on(t.timelineId, t.createdAt) }),
 );
 
+export const weddingActivityEvents = pgTable(
+  'wedding_activity_events',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    ownerId: text('owner_id').notNull(),
+    actorType: text('actor_type').notNull().default('owner'), // owner|couple|system
+    actorName: text('actor_name'),
+    action: text('action').notNull(),
+    itemKey: text('item_key'),
+    metadata: jsonb('metadata').notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ timelineCreatedIdx: index().on(t.timelineId, t.createdAt) }),
+);
+
+export const weddingVersions = pgTable(
+  'wedding_versions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    ownerId: text('owner_id').notNull(),
+    sequence: integer('sequence').notNull(),
+    source: text('source').notNull().default('manual'),
+    summary: text('summary'),
+    snapshot: jsonb('snapshot').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqSequence: unique().on(t.timelineId, t.sequence),
+    timelineCreatedIdx: index().on(t.timelineId, t.createdAt),
+  }),
+);
+
 export const milestoneOverrides = pgTable(
   'milestone_overrides',
   {

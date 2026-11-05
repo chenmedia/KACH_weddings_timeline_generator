@@ -1,5 +1,6 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { ok, fail } from './respond.js';
+import { logActivity } from './history.js';
 
 const ITEM_KEY = /^[a-zA-Z0-9_-]{1,80}$/;
 
@@ -33,7 +34,7 @@ export async function readPublicReview(db, timelineId, schema) {
   };
 }
 
-export async function submitPublicReview(req, res, { db, timelineId, schema }) {
+export async function submitPublicReview(req, res, { db, timelineId, ownerId, schema }) {
   const { timelineReviews, timelineComments } = schema;
   const action = req.body?.action;
   const authorName = clean(req.body?.authorName, 120);
@@ -50,6 +51,14 @@ export async function submitPublicReview(req, res, { db, timelineId, schema }) {
       .where(eq(timelineComments.timelineId, timelineId));
     if (count >= 200) return fail(res, 429, 'comment limit reached');
     await db.insert(timelineComments).values({ timelineId, itemKey, authorName, body, kind });
+    await logActivity(db, schema, {
+      timelineId,
+      ownerId,
+      actorType: 'couple',
+      actorName: authorName,
+      action: kind === 'change_request' ? 'review.changes_requested' : 'review.comment_added',
+      itemKey,
+    });
     if (kind === 'change_request') {
       await db
         .insert(timelineReviews)
@@ -76,6 +85,13 @@ export async function submitPublicReview(req, res, { db, timelineId, schema }) {
         target: timelineReviews.timelineId,
         set: { status, decidedBy: authorName, decidedAt: new Date(), updatedAt: new Date() },
       });
+    await logActivity(db, schema, {
+      timelineId,
+      ownerId,
+      actorType: 'couple',
+      actorName: authorName,
+      action: status === 'approved' ? 'review.approved' : 'review.changes_requested',
+    });
   } else {
     return fail(res, 422, 'valid action is required');
   }

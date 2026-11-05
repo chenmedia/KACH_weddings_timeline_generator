@@ -9,6 +9,7 @@ import { rowToState } from '../../../src/lib/row-mapper.js';
 import { getMilestones } from '../../../src/lib/milestones.js';
 import nb from '../../../src/locales/nb.js';
 import en from '../../../src/locales/en.js';
+import { listHistory } from '../../_lib/history.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -25,7 +26,7 @@ async function handler(req, res) {
     .where(and(eq(timelines.id, timelineId), eq(timelines.ownerId, uid)));
   if (!row) return fail(res, 404, 'not found', 'NOT_FOUND');
 
-  const [overrideRows, journeyRows, profileRows, reviewRows, commentRows] = await Promise.all([
+  const [overrideRows, journeyRows, profileRows, reviewRows, commentRows, history] = await Promise.all([
     db.select().from(milestoneOverrides).where(eq(milestoneOverrides.timelineId, timelineId)),
     db
       .select()
@@ -41,6 +42,7 @@ async function handler(req, res) {
       .from(timelineComments)
       .where(eq(timelineComments.timelineId, timelineId))
       .orderBy(desc(timelineComments.createdAt)),
+    listHistory(db, schema, timelineId, uid),
   ]);
   const project = {
     ...rowToState(row, overrideRows),
@@ -66,6 +68,8 @@ async function handler(req, res) {
       decidedAt: reviewRows[0]?.decidedAt || null,
       comments: commentRows,
     },
+    activity: history.activity,
+    versions: history.versions,
   });
 }
 

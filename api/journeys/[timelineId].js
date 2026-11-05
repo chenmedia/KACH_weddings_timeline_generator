@@ -5,6 +5,7 @@ import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
 import { withErrorCapture } from '../_lib/observability.js';
 import { journeyToRow, rowToJourney } from '../_lib/journey-row.js';
 import { importFocl, updateClientProfile, updatePhotographerReview } from '../_lib/client-actions.js';
+import { captureVersion, logActivity, restoreVersion } from '../_lib/history.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -26,6 +27,47 @@ async function handler(req, res) {
   if (req.method === 'POST' && req.body?.action === 'focl_import') {
     return importFocl(req, res, actionContext);
   }
+  if (req.method === 'POST' && req.body?.action === 'create_version') {
+    const version = await captureVersion(db, schema, {
+      timelineId,
+      ownerId: uid,
+      source: 'manual',
+      summary: String(req.body?.summary || 'Manual checkpoint').slice(0, 200),
+      force: true,
+    });
+    await logActivity(db, schema, {
+      timelineId,
+      ownerId: uid,
+      action: 'version.created',
+      metadata: { sequence: version?.sequence },
+    });
+    return ok(res, {
+      version: version
+        ? {
+            id: version.id,
+            sequence: version.sequence,
+            source: version.source,
+            summary: version.summary,
+            createdAt: version.createdAt,
+          }
+        : null,
+    });
+  }
+  if (req.method === 'POST' && req.body?.action === 'restore_version') {
+    const version = await restoreVersion(db, schema, {
+      timelineId,
+      ownerId: uid,
+      versionId: String(req.body?.versionId || ''),
+    });
+    if (!version) return fail(res, 404, 'version not found', 'NOT_FOUND');
+    await logActivity(db, schema, {
+      timelineId,
+      ownerId: uid,
+      action: 'version.restored',
+      metadata: { sequence: version.sequence },
+    });
+    return ok(res, { restored: true, sequence: version.sequence });
+  }
   if (req.method === 'PATCH') {
     return updatePhotographerReview(req, res, actionContext);
   }
@@ -46,6 +88,12 @@ async function handler(req, res) {
       return fail(res, 428, 'expectedVersion is required', 'VERSION_REQUIRED');
     }
     const values = journeyToRow(body.journey || body);
+    await captureVersion(db, schema, {
+      timelineId,
+      ownerId: uid,
+      source: 'journey_update',
+      summary: 'Before updating the client journey',
+    });
 
     if (!current) {
       if (expectedVersion !== 0) {
@@ -55,6 +103,7 @@ async function handler(req, res) {
         .insert(clientJourneys)
         .values({ timelineId, ownerId: uid, ...values })
         .returning();
+      await logActivity(db, schema, { timelineId, ownerId: uid, action: 'journey.updated' });
       return ok(res, { timelineId, journey: rowToJourney(created), journeyVersion: created.version }, 201);
     }
 
@@ -70,6 +119,7 @@ async function handler(req, res) {
       )
       .returning();
     if (!updated) return fail(res, 412, 'journey changed in another session', 'VERSION_CONFLICT');
+    await logActivity(db, schema, { timelineId, ownerId: uid, action: 'journey.updated' });
     return ok(res, { timelineId, journey: rowToJourney(updated), journeyVersion: updated.version });
   }
 
