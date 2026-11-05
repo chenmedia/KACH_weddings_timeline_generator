@@ -17,6 +17,7 @@ The existing `getMilestones(state, locale)` function remains the only scheduling
 
 The first release includes:
 
+- an operational home dashboard showing the next actions across weddings;
 - all current and future wedding clients loaded dynamically;
 - a signed-contract-to-first-anniversary journey;
 - shared dates synchronized with the Timeline Generator;
@@ -70,6 +71,7 @@ Every authenticated read and write must verify that the selected timeline belong
 
 ### Included in release 1
 
+- Upgrade the authenticated `/` overview from a tool launcher/recent-couples list to an operational dashboard.
 - Authenticated `/journey` feature in the existing app shell.
 - Dynamic couple selection using existing wedding records.
 - Couple summary, progress, next action, and last personal touch.
@@ -159,6 +161,14 @@ Each update must atomically compare the submitted expected version and increment
 
 Use the existing authenticated application shell and sidebar. Register one new navigation item: **Client journey**.
 
+The authenticated workspace has three primary destinations, in this order:
+
+1. **Overview** (`/`) — cross-wedding priorities and next actions.
+2. **Client journey** (`/journey`) — relationship workflow for the selected wedding.
+3. **Couples** (`/timeline`) — canonical wedding/timeline editor and couple management.
+
+Keep **New couple** owned by `/timeline`, because it creates the canonical Wedding Project. The Overview and Client Journey may link into that flow but must not implement competing creation forms.
+
 The `/journey` surface contains:
 
 1. **Couple selector**
@@ -169,16 +179,51 @@ The `/journey` surface contains:
 
 Do not create a second global navigation or embed the ChatGPT Site prototype in an iframe.
 
+### 8.1 Current dashboard evidence and migration target
+
+The live production app currently shows a centred header, `HOME`/`TIMELINE` top navigation, a Home tool launcher, and a timeline page with a stacked list of couples. The repository's current `main` branch is ahead of production: it contains a persistent authenticated sidebar, mobile drawer, feature registry, and a Home implementation that loads recent couples.
+
+Implementation must target the current `main` branch rather than reproduce the older production shell. The Vercel preview is the authority for verifying the merged result.
+
+Evolve the existing `src/features/home/` feature instead of creating another dashboard route:
+
+- retain the editorial greeting;
+- retain **New couple** and **All couples** actions;
+- replace the recent-couple cards with an operational **Next actions** list;
+- show a quiet season summary above the list, not a grid of large statistic cards;
+- make **Open journey** the primary row action;
+- keep **Edit timeline** as the secondary row action;
+- preserve the existing empty, loading, and error patterns;
+- remove the old Home tool-launcher/coming-soon content where it still exists in the deployed version; the sidebar already owns product navigation and roadmap teasers.
+
+Dashboard rows must not be nested buttons. Use a semantic list/article row with separate labelled links or buttons for Journey and Timeline.
+
+### 8.2 Cross-tool selected-couple context
+
+Use one bookmarkable query parameter for cross-feature selection:
+
+```text
+/?wedding=<timelineId>
+/journey?wedding=<timelineId>
+/timeline?wedding=<timelineId>
+```
+
+Both `/journey` and `/timeline` must read and validate `wedding`. Keep existing `sessionStorage` handoff flags only for backward compatibility during migration. New dashboard navigation must not depend on one-shot session state.
+
+When the selected wedding changes inside Journey or Timeline, update the URL with `history.replaceState` so reload, back/forward navigation, and copied internal URLs preserve context. Never expose the UUID in public couple links or analytics payloads.
+
 ## 9. Core user flows
 
 ### Flow A — Select a couple and find the next action
 
-1. Open `/journey` while authenticated.
-2. Load owned wedding projects dynamically.
-3. Select the most recently active or explicitly chosen couple.
-4. Load one coherent workspace projection.
-5. Show the current stage, progress, last touch, and earliest incomplete action.
-6. Let the photographer complete, edit, or open the relevant action.
+1. Open the authenticated Overview at `/`.
+2. Load dashboard summaries for owned weddings.
+3. Sort urgent/overdue actions first, followed by the nearest upcoming action.
+4. Choose **Open journey** for a wedding.
+5. Navigate to `/journey?wedding=<timelineId>`.
+6. Load one coherent workspace projection.
+7. Show the current stage, progress, last touch, and earliest incomplete action.
+8. Let the photographer complete, edit, or open the relevant action.
 
 **Expected result:** The photographer knows what to do next without opening a spreadsheet.
 
@@ -234,6 +279,10 @@ Do not create a second global navigation or embed the ChatGPT Site prototype in 
 | FR-003 | Persist the last selected couple locally for convenience, without treating it as canonical data. | Should | Returning to the route reselects an owned existing couple. |
 | FR-004 | Provide an empty state linking to `/timeline`. | Must | With no records, no broken dashboard is shown. |
 | FR-005 | Show couple name, wedding date, location, package, progress, next action, and last touch. | Must | Missing optional fields degrade gracefully. |
+| FR-006 | Upgrade the existing Home feature into an operational cross-wedding dashboard. | Must | Home shows season summary and prioritized next actions, not only tool cards or recent couples. |
+| FR-007 | Provide primary **Open journey** and secondary **Edit timeline** actions per dashboard row. | Must | Both preserve the selected wedding through `?wedding=<id>`. |
+| FR-008 | Load dashboard summaries in one request rather than one journey request per couple. | Must | Network inspection shows no N+1 pattern as the wedding count grows. |
+| FR-009 | Sort dashboard work by actionable urgency. | Must | Overdue/today items precede upcoming items; completed/disabled items do not become next action. |
 
 ### 10.2 Journey timeline and dates
 
@@ -363,7 +412,54 @@ Requirements:
 
 ## 14. API specification
 
-### 14.1 Workspace read
+### 14.1 Dashboard summary read
+
+```text
+GET /api/weddings/dashboard
+```
+
+Response:
+
+```json
+{
+  "summary": {
+    "weddingCount": 4,
+    "needsAttentionCount": 1,
+    "nextWeddingDate": "2027-06-01"
+  },
+  "weddings": [
+    {
+      "id": "uuid",
+      "couple": "Couple name",
+      "weddingDate": "2027-06-01",
+      "location": "",
+      "status": "lead",
+      "stageKey": "planning",
+      "nextActionKey": "planningQuestionnaire",
+      "nextActionDate": "2027-03-01",
+      "nextActionSource": "project",
+      "completedTaskCount": 3,
+      "totalTaskCount": 8,
+      "lastTouch": "2026-11-01",
+      "foclConfigured": true
+    }
+  ]
+}
+```
+
+Rules:
+
+- authenticate and filter by `owner_id`;
+- return language-neutral keys and ISO dates; the client localizes labels;
+- derive summary data from canonical project state plus journey state at request time;
+- do not persist a dashboard summary table or another copy of milestone dates;
+- use a bounded query/join and server-side derivation, not one browser request per wedding;
+- order output by urgency or return enough stable data for one deterministic client sort;
+- never include FOCL URL, message text, costs, private notes, or public share secrets in this summary.
+
+The existing `GET /api/timelines` remains the lightweight list used by the Timeline editor. Do not overload it with the entire journey projection.
+
+### 14.2 Workspace read
 
 ```text
 GET /api/weddings/:timelineId/workspace?locale=nb|en
@@ -391,7 +487,7 @@ Response:
 
 The endpoint composes canonical project data, `getMilestones()`, and sanitized journey state. A missing journey row returns defaults without creating data during GET.
 
-### 14.2 Project writes
+### 14.3 Project writes
 
 Extend the existing authenticated timeline/project write path to accept an expected `projectVersion` through `If-Match` or a documented body field. Preserve backward compatibility for unaffected routes during rollout, but require versioned writes from both authenticated editors before enabling `/journey` in production.
 
@@ -407,7 +503,7 @@ Shared milestone override command shape:
 
 Reset removes the override rather than storing the generated date.
 
-### 14.3 Journey read/write
+### 14.4 Journey read/write
 
 ```text
 GET /api/journeys/:timelineId
@@ -416,7 +512,7 @@ PUT /api/journeys/:timelineId
 
 `PUT` includes `expectedVersion`, validates every field, upserts the one-to-one row, and returns sanitized saved state plus the incremented `journeyVersion`.
 
-### 14.4 Error contract
+### 14.5 Error contract
 
 Use stable error codes in addition to localized UI copy:
 
@@ -440,7 +536,25 @@ src/features/journey/
   components.js       # only if index.js becomes difficult to maintain
 ```
 
-Register the feature after `timeline` in `src/main.js` with:
+Update the existing dashboard feature:
+
+```text
+src/features/home/
+  index.js          # dashboard summary loading and navigation
+  home.css          # next-action rows, season summary, responsive states
+```
+
+Extend `src/lib/api-client.js` with `dashboard()` and `workspace(id)` methods. Add a small shared navigation helper only if it prevents duplicate parsing/validation of the `wedding` query parameter across Home, Journey, and Timeline.
+
+Register features in the operational navigation order:
+
+```js
+startApp({ features: [home, journey, timeline] });
+```
+
+`home` remains first because it owns `/`. This order also makes Client Journey the primary workflow immediately after Overview in both the current top navigation and the newer sidebar shell.
+
+Define the Journey feature with this descriptor and register it between `home` and `timeline` in `src/main.js`:
 
 ```js
 {
@@ -470,6 +584,7 @@ Use GetFOCL as inspiration for focus, compact task flows, strong primary actions
 ### Required composition
 
 - Existing sidebar/app shell.
+- Overview: editorial greeting, quiet season summary, and a single prioritized next-actions list.
 - Compact couple rail or selector.
 - Shallow selected-couple header with one optional wedding image.
 - Tabs using underline/tonal active state, not pill navigation.
@@ -582,6 +697,9 @@ The implementation is incomplete unless all states below are intentionally desig
 ### Feature tests
 
 - descriptor registration and auth requirement;
+- Home loads one dashboard summary request and renders urgency order;
+- dashboard row opens `/journey?wedding=<id>` and timeline secondary action opens `/timeline?wedding=<id>`;
+- Home has no nested interactive controls and retains empty/loading/error states;
 - dynamic couple list and empty state;
 - couple selection loads workspace;
 - shared override writes canonical project state;
@@ -642,19 +760,29 @@ Given a stored FOCL URL, when opened, then it navigates to FOCL; the KACH UI doe
 
 Given a 320 px viewport and long Norwegian content, when every tab and form is used, then no document-level horizontal overflow or inaccessible control occurs.
 
+### AC-09 — Overview drives the workflow
+
+Given multiple owned weddings with incomplete actions, when the photographer opens `/`, then one dashboard request returns the summaries, the most urgent valid action is first, and its primary action opens the correct Client Journey through a bookmarkable `wedding` query parameter.
+
+### AC-10 — Dashboard does not create another truth
+
+Given a milestone or checklist change, when Overview is reloaded, then its next action and progress are re-derived from the Wedding Project and journey state rather than read from a duplicated dashboard record.
+
 ## 22. Delivery plan
 
 Implement as reviewable vertical slices on one feature branch:
 
 1. **Domain foundation** — pure journey model, milestone mapping, defaults, sanitizers, and tests.
 2. **Persistence** — project version if absent, `client_journeys`, generated migration, and migration tests.
-3. **API** — workspace read, journey read/write, versioned project writes, ownership and conflict tests.
-4. **Feature shell** — route registration, locale keys, couple selector, loading/empty/error states.
-5. **Journey workflow** — summary, milestones, shared edits, checklist, next action.
-6. **Referral workflow** — eight moments, presets, costs, per-wedding and season totals.
-7. **Templates & FOCL** — localized templates, copy feedback, URL setup/open, honest placeholders.
-8. **Design and responsive pass** — apply the surface brief, keyboard access, reduced motion, overflow tests.
-9. **Regression and preview** — full CI, fresh migration, screenshots, Clerk verification with a test wedding.
+3. **API** — dashboard summary, workspace read, journey read/write, versioned project writes, ownership and conflict tests.
+4. **Navigation context** — shared `wedding` query behavior in Home, Journey, and Timeline.
+5. **Overview integration** — evolve `src/features/home/` into the prioritized cross-wedding dashboard.
+6. **Feature shell** — route registration, locale keys, couple selector, loading/empty/error states.
+7. **Journey workflow** — summary, milestones, shared edits, checklist, next action.
+8. **Referral workflow** — eight moments, presets, costs, per-wedding and season totals.
+9. **Templates & FOCL** — localized templates, copy feedback, URL setup/open, honest placeholders.
+10. **Design and responsive pass** — apply the surface brief, keyboard access, reduced motion, overflow tests.
+11. **Regression and preview** — full CI, fresh migration, screenshots of Overview and Journey, Clerk verification with a test wedding.
 
 Each slice should leave tests green. Do not postpone ownership, conflicts, or mobile behavior until after the feature is functionally complete.
 
@@ -688,6 +816,9 @@ Each slice should leave tests green. Do not postpone ownership, conflicts, or mo
 | Are the current four clients fixtures? | No. They are live data and the UI must be dynamic. |
 | Should the prototype be embedded? | No. Rebuild within the existing app shell and conventions. |
 | Should FOCL's look be copied? | No. Borrow product discipline; preserve KACH/Chen Media identity. |
+| Does Client Journey live only as a separate route? | No. `/journey` is the detail workflow, while `/` surfaces its next actions across all weddings. |
+| Should Home call every journey endpoint? | No. Use one derived dashboard-summary endpoint to avoid N+1 requests. |
+| Production shell or repository `main` as implementation baseline? | Build against `main`; production currently shows an older top-nav/launcher shell. Verify the final shell in preview before release. |
 
 ### Open integration decision after release 1
 
@@ -698,6 +829,8 @@ Automatic FOCL synchronization requires verified documentation for authenticatio
 Implementation is done only when:
 
 - all Must requirements and acceptance scenarios pass;
+- Overview shows prioritized next actions and routes into the correct selected wedding;
+- Home uses one dashboard summary request rather than per-wedding journey requests;
 - shared dates are demonstrably identical across relevant surfaces;
 - stale writes cannot silently overwrite newer changes;
 - journey-only data is absent from public responses;
@@ -740,6 +873,9 @@ Critical architecture:
   concurrency. Never silently overwrite a newer save.
 - Keep journey-only data out of all public endpoints.
 - FOCL release 1 is a validated direct link and honest placeholders, not sync.
+- The existing Home feature becomes the cross-wedding dashboard. Add one derived
+  dashboard-summary endpoint, make Journey the primary next-action destination,
+  and use ?wedding=<timelineId> across Home, Journey, and Timeline.
 
 Preserve the existing Clerk, Neon/Drizzle, Vercel, feature-registry,
 localization, testing, and dependency-light JavaScript conventions. Work in
