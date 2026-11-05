@@ -16,6 +16,7 @@ describe('Clerk appearance', () => {
     expect(appearance.elements.headerTitle.fontFamily).toContain('Cormorant Garamond');
     expect(appearance.elements.formButtonPrimary.textTransform).toBe('uppercase');
     expect(appearance.elements.userButtonAvatarBox.borderRadius).toBe('2px');
+    expect(appearance.elements.userButtonPopoverActionButtonText.color).toBe('#3a3733');
   });
 
   it('merges component-specific elements without mutating the shared theme', () => {

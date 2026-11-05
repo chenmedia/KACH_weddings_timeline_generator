@@ -125,9 +125,12 @@ const CLERK_ELEMENTS = {
     boxShadow: '0 18px 48px rgba(58, 55, 51, 0.14)',
   },
   userButtonPopoverActionButton: {
+    color: '#3a3733',
     borderRadius: '2px',
     '&:hover': { backgroundColor: '#ece8e2' },
   },
+  userButtonPopoverActionButtonText: { color: '#3a3733', fontWeight: 500 },
+  userButtonPopoverActionButtonIcon: { color: '#6b675f' },
   userPreviewMainIdentifier: { color: '#1a1816', fontWeight: 600 },
   userPreviewSecondaryIdentifier: { color: '#6b675f' },
   navbar: { backgroundColor: '#eceae6', borderRight: '1px solid #d8d4cd' },
