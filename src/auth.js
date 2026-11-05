@@ -95,7 +95,7 @@ const CLERK_ELEMENTS = {
     '&:hover': { backgroundColor: '#3a3733' },
     '&:active': { transform: 'translateY(1px)' },
   },
-  footer: { background: 'transparent' },
+  footer: { display: 'none' },
   footerActionLink: {
     color: '#1a1816',
     fontWeight: 600,
@@ -113,34 +113,6 @@ const CLERK_ELEMENTS = {
   },
   formResendCodeLink: { color: '#1a1816', fontWeight: 600 },
   backLink: { color: '#1a1816', fontWeight: 600 },
-  userButtonTrigger: {
-    borderRadius: '2px',
-    '&:focus': { boxShadow: '0 0 0 2px #987760' },
-  },
-  userButtonAvatarBox: { width: '32px', height: '32px', borderRadius: '2px' },
-  userButtonPopoverCard: {
-    backgroundColor: '#f6f4f1',
-    border: '1px solid #d8d4cd',
-    borderRadius: '2px',
-    boxShadow: '0 18px 48px rgba(58, 55, 51, 0.14)',
-  },
-  userButtonPopoverActionButton: {
-    color: '#3a3733',
-    borderRadius: '2px',
-    '&:hover': { backgroundColor: '#ece8e2' },
-  },
-  userButtonPopoverActionButtonText: { color: '#3a3733', fontWeight: 500 },
-  userButtonPopoverActionButtonIcon: { color: '#6b675f' },
-  userPreviewMainIdentifier: { color: '#1a1816', fontWeight: 600 },
-  userPreviewSecondaryIdentifier: { color: '#6b675f' },
-  navbar: { backgroundColor: '#eceae6', borderRight: '1px solid #d8d4cd' },
-  navbarButton: { borderRadius: '2px', '&:hover': { backgroundColor: '#e7e3dd' } },
-  profileSectionTitleText: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: '1.25rem',
-    fontWeight: 500,
-  },
-  profileSectionPrimaryButton: { color: '#1a1816', fontWeight: 600 },
 };
 
 /** A fresh object keeps Clerk free to merge component-specific overrides. */
@@ -249,24 +221,6 @@ export function onAuthChange(cb) {
 
 export function mountSignIn(el) {
   _clerk?.mountSignIn(el, clerkSignInOptions());
-}
-
-export function mountUserButton(el) {
-  _clerk?.mountUserButton(el, {
-    appearance: clerkAppearance(),
-    userProfileMode: 'modal',
-    userProfileProps: {
-      appearance: clerkAppearance({
-        card: {
-          width: 'min(920px, calc(100vw - 32px))',
-          maxHeight: 'min(720px, calc(100dvh - 32px))',
-          border: '1px solid #d8d4cd',
-          borderRadius: '2px',
-          boxShadow: '0 28px 80px rgba(58, 55, 51, 0.18)',
-        },
-      }),
-    },
-  });
 }
 
 export async function signOut() {

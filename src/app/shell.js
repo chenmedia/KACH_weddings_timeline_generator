@@ -9,15 +9,16 @@ import {
   isSignedIn,
   onAuthChange,
   mountSignIn,
-  mountUserButton,
   getToken,
   getUser,
+  signOut,
 } from '../auth.js';
 import { initSentry, setUser } from '../lib/observability.js';
 import { el } from '../ui/dom.js';
 import { icons } from '../ui/icons.js';
 import { registerFeature, getFeatures } from './registry.js';
 import { resolveRoute, navigate, onRouteChange } from './router.js';
+import { buildAccountControl, closeAccountSurface } from './account.js';
 
 const root = document.getElementById('app'); // the .wrap element
 const SIDEBAR_KEY = 'kach-sidebar-collapsed';
@@ -236,12 +237,10 @@ function buildSidebar(features, active) {
   collapse.innerHTML = `<span class="side-ico" aria-hidden="true">${icons.chevron}</span>`;
   collapse.addEventListener('click', toggleCollapse);
 
-  // Account (Clerk user button) at the foot, SaaS-style — only when signed in.
+  // KACH account control at the foot. Clerk remains the session provider only.
   const footChildren = [];
   if (authEnabled && isSignedIn()) {
-    const account = el('div', { class: 'side-account', 'aria-label': locale.nav.account });
-    mountUserButton(account);
-    footChildren.push(account);
+    footChildren.push(buildAccountControl({ user: getUser(), locale, onSignOut: signOut }));
   }
   footChildren.push(buildLangbar(), collapse);
 
@@ -295,7 +294,7 @@ function renderSignIn(main) {
 
 // context handed to features — no globals reached into.
 function makeCtx() {
-  return { authEnabled, isSignedIn, getToken, mountUserButton, navigate, requestRender: render };
+  return { authEnabled, isSignedIn, getToken, navigate, requestRender: render };
 }
 
 // ---------- top-level render ----------
@@ -305,6 +304,7 @@ function resetLayout() {
 }
 
 function render() {
+  closeAccountSurface();
   applyMeta();
   const features = getFeatures();
   const route = resolveRoute(features);

@@ -8,8 +8,7 @@ import { t } from '../../i18n.js';
 
 /**
  * @param {object} locale
- * @param {{ onSelect:(id:string)=>void, onNew:()=>void, onDelete:(id:string)=>void,
- *           mountUserButton:(el:HTMLElement)=>void }} handlers
+ * @param {{ onSelect:(id:string)=>void, onNew:()=>void, onDelete:(id:string)=>void }} handlers
  */
 export function buildDashboard(locale, handlers) {
   const d = locale.dashboard;

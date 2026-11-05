@@ -25,6 +25,23 @@ export default {
     skip: 'Skip to main content',
   },
 
+  account: {
+    kicker: 'KACH studio account',
+    title: 'Your profile',
+    intro: 'The account used to manage every KACH Weddings client journey and timeline.',
+    open: 'Open profile menu',
+    close: 'Close profile',
+    profile: 'View profile',
+    signOut: 'Sign out',
+    signingOut: 'Signing out …',
+    email: 'Email address',
+    workspace: 'Workspace',
+    access: 'Access',
+    accessValue: 'Secure studio access',
+    securityNote: 'Your secure sign-in session remains protected in the background.',
+    noEmail: 'No email address',
+  },
+
   tools: {
     journey: {
       title: 'Client journey',
