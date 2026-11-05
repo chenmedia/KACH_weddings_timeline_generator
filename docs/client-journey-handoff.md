@@ -1,5 +1,7 @@
 # Codex handover: integrated KACH client journey
 
+> **Implementation authority:** `docs/client-journey-product-spec.md` is the canonical release-1 scope and acceptance contract. This handover supplies supporting implementation detail. If the two documents differ, follow the product spec and record the discrepancy in the implementation PR.
+
 ## Outcome
 
 Add an authenticated **Client journey** tool at `/journey` inside the existing KACH Weddings Tools app. It must use the same couple records and generated milestone dates as `/timeline`, while adding photographer-only relationship tasks, the eight referral moments, gift budgeting, FOCL links, and reusable message templates.
