@@ -37,7 +37,7 @@ function formatDate(value, locale) {
   return date ? fmtDate(date, locale.dateLocale) : '—';
 }
 
-function actionRow(locale, wedding, ctx) {
+function actionRow(locale, wedding, ctx, index) {
   const copy = locale.home.overview;
   const taskLabel = locale.journey.tasks[wedding.nextActionKey] || copy.noAction;
   const stageLabel = locale.journey.stages[wedding.stageKey] || wedding.stageKey;
@@ -64,6 +64,7 @@ function actionRow(locale, wedding, ctx) {
     : copy.noDate;
 
   return el('li', { class: `overview-row is-${timing}` }, [
+    el('span', { class: 'overview-index', text: String(index + 1).padStart(2, '0') }),
     el('div', { class: 'overview-couple' }, [
       el('h3', { text: wedding.couple || locale.timeline.defaultCouple }),
       el('p', {
@@ -89,10 +90,34 @@ function actionRow(locale, wedding, ctx) {
 }
 
 function seasonSummary(locale, summary) {
-  const copy = locale.home.overview;
-  const parts = [copy.weddingCount(summary.weddingCount), copy.needsAttention(summary.needsAttentionCount)];
-  if (summary.nextWeddingDate) parts.push(copy.nextWedding(formatDate(summary.nextWeddingDate, locale)));
-  return el('p', { class: 'home-season-summary', text: parts.join(' · ') });
+  const studio = locale.home.studio;
+  return el('dl', { class: 'home-season-summary' }, [
+    el('div', {}, [el('dt', { text: studio.weddings }), el('dd', { text: String(summary.weddingCount) })]),
+    el('div', {}, [
+      el('dt', { text: studio.attention }),
+      el('dd', { text: String(summary.needsAttentionCount) }),
+    ]),
+    el('div', {}, [
+      el('dt', { text: studio.nextWedding }),
+      el('dd', { text: summary.nextWeddingDate ? formatDate(summary.nextWeddingDate, locale) : '—' }),
+    ]),
+  ]);
+}
+
+function loadingOverview(locale) {
+  return el(
+    'div',
+    {
+      class: 'home-loading',
+      role: 'status',
+      'aria-label': locale.dashboard.loading,
+    },
+    [
+      el('span', { class: 'skeleton-line is-wide' }),
+      el('span', { class: 'skeleton-line' }),
+      el('span', { class: 'skeleton-line' }),
+    ],
+  );
 }
 
 function loadTimelineOnlyOverview(content, locale, ctx) {
@@ -106,7 +131,7 @@ function loadTimelineOnlyOverview(content, locale, ctx) {
         return;
       }
       const list = el('ul', { class: 'overview-list', role: 'list' });
-      timelines.slice(0, 6).forEach((timeline) => {
+      timelines.slice(0, 6).forEach((timeline, index) => {
         const open = el('button', {
           type: 'button',
           class: 'btn-ghost',
@@ -115,6 +140,7 @@ function loadTimelineOnlyOverview(content, locale, ctx) {
         open.addEventListener('click', () => ctx.navigate(pathForWedding(TIMELINE_PATH, timeline.id)));
         list.appendChild(
           el('li', { class: 'overview-row is-timeline-only' }, [
+            el('span', { class: 'overview-index', text: String(index + 1).padStart(2, '0') }),
             el('div', { class: 'overview-couple' }, [
               el('h3', { text: timeline.couple || locale.timeline.defaultCouple }),
               el('p', { class: 'overview-meta', text: formatDate(timeline.wdate, locale) }),
@@ -134,7 +160,6 @@ function loadTimelineOnlyOverview(content, locale, ctx) {
 function mount(container, ctx) {
   const locale = t();
   const wrap = el('section', { class: 'home no-print', 'aria-label': locale.home.intro });
-  wrap.appendChild(el('h2', { class: 'home-greeting', text: greeting(locale) }));
 
   const goNew = () => {
     setFlag(NEW_KEY, '1');
@@ -144,12 +169,25 @@ function mount(container, ctx) {
   newBtn.addEventListener('click', goNew);
   const allBtn = el('button', { class: 'btn-ghost', type: 'button', text: locale.home.allCouples });
   allBtn.addEventListener('click', () => ctx.navigate(TIMELINE_PATH));
-  wrap.appendChild(el('div', { class: 'home-actions cluster' }, [newBtn, allBtn]));
+  wrap.appendChild(
+    el('section', { class: 'home-hero' }, [
+      el('div', { class: 'home-hero-copy' }, [
+        el('p', { class: 'home-kicker', text: locale.home.studio.kicker }),
+        el('h2', { class: 'home-greeting', text: greeting(locale) }),
+        el('p', { class: 'home-intro', text: locale.home.studio.intro }),
+        el('div', { class: 'home-actions cluster' }, [newBtn, allBtn]),
+      ]),
+      el('figure', { class: 'home-image' }, [
+        el('img', { src: '/images/kach-journey-detail.jpg', alt: locale.home.studio.imageAlt }),
+        el('figcaption', { text: locale.home.studio.imageCaption }),
+      ]),
+    ]),
+  );
   container.appendChild(wrap);
 
   if (!(ctx.authEnabled && ctx.isSignedIn && ctx.isSignedIn())) return;
 
-  const status = el('p', { class: 'dash-empty', text: locale.dashboard.loading });
+  const status = loadingOverview(locale);
   const content = el('div', { class: 'home-overview', 'aria-live': 'polite' }, [status]);
   wrap.appendChild(content);
 
@@ -169,7 +207,7 @@ function mount(container, ctx) {
         return;
       }
       const list = el('ul', { class: 'overview-list', role: 'list' });
-      weddings.forEach((wedding) => list.appendChild(actionRow(locale, wedding, ctx)));
+      weddings.forEach((wedding, index) => list.appendChild(actionRow(locale, wedding, ctx, index)));
       content.appendChild(list);
     })
     .catch(() => {

@@ -19,6 +19,38 @@
   min-width: 0;
 }
 
+.journey-loading {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.28fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 64px);
+  min-height: 620px;
+}
+
+.journey-loading > span {
+  display: block;
+  background: var(--hairline);
+  opacity: 0.62;
+  animation: journey-loading-pulse 1.35s ease-in-out infinite alternate;
+}
+
+.journey-loading-rail {
+  grid-row: 1 / span 2;
+}
+
+.journey-loading-image {
+  min-height: 440px;
+}
+
+.journey-loading-card {
+  min-height: 150px;
+}
+
+@keyframes journey-loading-pulse {
+  to {
+    opacity: 0.24;
+  }
+}
+
 .journey-topline {
   display: flex;
   align-items: end;
@@ -868,6 +900,15 @@
 }
 
 @media (max-width: 720px) {
+  .journey-loading {
+    grid-template-columns: 1fr;
+    min-height: 520px;
+  }
+
+  .journey-loading-rail {
+    display: none;
+  }
+
   .journey-topline {
     align-items: stretch;
     flex-direction: column;

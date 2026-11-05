@@ -22,6 +22,9 @@ describe('home overview mount', () => {
     home.mount(container, { navigate: (p) => calls.push(p), authEnabled: false });
 
     expect(container.querySelector('.home-greeting')).toBeTruthy();
+    expect(container.querySelector('.home-image img').getAttribute('src')).toBe(
+      '/images/kach-journey-detail.jpg',
+    );
     const buttons = container.querySelectorAll('.home-actions button');
     expect(buttons.length).toBe(2);
 
@@ -65,6 +68,8 @@ describe('home overview mount', () => {
     });
 
     await vi.waitFor(() => expect(container.querySelectorAll('.overview-row')).toHaveLength(1));
+    expect(container.querySelectorAll('.home-season-summary > div')).toHaveLength(3);
+    expect(container.querySelector('.overview-index').textContent).toBe('01');
     expect(fetchMock).toHaveBeenCalledTimes(1);
     container.querySelector('.overview-primary').click();
     expect(calls).toContain(`/journey?wedding=${id}`);

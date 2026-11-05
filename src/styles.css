@@ -39,6 +39,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 ::selection {
   background: var(--ink);
@@ -56,6 +57,25 @@ body {
   font-weight: 300;
   line-height: 1.7;
   padding: 48px 20px 96px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1200;
+  padding: 10px 14px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .wrap {
@@ -130,7 +150,7 @@ body.drawer-lock {
   max-width: none;
   margin: 0;
   display: flex;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 .sidebar {
   flex: 0 0 248px;
@@ -144,7 +164,7 @@ body.drawer-lock {
   position: sticky;
   top: 0;
   align-self: flex-start;
-  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
 }
 .side-brand {
@@ -195,14 +215,16 @@ body.drawer-lock {
   cursor: pointer;
   transition:
     background-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 .side-item:hover {
   background: var(--hover);
   color: var(--ink);
+  transform: translateX(2px);
 }
 .side-item.is-active {
-  background: var(--ink);
+  background: #20251f;
   color: #fff;
 }
 .side-ico {
@@ -355,12 +377,23 @@ body.drawer-lock {
   .topbar-mark .light {
     font-weight: 300;
   }
+  .topbar-context {
+    min-width: 0;
+    margin-left: auto;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 60;
-    height: 100vh;
+    height: 100dvh;
     width: 264px;
     flex-basis: 264px;
     transform: translateX(-100%);
@@ -404,7 +437,7 @@ body.drawer-lock {
 }
 
 /* ---------- Header / wordmark ---------- */
-header {
+.site-header {
   text-align: center;
   margin-bottom: 44px;
 }
@@ -636,13 +669,17 @@ button {
   padding: 13px clamp(16px, 5vw, 26px);
   transition: 0.18s ease;
 }
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
 .btn-primary {
-  background: var(--ink);
+  background: #20251f;
   color: #fff;
-  border: 1px solid var(--ink);
+  border: 1px solid #20251f;
 }
 .btn-primary:hover {
-  background: #000;
+  background: #343a31;
+  border-color: #343a31;
 }
 .btn-ghost {
   background: transparent;
@@ -1072,6 +1109,32 @@ footer .links {
   margin-top: 12px;
 }
 
+footer .links a {
+  color: inherit;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.skeleton-line {
+  display: block;
+  width: 64%;
+  height: 12px;
+  background: var(--hairline);
+  opacity: 0.72;
+  animation: skeleton-pulse 1.35s ease-in-out infinite alternate;
+}
+
+.skeleton-line.is-wide {
+  width: 92%;
+  height: 18px;
+}
+
+@keyframes skeleton-pulse {
+  to {
+    opacity: 0.3;
+  }
+}
+
 .empty {
   text-align: center;
   color: var(--muted);
@@ -1132,7 +1195,7 @@ footer .links {
   .langbar {
     display: none !important;
   }
-  header {
+  .site-header {
     margin-bottom: 26px;
   }
   .tl-head {
@@ -1219,18 +1282,15 @@ footer .links {
   border-radius: 2px;
   text-transform: none;
   letter-spacing: normal;
-  /* transparent placeholder so the active accent doesn't shift layout */
-  box-shadow: inset 3px 0 0 transparent;
   transition:
     background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    color 0.15s ease;
 }
 .dash-item:hover {
   background: var(--hover);
 }
 .dash-item.is-active {
   background: var(--active);
-  box-shadow: inset 3px 0 0 var(--ink);
 }
 /* On pointer devices the delete affordance stays out of the way until the row
  * is hovered or focused; on touch (no hover) it remains visible. */

@@ -6,29 +6,254 @@
  * their own <feature>.css imported from the feature entry. This file is the
  * anchor for that convention and the home for future timeline-only rules. */
 
-/* Master-detail workspace: couples list (left) beside the editor (right) on
- * wide screens; stacks on narrow. The list is .no-print, so the PDF capture
- * (which resets .tl-workspace to block) is unaffected. */
+.app-canvas:has(.tl-workspace) {
+  max-width: 1380px;
+}
+
+.timeline-feature-header {
+  max-width: 680px;
+  margin-bottom: clamp(42px, 6vw, 72px);
+}
+
+.timeline-feature-header > p,
+.timeline-context-bar p {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.timeline-feature-header h1 {
+  margin-top: 14px;
+  font-family: var(--serif);
+  font-size: clamp(48px, 6vw, 76px);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 0.94;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.timeline-feature-header > span {
+  display: block;
+  max-width: 54ch;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Master-detail workspace: couples list beside the editor. */
 .tl-workspace {
   display: grid;
-  grid-template-columns: minmax(220px, 300px) 1fr;
-  gap: var(--sp-6);
+  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
   align-items: start;
 }
+
 .tl-workspace .dashboard {
   margin-bottom: 0;
   position: sticky;
   top: var(--sp-5);
+  padding: 0 clamp(18px, 2.5vw, 34px) 0 0;
+  border: 0;
+  border-right: 1px solid var(--hairline);
+  background: transparent;
 }
+
+.tl-workspace .dash-head {
+  align-items: stretch;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.tl-workspace .dash-actions,
+.tl-workspace .dash-actions button {
+  width: 100%;
+}
+
+.tl-workspace .dash-row {
+  gap: 8px;
+}
+
+.tl-workspace .dash-item {
+  padding: 15px 4px;
+  box-shadow: none;
+}
+
+.tl-workspace .dash-item:hover {
+  background: transparent;
+  color: var(--journey-clay, var(--clay));
+}
+
+.tl-workspace .dash-item.is-active {
+  background: transparent;
+  box-shadow: none;
+}
+
+.tl-workspace .dash-item.is-active .dash-couple {
+  color: var(--clay);
+}
+
 .tl-detail {
   min-width: 0;
 }
-@media (max-width: 860px) {
+
+.timeline-context-bar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.timeline-context-bar h2 {
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.timeline-context-link {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+}
+
+.tl-detail .share-panel,
+.tl-detail .controls {
+  border: 0;
+  background: var(--surface);
+}
+
+.tl-detail .share-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  column-gap: 34px;
+  padding: 30px 32px 32px;
+}
+
+.tl-detail .share-panel > :not(.share-qr-fig) {
+  grid-column: 1;
+}
+
+.tl-detail .share-qr-fig {
+  grid-column: 2;
+  grid-row: 1 / span 8;
+  align-self: start;
+  margin-top: 0;
+}
+
+.tl-detail .controls {
+  padding: clamp(28px, 4vw, 46px);
+}
+
+.tl-detail #output {
+  margin-top: 30px;
+  padding: clamp(34px, 6vw, 76px);
+  background: var(--surface);
+}
+
+.timeline-empty-state {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(34px, 6vw, 72px);
+  background: var(--surface);
+}
+
+.timeline-empty-number {
+  color: var(--clay);
+  font-family: var(--serif);
+  font-size: 16px;
+}
+
+.timeline-empty-state h2 {
+  max-width: 18ch;
+  margin-top: 16px;
+  font-family: var(--serif);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.timeline-empty-state p {
+  max-width: 48ch;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+@media (max-width: 960px) {
   .tl-workspace {
     grid-template-columns: 1fr;
   }
   .tl-workspace .dashboard {
     position: static;
+    padding: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .tl-workspace .dash-head {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .tl-workspace .dash-actions,
+  .tl-workspace .dash-actions button {
+    width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .timeline-feature-header {
+    margin-bottom: 42px;
+  }
+
+  .timeline-feature-header h1 {
+    font-size: clamp(38px, 11vw, 44px);
+    letter-spacing: -0.04em;
+  }
+
+  .timeline-context-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tl-detail .share-panel {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .tl-detail .share-panel > :not(.share-qr-fig),
+  .tl-detail .share-qr-fig {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .tl-detail .share-qr-fig {
+    margin-top: 20px;
+  }
+
+  .tl-detail #output {
+    padding: 28px 20px;
   }
 }
 

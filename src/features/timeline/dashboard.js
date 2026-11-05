@@ -29,14 +29,22 @@ export function buildDashboard(locale, handlers) {
 
   let activeId = null;
 
+  function loadingRows() {
+    return el('li', { class: 'dashboard-loading', role: 'status', 'aria-label': d.loading }, [
+      el('span', { class: 'skeleton-line is-wide' }),
+      el('span', { class: 'skeleton-line' }),
+      el('span', { class: 'skeleton-line' }),
+    ]);
+  }
+
   async function refresh() {
     list.innerHTML = '';
-    list.appendChild(el('div', { class: 'dash-empty', text: d.loading }));
+    list.appendChild(loadingRows());
     try {
       const { timelines } = await api.list();
       list.innerHTML = '';
       if (!timelines.length) {
-        list.appendChild(el('div', { class: 'dash-empty', text: d.empty }));
+        list.appendChild(el('li', { class: 'dash-empty', text: d.empty }));
         return;
       }
       timelines.forEach((tl) => {
@@ -79,7 +87,7 @@ export function buildDashboard(locale, handlers) {
       });
     } catch {
       list.innerHTML = '';
-      list.appendChild(el('div', { class: 'dash-empty', text: d.error }));
+      list.appendChild(el('li', { class: 'dash-empty', text: d.error }));
     }
   }
 

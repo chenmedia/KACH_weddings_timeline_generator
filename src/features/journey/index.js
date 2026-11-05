@@ -65,6 +65,22 @@ function inputField({ id, label, type = 'text', value = '', placeholder = '', on
   return el('div', { class: 'journey-field' }, [el('label', { for: id, text: label }), input]);
 }
 
+function journeyLoading(locale) {
+  return el(
+    'div',
+    {
+      class: 'journey-loading',
+      role: 'status',
+      'aria-label': locale.dashboard.loading,
+    },
+    [
+      el('span', { class: 'journey-loading-rail' }),
+      el('span', { class: 'journey-loading-image' }),
+      el('span', { class: 'journey-loading-card' }),
+    ],
+  );
+}
+
 async function switchCouple(nextId, resetControl) {
   if (!nextId || nextId === currentId) return;
   const locale = t();
@@ -629,7 +645,7 @@ async function loadWorkspace(id) {
   projectDirty = false;
   journeyDirty = false;
   host.innerHTML = '';
-  host.appendChild(el('p', { class: 'dash-empty', text: t().dashboard.loading }));
+  host.appendChild(journeyLoading(t()));
   try {
     workspace = await api.workspace(id, getLang());
     workspace.journey = sanitizeJourney(workspace.journey || defaultJourney());
@@ -644,9 +660,7 @@ async function mount(container, ctx) {
   shellCtx = ctx;
   const locale = t();
   const wrap = el('section', { class: 'journey-feature no-print' });
-  host = el('div', { class: 'journey-content' }, [
-    el('p', { class: 'dash-empty', text: locale.dashboard.loading }),
-  ]);
+  host = el('div', { class: 'journey-content' }, [journeyLoading(locale)]);
   wrap.appendChild(host);
   container.appendChild(wrap);
 
