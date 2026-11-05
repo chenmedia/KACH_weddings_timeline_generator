@@ -51,6 +51,7 @@ export function buildTimelineWorkspace({ locale, state, onChange, onReset, onOpe
       renderPreview();
     },
     onAction,
+    actionLabels: { share: locale.journey.timelineWorkspace.openSharing },
   }).el;
   renderPreview();
 
