@@ -57,6 +57,16 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(body),
     }),
+  createVersion: (id, summary = '') =>
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'create_version', summary }),
+    }),
+  restoreVersion: (id, versionId) =>
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'restore_version', versionId }),
+    }),
   create: (state) => authed('/api/timelines', { method: 'POST', body: JSON.stringify(state) }),
   update: (id, state) => authed(`/api/timelines/${id}`, { method: 'PUT', body: JSON.stringify(state) }),
   remove: (id) => authed(`/api/timelines/${id}`, { method: 'DELETE' }),

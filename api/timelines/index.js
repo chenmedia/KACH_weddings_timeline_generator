@@ -6,6 +6,7 @@ import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed, genSlug } from '../_lib/respond.js';
 import { withErrorCapture } from '../_lib/observability.js';
 import { stateToRow, overridesToRows, rowToState } from '../../src/lib/row-mapper.js';
+import { captureVersion, logActivity } from '../_lib/history.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -39,6 +40,18 @@ async function handler(req, res) {
       .returning();
     const ovRows = overridesToRows(created.id, state);
     if (ovRows.length) await db.insert(milestoneOverrides).values(ovRows);
+    await captureVersion(db, schema, {
+      timelineId: created.id,
+      ownerId: uid,
+      source: 'created',
+      summary: 'Initial version',
+      force: true,
+    });
+    await logActivity(db, schema, {
+      timelineId: created.id,
+      ownerId: uid,
+      action: 'project.created',
+    });
     return ok(res, { id: created.id, ...rowToState(created, ovRows), projectVersion: created.version }, 201);
   }
 

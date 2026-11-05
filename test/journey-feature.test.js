@@ -52,6 +52,23 @@ describe('journey feature', () => {
               milestones: getMilestones(project, nb),
               journey: defaultJourney(),
               journeyVersion: 0,
+              activity: [
+                {
+                  id: 'activity-1',
+                  actorType: 'owner',
+                  action: 'project.updated',
+                  createdAt: '2026-11-06T00:00:00.000Z',
+                },
+              ],
+              versions: [
+                {
+                  id: 'version-1',
+                  sequence: 1,
+                  source: 'manual',
+                  summary: 'Manuelt øyeblikksbilde',
+                  createdAt: '2026-11-06T00:00:00.000Z',
+                },
+              ],
             }),
           );
         }
@@ -75,7 +92,7 @@ describe('journey feature', () => {
     expect(container.querySelector('.journey-ledger-intro h2').textContent).toContain('En relasjon');
     expect(container.querySelectorAll('.journey-milestone-number').length).toBeGreaterThan(8);
     let tabs = container.querySelectorAll('[role="tab"]');
-    expect(tabs).toHaveLength(6);
+    expect(tabs).toHaveLength(7);
     expect(tabs[0].getAttribute('tabindex')).toBe('0');
     expect(tabs[1].getAttribute('tabindex')).toBe('-1');
     tabs[1].click();
@@ -110,6 +127,11 @@ describe('journey feature', () => {
     expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();
     tabs = container.querySelectorAll('[role="tab"]');
     tabs[4].click();
+    expect(container.querySelector('.history-workspace')).toBeTruthy();
+    expect(container.querySelectorAll('.activity-feed li')).toHaveLength(1);
+    expect(container.querySelectorAll('.version-list article')).toHaveLength(1);
+    tabs = container.querySelectorAll('[role="tab"]');
+    tabs[5].click();
     expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
   });
 });

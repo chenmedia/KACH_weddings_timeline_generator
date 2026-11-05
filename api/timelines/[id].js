@@ -7,6 +7,7 @@ import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed, genSlug } from '../_lib/respond.js';
 import { withErrorCapture } from '../_lib/observability.js';
 import { stateToRow, overridesToRows, rowToState } from '../../src/lib/row-mapper.js';
+import { captureVersion, logActivity } from '../_lib/history.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -42,6 +43,12 @@ async function handler(req, res) {
     if (!Number.isInteger(expectedVersion) || expectedVersion < 1) {
       return fail(res, 428, 'projectVersion is required', 'VERSION_REQUIRED');
     }
+    await captureVersion(db, schema, {
+      timelineId: id,
+      ownerId: uid,
+      source: 'project_update',
+      summary: 'Before updating wedding details',
+    });
     const [updated] = await db
       .update(timelines)
       .set({ ...stateToRow(state), updatedAt: new Date(), version: sql`${timelines.version} + 1` })
@@ -52,6 +59,11 @@ async function handler(req, res) {
     await db.delete(milestoneOverrides).where(eq(milestoneOverrides.timelineId, id));
     const ovRows = overridesToRows(id, state);
     if (ovRows.length) await db.insert(milestoneOverrides).values(ovRows);
+    await logActivity(db, schema, {
+      timelineId: id,
+      ownerId: uid,
+      action: 'project.updated',
+    });
     return ok(res, { id, ...rowToState(updated, ovRows), projectVersion: updated.version });
   }
 
@@ -102,6 +114,17 @@ async function handler(req, res) {
     }
 
     await db.update(timelines).set(patch).where(eq(timelines.id, id));
+    await logActivity(db, schema, {
+      timelineId: id,
+      ownerId: uid,
+      action: body.rotateSlug
+        ? 'sharing.revoked'
+        : 'shareEnabled' in body
+          ? enabled
+            ? 'sharing.enabled'
+            : 'sharing.disabled'
+          : 'sharing.expiry_updated',
+    });
     return ok(res, { shareSlug: slug, shareEnabled: enabled, shareExpiresAt: expiresAt });
   }
 

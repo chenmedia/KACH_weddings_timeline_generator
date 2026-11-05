@@ -27,11 +27,12 @@ import {
 } from './model.js';
 import { buildSharingWorkspace, buildTimelineWorkspace } from './timeline-workspace.js';
 import { buildClientCard } from './client-card.js';
+import { buildHistoryWorkspace } from './history-workspace.js';
 import { defaultClientProfile, sanitizeClientProfile } from '../../lib/client-profile.js';
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
 const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
-const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'referrals', 'templates'];
+const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'activity', 'referrals', 'templates'];
 const WORKSPACE_TABS = new Set(WORKSPACE_TAB_KEYS);
 
 let host = null;
@@ -554,6 +555,47 @@ function sharingPanel(locale) {
   });
 }
 
+function historyPanel(locale) {
+  return buildHistoryWorkspace({
+    locale,
+    activity: workspace.activity || [],
+    versions: workspace.versions || [],
+    milestones: workspace.milestones,
+    onCreate: async () => {
+      if (projectDirty || journeyDirty || profileDirty) {
+        const saved = await saveWorkspace();
+        if (!saved) return;
+      }
+      try {
+        await api.createVersion(currentId, locale.activity.manualSummary);
+        workspace = await api.workspace(currentId, getLang());
+        workspace.profile.data = sanitizeClientProfile(workspace.profile.data);
+        toast(locale.activity.created, { type: 'success' });
+        renderWorkspace();
+      } catch {
+        toast(locale.activity.failed, { type: 'error' });
+      }
+    },
+    onRestore: async (version) => {
+      const confirmed = await confirmDialog({
+        title: locale.activity.restoreConfirm.title,
+        body: locale.activity.restoreConfirm.body(version.sequence),
+        confirmLabel: locale.activity.restore,
+        cancelLabel: locale.feedback.cancel,
+        danger: true,
+      });
+      if (!confirmed) return;
+      try {
+        await api.restoreVersion(currentId, version.id);
+        await loadWorkspace(currentId);
+        toast(locale.activity.restored, { type: 'success' });
+      } catch {
+        toast(locale.activity.failed, { type: 'error' });
+      }
+    },
+  });
+}
+
 function referralPanel(locale) {
   const journey = workspace.journey;
   const copy = locale.journey.referrals;
@@ -810,6 +852,7 @@ function renderWorkspace() {
     client: clientPanel,
     timeline: timelinePanel,
     sharing: sharingPanel,
+    activity: historyPanel,
     referrals: referralPanel,
     templates: templatesPanel,
   };
