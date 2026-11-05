@@ -88,6 +88,9 @@ export default {
     selectPrompt: 'Velg et brudepar i listen, eller opprett et nytt.',
     signInTitle: 'Logg inn',
     signInIntro: 'Logg inn for å lage og lagre tidslinjer.',
+    signInKicker: 'KACH Weddings studio',
+    signInNote: 'Et privat arbeidsområde for planleggingen i KACH Weddings.',
+    signInImageAlt: 'Et nygift KACH Weddings-brudepar utendørs',
   },
 
   journey: {

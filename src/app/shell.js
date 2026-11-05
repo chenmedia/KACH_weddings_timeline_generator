@@ -274,12 +274,20 @@ function buildTopbar(activeFeature) {
 
 function renderSignIn(main) {
   const d = t().dashboard;
-  const slot = el('div');
+  document.body.classList.add('auth-mode');
+  const slot = el('div', { class: 'signin-slot' });
   main.appendChild(
     el('section', { class: 'signin-wrap', 'aria-label': d.signInTitle }, [
-      el('h2', { class: 'signin-title', text: d.signInTitle }),
-      el('p', { class: 'signin-intro', text: d.signInIntro }),
-      slot,
+      el('div', { class: 'signin-editorial' }, [
+        el('img', { src: '/images/kach-journey-detail.jpg', alt: d.signInImageAlt }),
+        el('div', { class: 'signin-shade', 'aria-hidden': 'true' }),
+        el('div', { class: 'signin-copy' }, [
+          el('p', { class: 'signin-kicker', text: d.signInKicker }),
+          el('h2', { class: 'signin-title', text: d.signInTitle }),
+          el('p', { class: 'signin-intro', text: d.signInIntro }),
+        ]),
+      ]),
+      el('div', { class: 'signin-panel' }, [slot, el('p', { class: 'signin-note', text: d.signInNote })]),
     ]),
   );
   mountSignIn(slot);
@@ -292,7 +300,7 @@ function makeCtx() {
 
 // ---------- top-level render ----------
 function resetLayout() {
-  document.body.classList.remove('app-mode');
+  document.body.classList.remove('app-mode', 'auth-mode');
   root.classList.remove('app-shell', 'is-collapsed', 'is-drawer-open');
 }
 

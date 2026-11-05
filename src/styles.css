@@ -142,6 +142,12 @@ body {
 body.app-mode {
   padding: 0;
 }
+body.auth-mode {
+  padding-top: 14px;
+}
+body.auth-mode .site-header {
+  margin-bottom: 14px;
+}
 /* Lock background scroll while the mobile nav drawer is open. */
 body.drawer-lock {
   overflow: hidden;
@@ -1328,25 +1334,135 @@ footer .links a {
   padding: 24px 0;
 }
 .signin-wrap {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.74fr) minmax(360px, 1fr);
+  width: min(100%, 900px);
+  margin: 12px auto 0;
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: 2px;
-  padding: 36px 34px;
-  max-width: 460px;
-  margin: 12px auto 0;
+  overflow: clip;
+}
+.signin-editorial {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--ink);
+}
+.signin-editorial > img,
+.signin-shade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.signin-editorial > img {
+  object-fit: cover;
+  object-position: 51% center;
+  filter: saturate(0.8) contrast(0.94);
+  transform: scale(1.015);
+}
+.signin-shade {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 24, 22, 0.66) 0%,
+    rgba(26, 24, 22, 0.08) 38%,
+    rgba(26, 24, 22, 0.1) 62%,
+    rgba(26, 24, 22, 0.72) 100%
+  );
+}
+.signin-copy {
+  position: absolute;
+  z-index: 1;
+  top: 28px;
+  right: 28px;
+  left: 28px;
+  color: #fff;
+}
+.signin-kicker,
+.signin-note {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.signin-kicker {
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.76);
 }
 .signin-title {
   font-family: var(--serif);
   font-weight: 500;
-  font-size: 28px;
-  color: var(--ink);
-  line-height: 1.1;
+  font-size: clamp(32px, 4vw, 46px);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 .signin-intro {
   font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  margin-top: 12px;
+  text-wrap: pretty;
+}
+.signin-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px;
+}
+.signin-slot {
+  width: 100%;
+  min-width: 0;
+}
+.signin-note {
   color: var(--muted);
-  line-height: 1.55;
-  margin: 10px 0 22px;
+  line-height: 1.5;
+  margin-top: 18px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .signin-wrap {
+    grid-template-columns: 1fr;
+    width: min(100%, 470px);
+  }
+  .signin-editorial {
+    min-height: 190px;
+  }
+  .signin-editorial > img {
+    object-position: center 43%;
+  }
+  .signin-copy {
+    top: 18px;
+    right: 22px;
+    left: 22px;
+  }
+  .signin-title {
+    font-size: 32px;
+  }
+  .signin-intro {
+    max-width: 34ch;
+  }
+  .signin-panel {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .signin-wrap {
+    margin-top: 4px;
+  }
+  .signin-editorial {
+    min-height: 156px;
+  }
+  .signin-panel {
+    padding: 12px;
+  }
+  .signin-note {
+    margin: 14px 8px 4px;
+  }
 }
 
 /* ---------- Share panel (authed) ---------- */
