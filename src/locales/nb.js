@@ -6,7 +6,7 @@ export default {
 
   meta: {
     title: 'KACH Weddings · Tidslinje',
-    description: 'Lag en elegant tidslinje for bryllupsfotograferingen – fra bestilling til ferdig galleri.',
+    description: 'Lag en elegant tidslinje for bryllupsfotograferingen, fra bestilling til ferdig galleri.',
   },
 
   header: {
@@ -80,8 +80,9 @@ export default {
     ],
     overview: {
       nextActions: 'Neste handlinger',
-      openJourney: 'Åpne klientreise',
-      editTimeline: 'Tidslinje',
+      nextActionsIntro: 'Start med det som haster, eller se hva som kommer videre.',
+      openJourney: 'Åpne brudepar',
+      editTimeline: 'Bryllupsdagen',
       noAction: 'Ingen åpne handlinger',
       noDate: 'Ingen dato',
       today: 'I dag',
@@ -91,6 +92,13 @@ export default {
       weddingCount: (count) => `${count} ${count === 1 ? 'bryllup' : 'bryllup'}`,
       needsAttention: (count) => `${count} trenger oppfølging`,
       nextWedding: (date) => `neste bryllup ${date}`,
+      filters: {
+        label: 'Filtrer neste handlinger',
+        all: 'Alle',
+        attention: 'Trenger oppfølging',
+        upcoming: 'Kommende',
+        empty: 'Ingen brudepar passer dette filteret.',
+      },
     },
   },
 
@@ -147,6 +155,7 @@ export default {
       clientSummary: 'Klientoversikt',
       nextThoughtfulAction: 'Neste gjennomtenkte handling',
       viewJourney: 'Se klientreisen',
+      openTasks: 'Åpne oppgaver',
       personalTouchNote: 'Relasjonen forblir synlig mellom milepælene.',
       experienceBudget: 'Opplevelsesbudsjett',
       contractToAnniversary: 'Fra kontrakt til første bryllupsdag',
@@ -247,10 +256,10 @@ export default {
       foclPlaceholder: 'https://getfocl.app/…',
       foclInvalid: 'Bruk en gyldig https-lenke.',
       integrationAreas: [
-        'Tidslinje — klar for en fremtidig verifisert FOCL-integrasjon',
-        'Personer og grupper — ikke synkronisert ennå',
-        'Leverandører og steder — ikke synkronisert ennå',
-        'Historie og bildeprioriteringer — ikke synkronisert ennå',
+        'Tidslinje: klar for en fremtidig verifisert FOCL-integrasjon',
+        'Personer og grupper: ikke synkronisert ennå',
+        'Leverandører og steder: ikke synkronisert ennå',
+        'Historie og bildeprioriteringer: ikke synkronisert ennå',
       ],
       welcome: {
         title: 'Velkommen',
@@ -258,7 +267,7 @@ export default {
       },
       weddingWeek: {
         title: 'Bryllupsuken',
-        body: 'Nå er bryllupsuken her. Dere trenger ikke å prestere noe foran kameraet – min jobb er å skape ro, se de små øyeblikkene og la dere være fullt til stede med menneskene deres.',
+        body: 'Nå er bryllupsuken her. Dere trenger ikke å prestere noe foran kameraet. Min jobb er å skape ro, se de små øyeblikkene og la dere være fullt til stede med menneskene deres.',
       },
       gallery: {
         title: 'Galleriet er klart',
@@ -271,7 +280,7 @@ export default {
     },
     feedback: {
       loadFailed: 'Kunne ikke laste klientreisen.',
-      saveFailed: 'Kunne ikke lagre alle endringene. Ingenting er skjult – prøv igjen.',
+      saveFailed: 'Kunne ikke lagre alle endringene. Ingenting er skjult. Prøv igjen.',
       conflict: 'Denne klientreisen ble endret et annet sted. Last inn siste versjon før du lagrer igjen.',
       invalidFocl: 'FOCL-lenken må starte med https://.',
     },
@@ -283,7 +292,7 @@ export default {
     hint: 'Brudeparet kan se (men ikke endre) tidslinjen via denne lenken.',
     copy: 'Kopier lenke',
     copied: 'Lenken er kopiert',
-    failed: 'Kunne ikke kopiere – kopier fra feltet i stedet.',
+    failed: 'Kunne ikke kopiere. Kopier fra feltet i stedet.',
     scan: 'Skann for å åpne',
     urlLabel: 'Delbar lenke',
     expiryLabel: 'Lenken utløper (valgfritt)',
@@ -349,7 +358,7 @@ export default {
       customize: 'Tilpass milepæler',
     },
     shareCopied: 'Lenken er kopiert',
-    shareFailed: 'Kunne ikke kopiere – kopier fra adressefeltet i stedet.',
+    shareFailed: 'Kunne ikke kopiere. Kopier fra adressefeltet i stedet.',
     langLabel: 'Språk',
   },
 

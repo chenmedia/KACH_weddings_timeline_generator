@@ -33,12 +33,13 @@ describe('home overview mount', () => {
 
   it('loads one operational dashboard and opens the selected journey', async () => {
     const id = '11111111-1111-4111-8111-111111111111';
+    const overdueId = '22222222-2222-4222-8222-222222222222';
     const fetchMock = vi.fn(() =>
       Promise.resolve({
         ok: true,
         status: 200,
         json: async () => ({
-          summary: { weddingCount: 1, needsAttentionCount: 0, nextWeddingDate: '2027-06-12' },
+          summary: { weddingCount: 2, needsAttentionCount: 1, nextWeddingDate: '2027-06-12' },
           weddings: [
             {
               id,
@@ -50,6 +51,18 @@ describe('home overview mount', () => {
               nextActionDate: '2027-03-08',
               nextActionTiming: 'upcoming',
               completedTaskCount: 2,
+              totalTaskCount: 8,
+            },
+            {
+              id: overdueId,
+              couple: 'Nora & Elias',
+              weddingDate: '2027-08-14',
+              location: 'Bergen',
+              stageKey: 'welcome',
+              nextActionKey: 'welcomeGuide',
+              nextActionDate: '2026-11-01',
+              nextActionTiming: 'overdue',
+              completedTaskCount: 0,
               totalTaskCount: 8,
             },
           ],
@@ -65,14 +78,20 @@ describe('home overview mount', () => {
       isSignedIn: () => true,
     });
 
-    await vi.waitFor(() => expect(container.querySelectorAll('.overview-row')).toHaveLength(1));
+    await vi.waitFor(() => expect(container.querySelectorAll('.overview-row')).toHaveLength(2));
     expect(container.querySelectorAll('.home-season-summary > div')).toHaveLength(3);
     expect(container.querySelector('.overview-index').textContent).toBe('01');
+    expect(container.querySelectorAll('.overview-filters button')).toHaveLength(3);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     container.querySelector('.overview-primary').click();
     expect(calls).toContain(`/journey?wedding=${id}`);
     container.querySelector('.overview-secondary').click();
     expect(calls).toContain(`/journey?wedding=${id}&tab=timeline`);
+
+    container.querySelectorAll('.overview-filters button')[1].click();
+    expect(container.querySelectorAll('.overview-row')).toHaveLength(1);
+    expect(container.querySelector('.overview-couple h3').textContent).toBe('Nora & Elias');
+    expect(container.querySelector('.overview-filter-empty').hidden).toBe(true);
   });
 });
 

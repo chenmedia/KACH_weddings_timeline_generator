@@ -48,7 +48,7 @@ export function buildDashboard(locale, handlers) {
       }
       timelines.forEach((tl) => {
         const coupleName = tl.couple || locale.timeline.defaultCouple;
-        const dateStr = tl.wdate ? fmtDate(parseISO(tl.wdate), locale.dateLocale) : '—';
+        const dateStr = tl.wdate ? fmtDate(parseISO(tl.wdate), locale.dateLocale) : '-';
         const open = el(
           'button',
           {
@@ -68,7 +68,7 @@ export function buildDashboard(locale, handlers) {
           class: 'linkbtn dash-delete',
           type: 'button',
           text: d.delete,
-          'aria-label': `${d.delete} – ${coupleName}`,
+          'aria-label': `${d.delete} - ${coupleName}`,
         });
         del.addEventListener('click', async (e) => {
           e.stopPropagation();

@@ -26,7 +26,7 @@ function greeting(locale) {
 
 function formatDate(value, locale) {
   const date = parseISO(value);
-  return date ? fmtDate(date, locale.dateLocale) : '—';
+  return date ? fmtDate(date, locale.dateLocale) : '-';
 }
 
 function actionRow(locale, wedding, ctx, index) {
@@ -91,8 +91,75 @@ function seasonSummary(locale, summary) {
     ]),
     el('div', {}, [
       el('dt', { text: studio.nextWedding }),
-      el('dd', { text: summary.nextWeddingDate ? formatDate(summary.nextWeddingDate, locale) : '—' }),
+      el('dd', { text: summary.nextWeddingDate ? formatDate(summary.nextWeddingDate, locale) : '-' }),
     ]),
+  ]);
+}
+
+function actionOverview(locale, weddings, ctx) {
+  const copy = locale.home.overview;
+  const filters = [
+    { key: 'all', label: copy.filters.all, test: () => true },
+    {
+      key: 'attention',
+      label: copy.filters.attention,
+      test: (wedding) => ['overdue', 'today'].includes(wedding.nextActionTiming),
+    },
+    {
+      key: 'upcoming',
+      label: copy.filters.upcoming,
+      test: (wedding) => wedding.nextActionTiming === 'upcoming',
+    },
+  ];
+  let activeFilter = 'all';
+  const list = el('ul', { class: 'overview-list', role: 'list' });
+  const empty = el('p', { class: 'overview-filter-empty', text: copy.filters.empty });
+  const filterBar = el('div', {
+    class: 'overview-filters',
+    role: 'group',
+    'aria-label': copy.filters.label,
+  });
+
+  const renderRows = () => {
+    const filter = filters.find(({ key }) => key === activeFilter) || filters[0];
+    const visible = weddings.filter(filter.test);
+    list.innerHTML = '';
+    visible.forEach((wedding, index) => list.appendChild(actionRow(locale, wedding, ctx, index)));
+    empty.hidden = visible.length > 0;
+    filterBar.querySelectorAll('button').forEach((button) => {
+      const selected = button.dataset.filter === activeFilter;
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+  };
+
+  filters.forEach((filter) => {
+    const count = weddings.filter(filter.test).length;
+    const button = el('button', {
+      type: 'button',
+      class: filter.key === activeFilter ? 'is-active' : '',
+      'aria-pressed': String(filter.key === activeFilter),
+      text: `${filter.label} ${count}`,
+    });
+    button.dataset.filter = filter.key;
+    button.addEventListener('click', () => {
+      activeFilter = filter.key;
+      renderRows();
+    });
+    filterBar.appendChild(button);
+  });
+
+  renderRows();
+  return el('section', { class: 'overview-actions-section' }, [
+    el('div', { class: 'overview-section-heading' }, [
+      el('div', {}, [
+        el('h3', { class: 'overview-title', text: copy.nextActions }),
+        el('p', { text: copy.nextActionsIntro }),
+      ]),
+      filterBar,
+    ]),
+    list,
+    empty,
   ]);
 }
 
@@ -192,14 +259,11 @@ function mount(container, ctx) {
     .then(({ summary, weddings }) => {
       content.innerHTML = '';
       content.appendChild(seasonSummary(locale, summary));
-      content.appendChild(el('h3', { class: 'overview-title', text: locale.home.overview.nextActions }));
       if (!weddings.length) {
         content.appendChild(el('p', { class: 'dash-empty', text: locale.dashboard.empty }));
         return;
       }
-      const list = el('ul', { class: 'overview-list', role: 'list' });
-      weddings.forEach((wedding, index) => list.appendChild(actionRow(locale, wedding, ctx, index)));
-      content.appendChild(list);
+      content.appendChild(actionOverview(locale, weddings, ctx));
     })
     .catch(() => {
       content.innerHTML = '';

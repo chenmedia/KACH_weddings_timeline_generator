@@ -58,7 +58,7 @@ function setWorkspaceTab(tab, { focus = true } = {}) {
 
 function formatDate(value, locale = t()) {
   const date = typeof value === 'string' ? parseISO(value) : value;
-  return date ? fmtDate(date, locale.dateLocale) : '—';
+  return date ? fmtDate(date, locale.dateLocale) : '-';
 }
 
 function validHttpsUrl(value) {
@@ -73,8 +73,10 @@ function validHttpsUrl(value) {
 function setDirty(kind) {
   if (kind === 'project') projectDirty = true;
   else journeyDirty = true;
-  const button = host?.querySelector('.journey-save');
-  if (button) button.disabled = saving || !(projectDirty || journeyDirty);
+  host?.querySelectorAll('.journey-save, .journey-mobile-save').forEach((button) => {
+    button.disabled = saving || !(projectDirty || journeyDirty);
+  });
+  host?.querySelector('.journey-mobile-save')?.classList.add('is-visible');
   const status = host?.querySelector('.journey-save-status');
   if (status) {
     status.textContent = t().journey.statusUnsaved;
@@ -247,8 +249,8 @@ function summaryHeader(locale) {
       el('article', { class: 'journey-summary-card journey-next-card' }, [
         el('p', { text: locale.journey.studio.nextThoughtfulAction }),
         el('h3', { text: next ? locale.journey.tasks[next.id] : locale.home.overview.noAction }),
-        el('span', { text: next?.dateISO ? formatDate(next.dateISO, locale) : '—' }),
-        el('button', { type: 'button', text: `${locale.journey.studio.viewJourney} ↗` }),
+        el('span', { text: next?.dateISO ? formatDate(next.dateISO, locale) : '-' }),
+        el('button', { type: 'button', text: locale.journey.studio.openTasks }),
       ]),
       el('article', { class: 'journey-summary-card journey-touch-card' }, [
         el('p', { text: locale.journey.lastTouch }),
@@ -267,7 +269,7 @@ function summaryHeader(locale) {
   );
   summary.querySelector('.journey-next-card button').addEventListener('click', () => {
     setWorkspaceTab('journey');
-    host.querySelector('.journey-ledger-intro')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    host.querySelector('.journey-stage-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   return el('div', { class: 'journey-studio' }, [
@@ -343,7 +345,7 @@ function milestoneDateControl(locale, row) {
     kind = 'bdate';
   } else if (!SHARED_OVERRIDE_KEYS.has(row.key)) {
     return el('div', { class: 'journey-date-readonly' }, [
-      el('span', { text: row.dateLabel || '—' }),
+      el('span', { text: row.dateLabel || '-' }),
       row.dateISO ? el('small', { text: locale.journey.calculated }) : null,
     ]);
   }
@@ -402,7 +404,7 @@ function milestoneList(locale) {
           referralNumber
             ? el('span', {
                 class: 'journey-referral-badge',
-                text: `✦ ${locale.journey.studio.referralMoment} ${referralNumber}`,
+                text: `${locale.journey.studio.referralMoment} ${referralNumber}`,
               })
             : null,
         ]),
@@ -446,7 +448,7 @@ function checklist(locale) {
     el('div', { class: 'journey-stage-heading' }, [
       el('p', {
         class: 'journey-stage-kicker',
-        text: `${locale.journey.studio.stage} · ${locale.journey.stages[stage]}`,
+        text: `${locale.journey.studio.stage}: ${locale.journey.stages[stage]}`,
       }),
       el('strong', { text: `${completedInStage} / ${tasks.length}` }),
     ]),
@@ -538,7 +540,7 @@ function referralPanel(locale) {
       max: '100000',
       step: '50',
       value: String(moment.costNok),
-      'aria-label': `${copy.moments[key].title} — ${copy.cost}`,
+      'aria-label': `${copy.moments[key].title} - ${copy.cost}`,
     });
     const update = () => {
       moment.enabled = toggle.checked;
@@ -660,14 +662,15 @@ function templatesPanel(locale) {
 async function saveWorkspace() {
   if (saving || !(projectDirty || journeyDirty)) return;
   const locale = t();
-  const save = host.querySelector('.journey-save');
   if (journeyDirty && !validHttpsUrl(workspace.journey.foclUrl)) {
     toast(locale.journey.feedback.invalidFocl, { type: 'error' });
     return;
   }
   saving = true;
-  save.disabled = true;
-  save.textContent = locale.journey.saving;
+  host.querySelectorAll('.journey-save, .journey-mobile-save').forEach((button) => {
+    button.disabled = true;
+    button.textContent = locale.journey.saving;
+  });
   const status = host.querySelector('.journey-save-status');
   if (status) {
     status.textContent = locale.journey.saving;
@@ -759,6 +762,14 @@ function renderWorkspace() {
   };
   panel.appendChild((panels[activeTab] || journeyPanel)(locale));
   host.appendChild(panel);
+  const mobileSave = el('button', {
+    type: 'button',
+    class: `btn-primary journey-mobile-save${dirty || saving ? ' is-visible' : ''}`,
+    text: saving ? locale.journey.saving : locale.journey.save,
+    ...(saving || !dirty ? { disabled: '' } : {}),
+  });
+  mobileSave.addEventListener('click', saveWorkspace);
+  host.appendChild(mobileSave);
 }
 
 async function createCouple() {

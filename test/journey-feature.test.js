@@ -85,6 +85,13 @@ describe('journey feature', () => {
     expect(container.querySelector('.journey-hero')).toBeNull();
     expect(container.querySelector('.journey-save-status').textContent).toBe('Alle endringer lagret');
     expect(container.querySelector('[data-action="share"]').textContent).toBe('Åpne deling');
+    expect(container.querySelector('.journey-mobile-save').disabled).toBe(true);
+    const coupleInput = container.querySelector('#couple');
+    coupleInput.value = 'Ada & Emil oppdatert';
+    coupleInput.dispatchEvent(new Event('input', { bubbles: true }));
+    await vi.waitFor(() => expect(container.querySelector('.journey-mobile-save').disabled).toBe(false));
+    expect(container.querySelector('.journey-mobile-save').classList.contains('is-visible')).toBe(true);
+    expect(container.querySelector('.journey-save-status').textContent).toBe('Ulagrede endringer');
     expect(location.search).toContain('tab=timeline');
     tabs = container.querySelectorAll('[role="tab"]');
     expect(tabs[1].getAttribute('tabindex')).toBe('0');
@@ -94,7 +101,7 @@ describe('journey feature', () => {
     tabs = container.querySelectorAll('[role="tab"]');
     expect(tabs[2].getAttribute('aria-selected')).toBe('true');
     tabs[0].click();
-    expect(container.querySelector('.journey-hero h2').textContent).toBe('Ada & Emil');
+    expect(container.querySelector('.journey-hero h2').textContent).toBe('Ada & Emil oppdatert');
     tabs = container.querySelectorAll('[role="tab"]');
     tabs[2].click();
     expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();

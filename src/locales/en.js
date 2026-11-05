@@ -6,8 +6,7 @@ export default {
 
   meta: {
     title: 'KACH Weddings · Timeline',
-    description:
-      'Create an elegant timeline for your wedding photography — from booking to finished gallery.',
+    description: 'Create an elegant timeline for your wedding photography, from booking to finished gallery.',
   },
 
   header: {
@@ -81,8 +80,9 @@ export default {
     ],
     overview: {
       nextActions: 'Next actions',
-      openJourney: 'Open journey',
-      editTimeline: 'Timeline',
+      nextActionsIntro: 'Start with overdue work, or review what is coming next.',
+      openJourney: 'Open client',
+      editTimeline: 'Wedding day',
       noAction: 'No open actions',
       noDate: 'No date',
       today: 'Today',
@@ -92,6 +92,13 @@ export default {
       weddingCount: (count) => `${count} wedding${count === 1 ? '' : 's'}`,
       needsAttention: (count) => `${count} need attention`,
       nextWedding: (date) => `next wedding ${date}`,
+      filters: {
+        label: 'Filter next actions',
+        all: 'All',
+        attention: 'Needs attention',
+        upcoming: 'Upcoming',
+        empty: 'No clients match this filter.',
+      },
     },
   },
 
@@ -148,6 +155,7 @@ export default {
       clientSummary: 'Client summary',
       nextThoughtfulAction: 'Next thoughtful action',
       viewJourney: 'View client journey',
+      openTasks: 'Open tasks',
       personalTouchNote: 'The relationship stays visible between milestones.',
       experienceBudget: 'Experience budget',
       contractToAnniversary: 'Contract to first anniversary',
@@ -255,10 +263,10 @@ export default {
       foclPlaceholder: 'https://getfocl.app/…',
       foclInvalid: 'Use a valid https link.',
       integrationAreas: [
-        'Timeline — ready for a future verified FOCL integration',
-        'People and groups — not synchronized yet',
-        'Vendors and locations — not synchronized yet',
-        'Story and image priorities — not synchronized yet',
+        'Timeline: ready for a future verified FOCL integration',
+        'People and groups: not synchronized yet',
+        'Vendors and locations: not synchronized yet',
+        'Story and image priorities: not synchronized yet',
       ],
       welcome: {
         title: 'Welcome',
@@ -266,7 +274,7 @@ export default {
       },
       weddingWeek: {
         title: 'Wedding week',
-        body: 'Your wedding week is here. You do not need to perform for the camera — my job is to create calm, notice the small moments, and let you be fully present with your people.',
+        body: 'Your wedding week is here. You do not need to perform for the camera. My job is to create calm, notice the small moments, and let you be fully present with your people.',
       },
       gallery: {
         title: 'Your gallery is ready',
@@ -279,7 +287,7 @@ export default {
     },
     feedback: {
       loadFailed: 'Could not load the client journey.',
-      saveFailed: 'Could not save every change. Nothing is hidden — please try again.',
+      saveFailed: 'Could not save every change. Nothing is hidden. Please try again.',
       conflict: 'This client journey changed elsewhere. Load the latest version before saving again.',
       invalidFocl: 'The FOCL link must start with https://.',
     },
@@ -291,7 +299,7 @@ export default {
     hint: 'The couple can view (but not edit) the timeline via this link.',
     copy: 'Copy link',
     copied: 'Link copied',
-    failed: 'Could not copy — copy it from the field instead.',
+    failed: 'Could not copy. Copy it from the field instead.',
     scan: 'Scan to open',
     urlLabel: 'Shareable link',
     expiryLabel: 'Link expires (optional)',
@@ -357,7 +365,7 @@ export default {
       customize: 'Customise milestones',
     },
     shareCopied: 'Link copied',
-    shareFailed: 'Could not copy — copy it from the address bar instead.',
+    shareFailed: 'Could not copy. Copy it from the address bar instead.',
     langLabel: 'Language',
   },
 
@@ -424,7 +432,7 @@ export default {
       tag: 'Planning',
       title: 'Planning call',
       desc: 'We talk through the whole day: the run-of-day plan, your wish list, family photos and which images matter most to you.',
-      who: 'About a week after the form — we agree a time together.',
+      who: 'About a week after the form. We agree a time together.',
     },
     finalSync: {
       tag: 'Confirmation',
@@ -435,13 +443,13 @@ export default {
     day: {
       tag: 'The wedding day',
       title: 'The wedding day',
-      desc: 'We are there throughout the whole day, capturing your story as it unfolds — effortless and real.',
+      desc: 'We are there throughout the whole day, capturing your story as it unfolds naturally.',
       who: '',
     },
     sneak: {
       tag: 'Delivery',
       title: 'Sneak peek',
-      desc: 'A small selection of images while the feeling is still fresh — perfect for the first thank-you notes.',
+      desc: 'A small selection of images while the feeling is still fresh, ready for the first thank-you notes.',
       who: 'KACH Weddings will send it.',
     },
     final: {
@@ -470,9 +478,9 @@ export default {
       eyebrowIncluded: 'Included in the package',
       eyebrowOptional: 'Optional add-on',
       descIncluded:
-        'A dedicated photo session for the two of you — a relaxed way to grow comfortable in front of the camera. We find a good time together.',
+        'A dedicated photo session for the two of you. It is a relaxed way to grow comfortable in front of the camera, and we find a good time together.',
       descOptional:
-        'A dedicated photo session for the two of you during the autumn or spring before the wedding — a relaxed way to grow comfortable in front of the camera.',
+        'A dedicated photo session during the autumn or spring before the wedding, designed to help you feel comfortable in front of the camera.',
       noteOptional: 'Comes in addition to the package price.',
       seasonsLabel: 'Suitable seasons',
       seasons: { autumn: 'Autumn', spring: 'Spring', summer: 'Summer' },
@@ -482,9 +490,9 @@ export default {
       eyebrowIncluded: 'Included in the package',
       eyebrowOptional: 'Optional add-on',
       descIncluded:
-        'Once the gallery is ready, your favourites can be gathered into a handmade album — your story in physical form.',
+        'Once the gallery is ready, your favourites can be gathered into a handmade album that holds your story in physical form.',
       descOptional:
-        'Once the gallery is ready, your favourites can be gathered into a handmade album — your story in physical form.',
+        'Once the gallery is ready, your favourites can be gathered into a handmade album that holds your story in physical form.',
       noteOptional: 'Comes in addition to the package price.',
     },
   },
