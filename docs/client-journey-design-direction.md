@@ -54,6 +54,39 @@ Suggested wide layout:
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
+## Overview dashboard integration
+
+The authenticated Home route is not a second visual world. It is the cross-wedding front door to Client Journey and uses the same Operate language.
+
+Target composition:
+
+```text
+┌ existing sidebar ──────────────────────────────────────────────────────┐
+│ Good morning, Kai                         New couple   All couples     │
+│ 4 weddings · 1 needs attention · next wedding 1 June 2027             │
+│                                                                       │
+│ NEXT ACTIONS                                                          │
+│ Couple name     Stage       Next action        Due       3/8          │
+│                                             Open journey  Timeline    │
+│ ───────────────────────────────────────────────────────────────────── │
+│ Couple name     Stage       Next action        Due       5/8          │
+│                                             Open journey  Timeline    │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+Rules:
+
+- Keep the editorial greeting but let the action list dominate the page.
+- Use one quiet inline season summary, not three or four statistic cards.
+- Sort rows by urgency; use calm textual labels for overdue/today/upcoming states.
+- Couple name may use Cormorant; action, date, stage, and progress use Montserrat.
+- **Open journey** is the visible primary action. **Timeline** is quieter but always available.
+- Rows use whitespace and fine rules; they are not large rounded cards.
+- Do not make the whole row a button when it contains separate Journey and Timeline actions.
+- On mobile, stack row content and keep both actions visible without horizontal document scrolling.
+- Empty state leads to **New couple**; loading and errors occupy the list region without moving the header.
+- Remove the old tool-launcher card grid from Home once the sidebar/feature navigation is active.
+
 ## Visual system
 
 Start from the existing tokens and adjust only where this surface needs a clearer product rhythm.
