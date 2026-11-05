@@ -21,6 +21,7 @@ export default {
     soon: 'Snart',
     menu: 'Meny',
     account: 'Konto',
+    skip: 'Hopp til hovedinnhold',
   },
 
   tools: {
@@ -31,6 +32,8 @@ export default {
     timeline: {
       title: 'Tidslinjegenerator',
       summary: 'Lag en elegant fotograferingstidslinje for hvert brudepar.',
+      eyebrow: 'Arbeidsflate for bryllupsplanlegging',
+      selected: 'Valgt brudepar',
     },
   },
 
@@ -39,6 +42,15 @@ export default {
     soon: 'Kommer snart',
     recent: 'Siste brudepar',
     allCouples: 'Alle brudepar',
+    studio: {
+      kicker: 'Studio for klientopplevelse',
+      intro: 'En rolig oversikt over relasjonene, datoene og den personlige oppfølgingen som trenger deg.',
+      imageAlt: 'Et nygift KACH Weddings-brudepar utendørs',
+      imageCaption: 'Omtanke før, under og lenge etter bryllupsdagen.',
+      weddings: 'Bryllup',
+      attention: 'Trenger oppfølging',
+      nextWedding: 'Neste bryllup',
+    },
     greeting: {
       morning: 'God morgen',
       afternoon: 'God ettermiddag',

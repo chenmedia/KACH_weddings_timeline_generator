@@ -22,6 +22,7 @@ export default {
     soon: 'Soon',
     menu: 'Menu',
     account: 'Account',
+    skip: 'Skip to main content',
   },
 
   tools: {
@@ -32,6 +33,8 @@ export default {
     timeline: {
       title: 'Timeline generator',
       summary: 'Build an elegant photography timeline for each couple.',
+      eyebrow: 'Wedding planning workspace',
+      selected: 'Selected couple',
     },
   },
 
@@ -40,6 +43,15 @@ export default {
     soon: 'Coming soon',
     recent: 'Recent couples',
     allCouples: 'All couples',
+    studio: {
+      kicker: 'Client experience studio',
+      intro: 'A calm view of the relationships, dates and personal follow-ups that need your attention.',
+      imageAlt: 'A newly married KACH Weddings couple outdoors',
+      imageCaption: 'Care before, during and long after the wedding day.',
+      weddings: 'Weddings',
+      attention: 'Need attention',
+      nextWedding: 'Next wedding',
+    },
     greeting: {
       morning: 'Good morning',
       afternoon: 'Good afternoon',

@@ -83,7 +83,7 @@ export function renderTimeline(state, locale, out) {
 
   html += `<footer>
     <div class="sig">${esc(locale.footer.sig)}</div>
-    <div class="links">${esc(SITE_URL)}</div>
+    <div class="links"><a href="https://${esc(SITE_URL)}" target="_blank" rel="noopener noreferrer">${esc(SITE_URL)}</a></div>
   </footer>`;
 
   out.innerHTML = html;

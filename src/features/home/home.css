@@ -1,44 +1,142 @@
+.app-canvas:has(.home) {
+  max-width: 1240px;
+}
+
 .home {
-  max-width: 880px;
+  width: 100%;
   margin: 0 auto;
 }
 
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.72fr);
+  align-items: end;
+  gap: clamp(42px, 7vw, 96px);
+}
+
+.home-hero-copy {
+  padding: clamp(24px, 4vw, 54px) 0 clamp(18px, 3vw, 38px);
+}
+
+.home-kicker,
+.overview-title,
+.home-season-summary dt,
+.overview-stage {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
 .home-greeting {
-  max-width: 14ch;
+  max-width: 12ch;
+  margin-top: 16px;
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(36px, 6vw, 58px);
-  line-height: 1.02;
+  font-size: clamp(50px, 7vw, 86px);
+  letter-spacing: -0.025em;
+  line-height: 0.92;
   color: var(--ink);
   text-wrap: balance;
 }
 
+.home-intro {
+  max-width: 48ch;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.72;
+  text-wrap: pretty;
+}
+
 .home-actions {
-  margin-top: var(--sp-5);
+  margin-top: 30px;
+}
+
+.home-image {
+  position: relative;
+  min-height: 460px;
+  overflow: hidden;
+  background: #d7d1c8;
+}
+
+.home-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 30, 26, 0.1);
+  pointer-events: none;
+}
+
+.home-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.home-image figcaption {
+  position: absolute;
+  z-index: 1;
+  right: 24px;
+  bottom: 22px;
+  left: 24px;
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.35;
+  text-wrap: balance;
 }
 
 .home-overview {
-  margin-top: 52px;
+  margin-top: clamp(50px, 7vw, 88px);
+}
+
+.home-loading,
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px 0;
 }
 
 .home-season-summary {
-  padding: 15px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
-  color: var(--muted);
-  font-size: 13px;
+}
+
+.home-season-summary > div {
+  min-width: 0;
+  padding: 24px clamp(18px, 3vw, 34px);
+  border-left: 1px solid var(--hairline);
+}
+
+.home-season-summary > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.home-season-summary dd {
+  margin-top: 9px;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
-  line-height: 1.55;
+  line-height: 1;
 }
 
 .overview-title {
-  margin: 42px 0 12px;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
+  margin: clamp(48px, 6vw, 74px) 0 16px;
 }
 
 .overview-list {
@@ -50,11 +148,20 @@
 
 .overview-row {
   display: grid;
-  grid-template-columns: minmax(170px, 0.9fr) minmax(220px, 1.25fr) minmax(88px, 0.5fr) auto;
+  grid-template-columns: 38px minmax(160px, 0.85fr) minmax(220px, 1.35fr) minmax(100px, 0.5fr) auto;
   align-items: center;
-  gap: 18px;
-  padding: 24px 0;
+  gap: clamp(16px, 2.4vw, 30px);
+  padding: 26px 0 30px;
   border-bottom: 1px solid var(--hairline);
+}
+
+.overview-index {
+  align-self: start;
+  padding-top: 3px;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
 }
 
 .overview-couple,
@@ -66,46 +173,38 @@
 .overview-couple h3 {
   overflow-wrap: anywhere;
   font-family: var(--serif);
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.1;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.06;
   color: var(--ink);
 }
 
 .overview-meta,
 .overview-due,
 .overview-progress {
-  margin-top: 6px;
+  margin-top: 7px;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .overview-next {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 5px;
 }
 
 .overview-next strong {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.4;
-}
-
-.overview-stage {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  line-height: 1.45;
 }
 
 .overview-row.is-overdue .overview-due,
 .overview-row.is-today .overview-due {
-  color: var(--clay, #795744);
+  color: var(--clay);
   font-weight: 500;
 }
 
@@ -115,8 +214,8 @@
 
 .overview-progress-track {
   width: 100%;
-  height: 2px;
-  margin-top: 9px;
+  height: 1px;
+  margin-top: 10px;
   overflow: hidden;
   background: var(--hairline);
 }
@@ -124,7 +223,7 @@
 .overview-progress-track span {
   display: block;
   height: 100%;
-  background: var(--moss, #5e5d50);
+  background: var(--moss);
 }
 
 .overview-row-actions {
@@ -135,64 +234,95 @@
 }
 
 .overview-row-actions button {
-  min-height: 42px;
-  padding: 10px 14px;
+  min-height: 40px;
+  padding: 9px 14px;
   white-space: nowrap;
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.15em;
 }
 
 .overview-row.is-timeline-only {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1050px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.75fr);
+  }
+
+  .home-image {
+    min-height: 400px;
+  }
+
   .overview-row {
-    grid-template-columns: minmax(150px, 0.8fr) minmax(200px, 1.2fr) auto;
+    grid-template-columns: 34px minmax(150px, 0.8fr) minmax(200px, 1.2fr) auto;
   }
 
   .overview-progress {
-    grid-column: 1 / 3;
+    grid-column: 2 / 4;
     grid-row: 2;
-    max-width: 280px;
-    margin-top: -6px;
+    max-width: 300px;
+    margin-top: -8px;
   }
 
   .overview-row-actions {
-    grid-column: 3;
+    grid-column: 4;
     grid-row: 1 / 3;
   }
 }
 
-@media (max-width: 640px) {
-  .home-greeting {
-    font-size: clamp(34px, 12vw, 48px);
+@media (max-width: 760px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
   }
 
-  .home-overview {
-    margin-top: 40px;
+  .home-hero-copy {
+    padding-bottom: 0;
+  }
+
+  .home-greeting {
+    max-width: 11ch;
+    font-size: clamp(48px, 14vw, 70px);
+  }
+
+  .home-image {
+    min-height: 430px;
   }
 
   .home-season-summary {
-    font-size: 12px;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .overview-title {
-    margin-top: 34px;
+  .home-season-summary > div {
+    padding: 20px;
+  }
+
+  .home-season-summary > div:nth-child(3) {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-top: 1px solid var(--hairline);
+    border-left: 0;
   }
 
   .overview-row {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 24px 0 28px;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 14px;
   }
 
+  .overview-couple,
+  .overview-next,
   .overview-progress,
   .overview-row-actions {
-    grid-column: auto;
+    grid-column: 2;
     grid-row: auto;
     max-width: none;
     margin-top: 0;
+  }
+
+  .overview-index {
+    grid-column: 1;
+    grid-row: 1 / span 4;
   }
 
   .overview-row-actions {
@@ -203,5 +333,15 @@
   .overview-row-actions button {
     flex: 1 1 150px;
     min-height: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .home-image {
+    min-height: 360px;
+  }
+
+  .home-actions > button {
+    flex: 1 1 100%;
   }
 }

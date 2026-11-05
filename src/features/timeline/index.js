@@ -16,7 +16,7 @@ import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
 import { toast } from '../../ui/feedback.js';
 import { icons } from '../../ui/icons.js';
-import { replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
+import { pathForWedding, replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
 import { renderTimeline } from './render.js';
@@ -35,6 +35,7 @@ let ctx = null; // shell context (getToken, mountUserButton, …)
 let publicCache = null; // { slug, state } for couple links
 let saveInFlight = false;
 let saveQueued = false;
+let contextCoupleEl = null;
 
 // ---------- timeline output ----------
 function render() {
@@ -81,6 +82,7 @@ function scheduleSave() {
 }
 
 function onChange() {
+  if (contextCoupleEl) contextCoupleEl.textContent = state?.couple || t().timeline.defaultCouple;
   render();
   scheduleSave();
 }
@@ -151,11 +153,33 @@ function renderEditorArea() {
   if (!editorContainer) return;
   editorContainer.innerHTML = '';
   if (!state) {
-    editorContainer.appendChild(el('div', { class: 'dash-empty', text: t().dashboard.selectPrompt }));
+    editorContainer.appendChild(
+      el('div', { class: 'timeline-empty-state' }, [
+        el('span', { class: 'timeline-empty-number', text: '01' }),
+        el('h2', { text: t().dashboard.selectPrompt }),
+        el('p', { text: t().tools.timeline.summary }),
+      ]),
+    );
     outputEl = null;
+    contextCoupleEl = null;
     return;
   }
   if (apiMode && currentTimelineId && !clientView) {
+    contextCoupleEl = el('h2', { text: state.couple || t().timeline.defaultCouple });
+    const journeyButton = el('button', {
+      type: 'button',
+      class: 'timeline-context-link',
+      text: `${t().home.overview.openJourney} ↗`,
+    });
+    journeyButton.addEventListener('click', () => {
+      ctx.navigate(pathForWedding('/journey', currentTimelineId));
+    });
+    editorContainer.appendChild(
+      el('header', { class: 'timeline-context-bar' }, [
+        el('div', {}, [el('p', { text: t().tools.timeline.selected }), contextCoupleEl]),
+        journeyButton,
+      ]),
+    );
     editorContainer.appendChild(buildSharePanel(t(), { timelineId: currentTimelineId, state }));
   }
   if (!clientView) {
@@ -254,6 +278,13 @@ function mount(container, shellCtx) {
   dashboardInstance = dash;
   if (currentTimelineId) dash.setActive(currentTimelineId);
   editorContainer = el('div', { class: 'tl-detail' });
+  container.appendChild(
+    el('header', { class: 'timeline-feature-header' }, [
+      el('p', { text: t().tools.timeline.eyebrow }),
+      el('h1', { text: t().tools.timeline.title }),
+      el('span', { text: t().tools.timeline.summary }),
+    ]),
+  );
   container.appendChild(el('div', { class: 'tl-workspace' }, [dash.el, editorContainer]));
   renderEditorArea();
   dash.refresh();
@@ -357,6 +388,7 @@ function reset() {
   publicCache = null;
   saveInFlight = false;
   saveQueued = false;
+  contextCoupleEl = null;
 }
 
 // Feature descriptor consumed by the app shell / registry.

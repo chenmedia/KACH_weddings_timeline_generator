@@ -65,7 +65,7 @@ function setLink(rel, hreflang, href) {
 
 // ---------- shell chrome ----------
 function buildHeader(homeLink) {
-  const header = el('header');
+  const header = el('header', { class: 'site-header' });
   header.innerHTML = `<h1 class="wordmark">KACH <span class="light">Weddings</span></h1>
     <div class="eyebrow"></div>`;
   header.querySelector('.eyebrow').textContent = t().header.eyebrow;
@@ -253,7 +253,7 @@ function buildSidebar(features, active) {
 }
 
 // Slim mobile-only bar: hamburger + wordmark. Opens the drawer.
-function buildTopbar() {
+function buildTopbar(activeFeature) {
   const burger = el('button', {
     class: 'burger',
     type: 'button',
@@ -265,7 +265,11 @@ function buildTopbar() {
   burger.addEventListener('click', () => setDrawerOpen(!root.classList.contains('is-drawer-open')));
   const mark = el('span', { class: 'topbar-mark' });
   mark.innerHTML = 'KACH <span class="light">Weddings</span>';
-  return el('div', { class: 'app-topbar no-print' }, [burger, mark]);
+  const context = el('span', {
+    class: 'topbar-context',
+    text: activeFeature?.navLabel ? activeFeature.navLabel(t()) : '',
+  });
+  return el('div', { class: 'app-topbar no-print' }, [burger, mark, context]);
 }
 
 function renderSignIn(main) {
@@ -298,7 +302,8 @@ function render() {
   const route = resolveRoute(features);
 
   root.innerHTML = '';
-  const main = el('div', { id: 'main' });
+  const main = el('main', { id: 'main' });
+  root.appendChild(el('a', { class: 'skip-link', href: '#main', text: t().nav.skip }));
 
   // Public couple view — clean page, no app chrome.
   if (route.kind === 'public' && route.feature) {
@@ -325,7 +330,13 @@ function render() {
     backdrop.addEventListener('click', () => setDrawerOpen(false));
     root.appendChild(backdrop);
     root.appendChild(
-      el('div', { class: 'app-body' }, [buildTopbar(), el('div', { class: 'app-canvas' }, [main])]),
+      el(
+        'div',
+        {
+          class: 'app-body',
+        },
+        [buildTopbar(route.feature), el('div', { class: 'app-canvas' }, [main])],
+      ),
     );
     route.feature.mount(main, makeCtx());
     return;
