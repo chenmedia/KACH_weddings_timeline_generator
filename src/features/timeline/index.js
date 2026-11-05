@@ -26,6 +26,7 @@ import {
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
 import { renderTimeline } from './render.js';
+import { mountCoupleReview } from './couple-review.js';
 import { buildDashboard } from './dashboard.js';
 
 // ---- feature state (persists across re-mounts: lang switch, etc.) ----
@@ -39,6 +40,8 @@ let editorContainer = null;
 let dashboardInstance = null;
 let ctx = null; // shell context (getToken, navigate, …)
 let publicCache = null; // { slug, state } for couple links
+let publicReview = null;
+let currentPublicSlug = '';
 let saveInFlight = false;
 let saveQueued = false;
 let contextCoupleEl = null;
@@ -51,6 +54,14 @@ function render() {
     return;
   }
   renderTimeline(state, t(), outputEl);
+  if (clientView && publicReview && currentPublicSlug) {
+    mountCoupleReview(outputEl, t(), publicReview, async (body) => {
+      const result = await api.submitPublicReview(currentPublicSlug, body);
+      publicReview = result.review;
+      publicCache = { slug: currentPublicSlug, state, review: publicReview };
+      render();
+    });
+  }
 }
 
 let saveTimer;
@@ -334,6 +345,7 @@ function handleHandoff() {
 async function mountPublic(container, shellCtx, match) {
   ctx = shellCtx;
   clientView = true;
+  currentPublicSlug = match.slug || '';
   const out = el('section', { id: 'output' });
   container.appendChild(out);
   outputEl = out;
@@ -353,6 +365,7 @@ async function mountPublic(container, shellCtx, match) {
   // Couple read-only link /c/:slug.
   if (publicCache && publicCache.slug === match.slug) {
     state = publicCache.state;
+    publicReview = publicCache.review || null;
     renderPublic();
     return;
   }
@@ -361,7 +374,8 @@ async function mountPublic(container, shellCtx, match) {
   try {
     const data = await api.publicGet(match.slug);
     state = data.state;
-    publicCache = { slug: match.slug, state: data.state };
+    publicReview = data.review || { status: 'open', comments: [] };
+    publicCache = { slug: match.slug, state: data.state, review: publicReview };
     if (data.lang && data.lang !== getLang()) {
       setLang(data.lang, false);
       ctx.requestRender();
@@ -369,6 +383,7 @@ async function mountPublic(container, shellCtx, match) {
     }
   } catch {
     state = null;
+    publicReview = null;
     publicCache = { slug: match.slug, state: null };
   }
   renderPublic();
@@ -408,6 +423,8 @@ function reset() {
   editorContainer = null;
   dashboardInstance = null;
   publicCache = null;
+  publicReview = null;
+  currentPublicSlug = '';
   saveInFlight = false;
   saveQueued = false;
   contextCoupleEl = null;

@@ -26,10 +26,12 @@ import {
   sanitizeJourney,
 } from './model.js';
 import { buildSharingWorkspace, buildTimelineWorkspace } from './timeline-workspace.js';
+import { buildClientCard } from './client-card.js';
+import { defaultClientProfile, sanitizeClientProfile } from '../../lib/client-profile.js';
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
 const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
-const WORKSPACE_TAB_KEYS = ['journey', 'timeline', 'sharing', 'referrals', 'templates'];
+const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'referrals', 'templates'];
 const WORKSPACE_TABS = new Set(WORKSPACE_TAB_KEYS);
 
 let host = null;
@@ -39,6 +41,7 @@ let workspace = null;
 let activeTab = 'journey';
 let projectDirty = false;
 let journeyDirty = false;
+let profileDirty = false;
 let saving = false;
 
 function tabFromUrl(search = location.search) {
@@ -72,9 +75,10 @@ function validHttpsUrl(value) {
 
 function setDirty(kind) {
   if (kind === 'project') projectDirty = true;
+  else if (kind === 'profile') profileDirty = true;
   else journeyDirty = true;
   host?.querySelectorAll('.journey-save, .journey-mobile-save').forEach((button) => {
-    button.disabled = saving || !(projectDirty || journeyDirty);
+    button.disabled = saving || !(projectDirty || journeyDirty || profileDirty);
   });
   host?.querySelector('.journey-mobile-save')?.classList.add('is-visible');
   const status = host?.querySelector('.journey-save-status');
@@ -113,7 +117,7 @@ function journeyLoading(locale) {
 async function switchCouple(nextId, resetControl) {
   if (!nextId || nextId === currentId) return;
   const locale = t();
-  if (projectDirty || journeyDirty) {
+  if (projectDirty || journeyDirty || profileDirty) {
     const discard = await confirmDialog({
       title: locale.journey.unsaved.title,
       body: locale.journey.unsaved.body,
@@ -502,11 +506,51 @@ function timelinePanel(locale) {
   });
 }
 
+function clientPanel(locale) {
+  return buildClientCard({
+    locale,
+    workspace,
+    onProfileChange: (rerender = false) => {
+      setDirty('profile');
+      if (rerender) renderWorkspace();
+    },
+    onJourneyChange: () => setDirty('journey'),
+    onImport: async (payload) => {
+      if (projectDirty || journeyDirty || profileDirty) {
+        const saved = await saveWorkspace();
+        if (!saved) throw new Error('save failed');
+      }
+      const result = await api.importFocl(currentId, payload);
+      workspace = await api.workspace(currentId, getLang());
+      workspace.profile.data = sanitizeClientProfile(workspace.profile.data);
+      couples = couples.map((couple) =>
+        couple.id === currentId
+          ? { ...couple, couple: result.project.couple, wdate: result.project.wdate }
+          : couple,
+      );
+      toast(locale.clientCard.imported(result.imported), { type: 'success' });
+      renderWorkspace();
+    },
+  });
+}
+
 function sharingPanel(locale) {
   return buildSharingWorkspace({
     locale,
     timelineId: currentId,
     state: workspace.project,
+    review: workspace.review,
+    milestones: workspace.milestones,
+    onResolve: async (commentId, status) => {
+      const result = await api.updateReview(currentId, { commentId, status });
+      workspace.review = result.review;
+      renderWorkspace();
+    },
+    onReset: async () => {
+      const result = await api.updateReview(currentId, { resetReview: true });
+      workspace.review = result.review;
+      renderWorkspace();
+    },
   });
 }
 
@@ -660,11 +704,11 @@ function templatesPanel(locale) {
 }
 
 async function saveWorkspace() {
-  if (saving || !(projectDirty || journeyDirty)) return;
+  if (saving || !(projectDirty || journeyDirty || profileDirty)) return false;
   const locale = t();
   if (journeyDirty && !validHttpsUrl(workspace.journey.foclUrl)) {
     toast(locale.journey.feedback.invalidFocl, { type: 'error' });
-    return;
+    return false;
   }
   saving = true;
   host.querySelectorAll('.journey-save, .journey-mobile-save').forEach((button) => {
@@ -696,6 +740,12 @@ async function saveWorkspace() {
       workspace.journeyVersion = saved.journeyVersion;
       journeyDirty = false;
     }
+    if (profileDirty) {
+      const saved = await api.updateClientProfile(currentId, workspace.profile, workspace.profileVersion);
+      workspace.profile = saved.profile;
+      workspace.profileVersion = saved.profileVersion;
+      profileDirty = false;
+    }
     workspace = await api.workspace(currentId, getLang());
     couples = couples.map((couple) =>
       couple.id === currentId
@@ -705,6 +755,7 @@ async function saveWorkspace() {
     saving = false;
     toast(locale.journey.saved, { type: 'success' });
     renderWorkspace();
+    return true;
   } catch (error) {
     saving = false;
     const message =
@@ -713,6 +764,7 @@ async function saveWorkspace() {
         : locale.journey.feedback.saveFailed;
     toast(message, { type: 'error' });
     renderWorkspace();
+    return false;
   }
 }
 
@@ -721,7 +773,7 @@ function renderWorkspace() {
   const locale = t();
   host.innerHTML = '';
   host.classList.toggle('is-operational', activeTab !== 'journey');
-  const dirty = projectDirty || journeyDirty;
+  const dirty = projectDirty || journeyDirty || profileDirty;
   host.appendChild(
     el('div', { class: 'journey-topline' }, [
       coupleSelector(locale),
@@ -755,6 +807,7 @@ function renderWorkspace() {
   });
   const panels = {
     journey: journeyPanel,
+    client: clientPanel,
     timeline: timelinePanel,
     sharing: sharingPanel,
     referrals: referralPanel,
@@ -794,11 +847,23 @@ async function loadWorkspace(id) {
   workspace = null;
   projectDirty = false;
   journeyDirty = false;
+  profileDirty = false;
   host.innerHTML = '';
   host.appendChild(journeyLoading(t()));
   try {
     workspace = await api.workspace(id, getLang());
     workspace.journey = sanitizeJourney(workspace.journey || defaultJourney());
+    workspace.profile = workspace.profile || {
+      data: defaultClientProfile(),
+      source: 'manual',
+      sourceId: '',
+      sourceUrl: '',
+      syncStatus: 'not_connected',
+      lastSyncedAt: null,
+    };
+    workspace.profileVersion = workspace.profileVersion || 0;
+    workspace.profile.data = sanitizeClientProfile(workspace.profile.data);
+    workspace.review = workspace.review || { status: 'open', comments: [] };
     renderWorkspace();
   } catch {
     host.innerHTML = '';
@@ -855,6 +920,7 @@ function reset() {
   activeTab = 'journey';
   projectDirty = false;
   journeyDirty = false;
+  profileDirty = false;
   saving = false;
 }
 

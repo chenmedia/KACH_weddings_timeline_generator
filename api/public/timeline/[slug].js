@@ -5,9 +5,10 @@ import { getDb, schema } from '../../_lib/db.js';
 import { ok, fail, methodNotAllowed } from '../../_lib/respond.js';
 import { withErrorCapture } from '../../_lib/observability.js';
 import { rowToState } from '../../../src/lib/row-mapper.js';
+import { readPublicReview, submitPublicReview } from '../../_lib/public-review.js';
 
 async function handler(req, res) {
-  if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
+  if (!['GET', 'POST'].includes(req.method)) return methodNotAllowed(res, ['GET', 'POST']);
   const db = getDb();
   const { timelines, milestoneOverrides } = schema;
   const slug = req.query.slug;
@@ -20,6 +21,11 @@ async function handler(req, res) {
   if (!row) return fail(res, 404, 'not found');
   if (row.shareExpiresAt && new Date(row.shareExpiresAt) < new Date()) {
     return fail(res, 410, 'link expired');
+  }
+
+  if (req.method === 'POST') {
+    res.setHeader('Cache-Control', 'private, no-store');
+    return submitPublicReview(req, res, { db, timelineId: row.id, schema });
   }
 
   const ovRows = await db.select().from(milestoneOverrides).where(eq(milestoneOverrides.timelineId, row.id));
@@ -39,8 +45,12 @@ async function handler(req, res) {
   // rowToState emits only the client `state` shape (couple, dates, toggles,
   // overrides, lang) — no owner_id, status or bookkeeping leaks out.
   const state = rowToState(row, ovRows);
-  res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=30');
-  return ok(res, { state, lang: row.lang || 'nb' });
+  res.setHeader('Cache-Control', 'private, no-store');
+  return ok(res, {
+    state,
+    lang: row.lang || 'nb',
+    review: await readPublicReview(db, row.id, schema),
+  });
 }
 
 export default withErrorCapture(handler);
