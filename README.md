@@ -24,6 +24,10 @@ på en helligdag flyttes til neste virkedag.
 - **Selvhostede skrifter** – ingen kall til Google Fonts (personvern/GDPR)
 - **Lagring lokalt** i nettleseren (localStorage) – siste oppsett huskes
 - **Valgfri, cookieless statistikk** (Plausible) – avslått som standard
+- **Operativ oversikt og klientreise** – neste handling, sjekklister, referral moments,
+  gavebudsjett, meldingsmaler og direkte FOCL-lenke per brudepar
+- **Felles bryllupsprosjekt** – oversikt, klientreise og tidslinje bruker samme
+  kanoniske datoer og manuelle overstyringer
 - **Utskriftsvennlig** og responsiv
 
 ## Teknologi
@@ -109,7 +113,7 @@ førstegangslasten – og brudeparets skrivebeskyttede visning – holdes liten.
 2. Legg til tekstene under `items.<nøkkel>` i **både** `src/locales/nb.js` og
    `src/locales/en.js`.
 
-## Backend (Phase 1 — scaffold)
+## Backend og Client Journey
 
 Et valgfritt backend for lagring, innlogging og integrasjoner er **skissert, men
 inaktivt som standard**: uten miljøvariabler kjører appen akkurat som før
@@ -125,6 +129,11 @@ Det som er på plass i denne fasen:
   `overrides`, `public/timeline/:slug` (skrivebeskyttet for brudeparet, kun
   klient-trygge felt), og `cron/{retention,storage-report}` (lagringshygiene,
   beskyttet av `CRON_SECRET`; planlagt i `vercel.json`).
+- **Client Journey:** `client_journeys` lagrer bare fotografens sjekklister,
+  referral-oppsett, FOCL-lenke og journey-only datoer. Delte milepæler beregnes
+  fortsatt av `getMilestones()` fra bryllupsprosjektet.
+- **Oversikt:** `/api/weddings/dashboard` avleder neste handling og fremdrift for
+  alle bryllup i ett kall uten å lagre en separat dashboardkopi.
 - **Adaptere (rene, testet):** `src/lib/row-mapper.js` (DB-rad ↔ `state`) og
   `src/lib/state-source.js` (localStorage i dag, API når påslått). Dato­logikken i
   `milestones.js`/`dates.js` er fortsatt eneste kilde — beregnede datoer lagres

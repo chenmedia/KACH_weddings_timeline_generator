@@ -39,7 +39,7 @@ async function handler(req, res) {
       .returning();
     const ovRows = overridesToRows(created.id, state);
     if (ovRows.length) await db.insert(milestoneOverrides).values(ovRows);
-    return ok(res, { id: created.id, ...rowToState(created, ovRows) }, 201);
+    return ok(res, { id: created.id, ...rowToState(created, ovRows), projectVersion: created.version }, 201);
   }
 
   return methodNotAllowed(res, ['GET', 'POST']);

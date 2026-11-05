@@ -41,12 +41,12 @@ describe('rowToState', () => {
 });
 
 describe('stateToRow', () => {
-  it('produces snake_case inputs with numeric/null coercion', () => {
+  it('produces Drizzle property inputs with numeric/null coercion', () => {
     const r = stateToRow({ ...defaultState(), couple: 'A', wdate: '2027-06-12', delw: '5', sendDays: '2' });
     expect(r.couple).toBe('A');
     expect(r.wdate).toBe('2027-06-12');
     expect(r.delw).toBe(5);
-    expect(r.send_days).toBe(2);
+    expect(r.sendDays).toBe(2);
     expect(r.bdate).toBeNull();
   });
 });
@@ -75,12 +75,12 @@ describe('overridesToRows', () => {
       overrides: { sneak: { hidden: true }, gallery: { date: '2027-08-01' } },
     });
     expect(rows).toContainEqual({
-      timeline_id: 't1',
-      item_key: 'sneak',
+      timelineId: 't1',
+      itemKey: 'sneak',
       hidden: true,
       date: null,
       note: null,
     });
-    expect(rows.find((r) => r.item_key === 'gallery').date).toBe('2027-08-01');
+    expect(rows.find((r) => r.itemKey === 'gallery').date).toBe('2027-08-01');
   });
 });

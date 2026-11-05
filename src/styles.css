@@ -24,6 +24,8 @@
    * re-skinned per-theme separately.) */
   --hover: #ece8e2;
   --active: #e7e3dd;
+  --moss: #5e5d50;
+  --clay: #987760;
   /* Radius scale — --radius-sm for inputs/buttons, --radius-md for cards/panels. */
   --radius-sm: 2px;
   --radius-md: 6px;
@@ -37,6 +39,15 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+::selection {
+  background: var(--ink);
+  color: var(--surface);
+}
+input,
+select,
+textarea {
+  caret-color: var(--ink);
 }
 body {
   background: var(--bg);
@@ -691,7 +702,7 @@ button {
   line-height: 1.45;
   padding: var(--sp-3) var(--sp-4);
   border-radius: 4px;
-  border-left: 3px solid var(--field-border);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   box-shadow: 0 6px 24px rgba(26, 24, 22, 0.22);
   opacity: 0;
   transform: translateY(8px);
@@ -704,10 +715,10 @@ button {
   transform: translateY(0);
 }
 .toast-item.is-success {
-  border-left-color: #5a7d54;
+  border-color: rgba(151, 184, 143, 0.65);
 }
 .toast-item.is-error {
-  border-left-color: #d98b7e;
+  border-color: rgba(217, 139, 126, 0.7);
 }
 .toast-msg {
   flex: 1 1 auto;

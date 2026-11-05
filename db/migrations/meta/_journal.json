@@ -22,6 +22,13 @@
       "when": 1782150829310,
       "tag": "0002_tired_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793869273582,
+      "tag": "0003_aberrant_sumo",
+      "breakpoints": true
     }
   ]
 }

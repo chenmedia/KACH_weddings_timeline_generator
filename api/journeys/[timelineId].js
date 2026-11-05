@@ -1,0 +1,67 @@
+import { and, eq, sql } from 'drizzle-orm';
+import { getDb, schema } from '../_lib/db.js';
+import { requireUser } from '../_lib/auth.js';
+import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
+import { withErrorCapture } from '../_lib/observability.js';
+import { journeyToRow, rowToJourney } from '../_lib/journey-row.js';
+
+async function handler(req, res) {
+  const uid = await requireUser(req, res);
+  if (!uid) return;
+  const db = getDb();
+  const { timelines, clientJourneys } = schema;
+  const timelineId = req.query.timelineId;
+
+  const [project] = await db
+    .select({ id: timelines.id })
+    .from(timelines)
+    .where(and(eq(timelines.id, timelineId), eq(timelines.ownerId, uid)));
+  if (!project) return fail(res, 404, 'not found', 'NOT_FOUND');
+
+  const [current] = await db
+    .select()
+    .from(clientJourneys)
+    .where(and(eq(clientJourneys.timelineId, timelineId), eq(clientJourneys.ownerId, uid)));
+
+  if (req.method === 'GET') {
+    return ok(res, { timelineId, journey: rowToJourney(current), journeyVersion: current?.version || 0 });
+  }
+
+  if (req.method === 'PUT') {
+    const body = req.body || {};
+    const expectedVersion = Number(body.expectedVersion);
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 0) {
+      return fail(res, 428, 'expectedVersion is required', 'VERSION_REQUIRED');
+    }
+    const values = journeyToRow(body.journey || body);
+
+    if (!current) {
+      if (expectedVersion !== 0) {
+        return fail(res, 412, 'journey changed in another session', 'VERSION_CONFLICT');
+      }
+      const [created] = await db
+        .insert(clientJourneys)
+        .values({ timelineId, ownerId: uid, ...values })
+        .returning();
+      return ok(res, { timelineId, journey: rowToJourney(created), journeyVersion: created.version }, 201);
+    }
+
+    const [updated] = await db
+      .update(clientJourneys)
+      .set({ ...values, version: sql`${clientJourneys.version} + 1`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(clientJourneys.timelineId, timelineId),
+          eq(clientJourneys.ownerId, uid),
+          eq(clientJourneys.version, expectedVersion),
+        ),
+      )
+      .returning();
+    if (!updated) return fail(res, 412, 'journey changed in another session', 'VERSION_CONFLICT');
+    return ok(res, { timelineId, journey: rowToJourney(updated), journeyVersion: updated.version });
+  }
+
+  return methodNotAllowed(res, ['GET', 'PUT']);
+}
+
+export default withErrorCapture(handler);

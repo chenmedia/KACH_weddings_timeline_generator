@@ -78,7 +78,7 @@ describe('themeId flows through state', () => {
 
   it('round-trips through the DB row mapper', () => {
     const row = stateToRow({ ...defaultState(), wdate: '2027-06-12', themeId: 'sand' });
-    expect(row.theme_id).toBe('sand');
+    expect(row.themeId).toBe('sand');
     expect(rowToState({ id: 'x', ...row, lang: 'nb' }).themeId).toBe('sand');
   });
 });

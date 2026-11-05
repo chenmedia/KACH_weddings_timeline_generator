@@ -5,8 +5,8 @@ export function ok(res, data, status = 200) {
   res.status(status).json(data);
 }
 
-export function fail(res, status, message) {
-  res.status(status).json({ error: message });
+export function fail(res, status, message, code) {
+  res.status(status).json({ error: message, ...(code ? { code } : {}) });
 }
 
 export function methodNotAllowed(res, allowed) {

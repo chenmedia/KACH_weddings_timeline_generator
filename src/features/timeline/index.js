@@ -16,6 +16,7 @@ import { api } from '../../lib/api-client.js';
 import { el, esc } from '../../ui/dom.js';
 import { toast } from '../../ui/feedback.js';
 import { icons } from '../../ui/icons.js';
+import { replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
 import { buildControls } from './controls.js';
 import { buildSharePanel } from './share-panel.js';
 import { renderTimeline } from './render.js';
@@ -32,6 +33,8 @@ let editorContainer = null;
 let dashboardInstance = null;
 let ctx = null; // shell context (getToken, mountUserButton, …)
 let publicCache = null; // { slug, state } for couple links
+let saveInFlight = false;
+let saveQueued = false;
 
 // ---------- timeline output ----------
 function render() {
@@ -44,23 +47,37 @@ function render() {
 }
 
 let saveTimer;
+async function persistTimeline() {
+  if (saveInFlight) {
+    saveQueued = true;
+    return;
+  }
+  saveInFlight = true;
+  try {
+    const saved = await source.save(state);
+    if (saved?.projectVersion) state.projectVersion = saved.projectVersion;
+  } catch (err) {
+    saveQueued = false;
+    console.error('save failed', err);
+    reportError(err, { op: 'save' });
+    toast(err?.code === 'VERSION_CONFLICT' ? t().feedback.conflict : t().feedback.saveFailed, {
+      type: 'error',
+      actionLabel: t().feedback.retry,
+      onAction: scheduleSave,
+    });
+  } finally {
+    saveInFlight = false;
+    if (saveQueued) {
+      saveQueued = false;
+      scheduleSave();
+    }
+  }
+}
+
 function scheduleSave() {
   if (clientView || !source) return;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(
-    () => {
-      source.save(state).catch((err) => {
-        console.error('save failed', err);
-        reportError(err, { op: 'save' });
-        toast(t().feedback.saveFailed, {
-          type: 'error',
-          actionLabel: t().feedback.retry,
-          onAction: scheduleSave,
-        });
-      });
-    },
-    apiMode ? 700 : 0,
-  );
+  saveTimer = setTimeout(persistTimeline, apiMode ? 700 : 0);
 }
 
 function onChange() {
@@ -165,6 +182,7 @@ async function selectTimeline(id) {
   try {
     const data = await api.get(id);
     currentTimelineId = id;
+    replaceSelectedWedding(id);
     apiMode = true;
     source = new ApiSource({ getToken: ctx.getToken });
     source.timelineId = id;
@@ -255,8 +273,9 @@ function handleHandoff() {
   } catch {
     /* ignore */
   }
+  const deepLinkId = selectedWeddingFromUrl();
   if (wantNew) newTimeline();
-  else if (openId) selectTimeline(openId);
+  else if (deepLinkId || openId) selectTimeline(deepLinkId || openId);
 }
 
 async function mountPublic(container, shellCtx, match) {
@@ -326,6 +345,7 @@ function matchPublic(pathname, params) {
 }
 
 function reset() {
+  clearTimeout(saveTimer);
   state = null;
   source = null;
   apiMode = false;
@@ -334,6 +354,9 @@ function reset() {
   outputEl = null;
   editorContainer = null;
   dashboardInstance = null;
+  publicCache = null;
+  saveInFlight = false;
+  saveQueued = false;
 }
 
 // Feature descriptor consumed by the app shell / registry.

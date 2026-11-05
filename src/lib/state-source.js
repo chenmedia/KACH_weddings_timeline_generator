@@ -60,8 +60,13 @@ export class ApiSource {
       headers: await this._headers(),
       body: JSON.stringify(state),
     });
-    if (!res.ok) throw new Error(`save failed: ${res.status}`);
-    const row = await res.json();
+    const row = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const error = /** @type {any} */ (new Error(row.error || `save failed: ${res.status}`));
+      error.status = res.status;
+      error.code = row.code;
+      throw error;
+    }
     if (row && row.id) this.timelineId = row.id;
     return row;
   }
