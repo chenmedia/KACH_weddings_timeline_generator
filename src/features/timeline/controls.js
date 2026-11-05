@@ -17,7 +17,7 @@ function textField(id, labelText, type, value, placeholder) {
 }
 
 // Build the controls panel (form + actions + milestone editor).
-// handlers: { onChange, onAction(name, button) }
+// handlers: { onChange, onAction(name, button), actionLabels? }
 export function buildControls(locale, state, handlers) {
   const c = locale.controls;
   const f = c.fields;
@@ -94,7 +94,12 @@ export function buildControls(locale, state, handlers) {
 
   // ----- actions -----
   const mkBtn = (name, label, cls) => {
-    const b = el('button', { class: cls, type: 'button', text: label });
+    const b = el('button', {
+      class: cls,
+      type: 'button',
+      text: handlers.actionLabels?.[name] || label,
+      'data-action': name,
+    });
     b.addEventListener('click', () => handlers.onAction(name, b));
     return b;
   };

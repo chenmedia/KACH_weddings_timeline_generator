@@ -29,7 +29,8 @@ import { buildSharingWorkspace, buildTimelineWorkspace } from './timeline-worksp
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
 const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
-const WORKSPACE_TABS = new Set(['journey', 'timeline', 'sharing', 'referrals', 'templates']);
+const WORKSPACE_TAB_KEYS = ['journey', 'timeline', 'sharing', 'referrals', 'templates'];
+const WORKSPACE_TABS = new Set(WORKSPACE_TAB_KEYS);
 
 let host = null;
 let couples = [];
@@ -45,13 +46,14 @@ function tabFromUrl(search = location.search) {
   return WORKSPACE_TABS.has(tab) ? tab : 'journey';
 }
 
-function setWorkspaceTab(tab) {
+function setWorkspaceTab(tab, { focus = true } = {}) {
   activeTab = WORKSPACE_TABS.has(tab) ? tab : 'journey';
   const url = new URL(location.href);
   if (activeTab === 'journey') url.searchParams.delete('tab');
   else url.searchParams.set('tab', activeTab);
   history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
   renderWorkspace();
+  if (focus) host?.querySelector(`#journey-tab-${activeTab}`)?.focus();
 }
 
 function formatDate(value, locale = t()) {
@@ -73,6 +75,11 @@ function setDirty(kind) {
   else journeyDirty = true;
   const button = host?.querySelector('.journey-save');
   if (button) button.disabled = saving || !(projectDirty || journeyDirty);
+  const status = host?.querySelector('.journey-save-status');
+  if (status) {
+    status.textContent = t().journey.statusUnsaved;
+    status.classList.add('is-dirty');
+  }
 }
 
 function refreshMilestones() {
@@ -271,20 +278,56 @@ function summaryHeader(locale) {
 
 function tabBar(locale) {
   const bar = el('div', { class: 'journey-tabs', role: 'tablist', 'aria-label': locale.journey.title });
-  for (const key of ['journey', 'timeline', 'sharing', 'referrals', 'templates']) {
+  for (const key of WORKSPACE_TAB_KEYS) {
     const button = el('button', {
+      id: `journey-tab-${key}`,
       type: 'button',
       role: 'tab',
       class: activeTab === key ? 'is-active' : '',
       'aria-selected': String(activeTab === key),
+      'aria-controls': 'journey-tabpanel',
+      tabindex: activeTab === key ? '0' : '-1',
       text: locale.journey.tabs[key],
     });
     button.addEventListener('click', () => {
       setWorkspaceTab(key);
     });
+    button.addEventListener('keydown', (event) => {
+      const current = WORKSPACE_TAB_KEYS.indexOf(key);
+      let next = null;
+      if (event.key === 'ArrowRight') next = (current + 1) % WORKSPACE_TAB_KEYS.length;
+      else if (event.key === 'ArrowLeft') {
+        next = (current - 1 + WORKSPACE_TAB_KEYS.length) % WORKSPACE_TAB_KEYS.length;
+      } else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = WORKSPACE_TAB_KEYS.length - 1;
+      if (next === null) return;
+      event.preventDefault();
+      setWorkspaceTab(WORKSPACE_TAB_KEYS[next]);
+    });
     bar.appendChild(button);
   }
   return bar;
+}
+
+function compactClientHeader(locale) {
+  const project = workspace.project;
+  const overview = el('button', {
+    type: 'button',
+    class: 'journey-context-overview',
+    text: `← ${locale.journey.viewOverview}`,
+  });
+  overview.addEventListener('click', () => setWorkspaceTab('journey'));
+  return el('header', { class: 'journey-compact-header' }, [
+    el('div', {}, [
+      el('p', { class: 'journey-studio-kicker', text: locale.journey.currentClient }),
+      el('h2', { text: project.couple || locale.timeline.defaultCouple }),
+      el('p', {
+        class: 'journey-compact-meta',
+        text: [formatDate(project.wdate, locale), project.place].filter(Boolean).join(' · '),
+      }),
+    ]),
+    overview,
+  ]);
 }
 
 function milestoneDateControl(locale, row) {
@@ -625,6 +668,11 @@ async function saveWorkspace() {
   saving = true;
   save.disabled = true;
   save.textContent = locale.journey.saving;
+  const status = host.querySelector('.journey-save-status');
+  if (status) {
+    status.textContent = locale.journey.saving;
+    status.classList.remove('is-dirty');
+  }
   try {
     if (projectDirty) {
       const saved = await api.update(currentId, {
@@ -669,21 +717,39 @@ function renderWorkspace() {
   if (!host || !workspace) return;
   const locale = t();
   host.innerHTML = '';
+  host.classList.toggle('is-operational', activeTab !== 'journey');
+  const dirty = projectDirty || journeyDirty;
   host.appendChild(
     el('div', { class: 'journey-topline' }, [
       coupleSelector(locale),
-      el('button', {
-        type: 'button',
-        class: 'btn-primary journey-save',
-        text: saving ? locale.journey.saving : locale.journey.save,
-        ...(saving || !(projectDirty || journeyDirty) ? { disabled: '' } : {}),
-      }),
+      el('div', { class: 'journey-save-cluster' }, [
+        el('span', {
+          class: `journey-save-status${dirty ? ' is-dirty' : ''}`,
+          text: saving
+            ? locale.journey.saving
+            : dirty
+              ? locale.journey.statusUnsaved
+              : locale.journey.statusSaved,
+          'aria-live': 'polite',
+        }),
+        el('button', {
+          type: 'button',
+          class: 'btn-primary journey-save',
+          text: saving ? locale.journey.saving : locale.journey.save,
+          ...(saving || !dirty ? { disabled: '' } : {}),
+        }),
+      ]),
     ]),
   );
   host.querySelector('.journey-save').addEventListener('click', saveWorkspace);
-  host.appendChild(summaryHeader(locale));
+  host.appendChild(activeTab === 'journey' ? summaryHeader(locale) : compactClientHeader(locale));
   host.appendChild(tabBar(locale));
-  const panel = el('div', { class: 'journey-tab-panel', role: 'tabpanel' });
+  const panel = el('div', {
+    id: 'journey-tabpanel',
+    class: 'journey-tab-panel',
+    role: 'tabpanel',
+    'aria-labelledby': `journey-tab-${activeTab}`,
+  });
   const panels = {
     journey: journeyPanel,
     timeline: timelinePanel,

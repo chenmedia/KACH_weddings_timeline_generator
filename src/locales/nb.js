@@ -129,6 +129,10 @@ export default {
     save: 'Lagre endringer',
     saving: 'Lagrer …',
     saved: 'Endringene er lagret',
+    currentClient: 'Valgt brudepar',
+    viewOverview: 'Til klientoversikten',
+    statusSaved: 'Alle endringer lagret',
+    statusUnsaved: 'Ulagrede endringer',
     openFocl: 'Åpne i FOCL',
     setupFocl: 'Legg til FOCL-lenke',
     studio: {
@@ -171,6 +175,7 @@ export default {
       title: 'Tidslinjen, bygget inn i klientreisen.',
       intro:
         'Planlegg fotograferingen, juster leveringsdatoer og se brudeparets ferdige tidslinje uten å forlate arbeidsflaten.',
+      openSharing: 'Åpne deling',
     },
     sharingWorkspace: {
       kicker: 'Brudeparvisning',

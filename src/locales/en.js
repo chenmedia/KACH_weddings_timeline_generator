@@ -130,6 +130,10 @@ export default {
     save: 'Save changes',
     saving: 'Saving …',
     saved: 'Changes saved',
+    currentClient: 'Selected couple',
+    viewOverview: 'Back to client overview',
+    statusSaved: 'All changes saved',
+    statusUnsaved: 'Unsaved changes',
     openFocl: 'Open in FOCL',
     setupFocl: 'Add FOCL link',
     studio: {
@@ -172,6 +176,7 @@ export default {
       title: 'The timeline, inside the client journey.',
       intro:
         'Plan the photography, adjust delivery dates and review the couple-facing timeline without leaving the workspace.',
+      openSharing: 'Open sharing',
     },
     sharingWorkspace: {
       kicker: 'Couple view',

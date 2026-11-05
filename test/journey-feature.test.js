@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-/* global document, history, location */
+/* global document, history, location, KeyboardEvent */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import journey from '../src/features/journey/index.js';
 import { defaultJourney } from '../src/features/journey/model.js';
@@ -30,6 +30,7 @@ function response(payload) {
 afterEach(() => {
   vi.unstubAllGlobals();
   journey.reset();
+  document.body.innerHTML = '';
   history.replaceState({}, '', '/');
 });
 
@@ -58,6 +59,7 @@ describe('journey feature', () => {
       }),
     );
     const container = document.createElement('div');
+    document.body.appendChild(container);
     await journey.mount(container, {
       authEnabled: true,
       isSignedIn: () => true,
@@ -72,14 +74,31 @@ describe('journey feature', () => {
     expect(container.querySelectorAll('.journey-summary-card')).toHaveLength(4);
     expect(container.querySelector('.journey-ledger-intro h2').textContent).toContain('En relasjon');
     expect(container.querySelectorAll('.journey-milestone-number').length).toBeGreaterThan(8);
-    const tabs = container.querySelectorAll('[role="tab"]');
+    let tabs = container.querySelectorAll('[role="tab"]');
     expect(tabs).toHaveLength(5);
+    expect(tabs[0].getAttribute('tabindex')).toBe('0');
+    expect(tabs[1].getAttribute('tabindex')).toBe('-1');
     tabs[1].click();
     expect(container.querySelector('.journey-timeline-workspace')).toBeTruthy();
     expect(container.querySelector('.journey-timeline-preview .timeline')).toBeTruthy();
+    expect(container.querySelector('.journey-compact-header h2').textContent).toBe('Ada & Emil');
+    expect(container.querySelector('.journey-hero')).toBeNull();
+    expect(container.querySelector('.journey-save-status').textContent).toBe('Alle endringer lagret');
+    expect(container.querySelector('[data-action="share"]').textContent).toBe('Åpne deling');
     expect(location.search).toContain('tab=timeline');
+    tabs = container.querySelectorAll('[role="tab"]');
+    expect(tabs[1].getAttribute('tabindex')).toBe('0');
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();
+    expect(document.activeElement.id).toBe('journey-tab-sharing');
+    tabs = container.querySelectorAll('[role="tab"]');
+    expect(tabs[2].getAttribute('aria-selected')).toBe('true');
+    tabs[0].click();
+    expect(container.querySelector('.journey-hero h2').textContent).toBe('Ada & Emil');
+    tabs = container.querySelectorAll('[role="tab"]');
     tabs[2].click();
     expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();
+    tabs = container.querySelectorAll('[role="tab"]');
     tabs[3].click();
     expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
   });
