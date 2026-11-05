@@ -65,6 +65,13 @@ describe('journey feature', () => {
     });
 
     expect(container.querySelector('.journey-hero h2').textContent).toBe('Ada & Emil');
+    expect(container.querySelector('.journey-hero img').getAttribute('src')).toBe(
+      '/images/kach-journey-hero.jpeg',
+    );
+    expect(container.querySelectorAll('.journey-client-list button')).toHaveLength(1);
+    expect(container.querySelectorAll('.journey-summary-card')).toHaveLength(4);
+    expect(container.querySelector('.journey-ledger-intro h2').textContent).toContain('En relasjon');
+    expect(container.querySelectorAll('.journey-milestone-number').length).toBeGreaterThan(8);
     const tabs = container.querySelectorAll('[role="tab"]');
     expect(tabs).toHaveLength(3);
     tabs[1].click();
