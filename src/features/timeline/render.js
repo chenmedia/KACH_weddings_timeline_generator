@@ -69,7 +69,7 @@ export function renderTimeline(state, locale, out) {
     if (r.isBooking) cls.push('is-booking');
     if (r.isSoft) cls.push('is-soft');
     if (r.isPast) cls.push('is-past');
-    html += `<div class="${cls.join(' ')}">
+    html += `<div class="${cls.join(' ')}" data-item-key="${esc(r.key)}">
       <span class="marker"></span>
       <span class="tag">${esc(r.tag)}</span>
       <div class="date">${esc(r.dateLabel)}</div><div class="weekday">${esc(r.weekday)}</div>

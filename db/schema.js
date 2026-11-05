@@ -11,6 +11,7 @@ import {
   timestamp,
   numeric,
   jsonb,
+  index,
   unique,
 } from 'drizzle-orm/pg-core';
 
@@ -86,6 +87,64 @@ export const clientJourneys = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({ uniqTimeline: unique().on(t.timelineId) }),
+);
+
+// One evolving, normalized client card per wedding. `data` deliberately keeps
+// the FOCL-shaped details flexible while the source metadata stays queryable.
+export const clientProfiles = pgTable(
+  'client_profiles',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    ownerId: text('owner_id').notNull(),
+    version: integer('version').notNull().default(1),
+    data: jsonb('data').notNull().default({}),
+    source: text('source').notNull().default('manual'), // manual|focl-chatgpt|focl-api
+    sourceId: text('source_id'),
+    sourceUrl: text('source_url'),
+    syncStatus: text('sync_status').notNull().default('not_connected'),
+    lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqTimeline: unique().on(t.timelineId) }),
+);
+
+// Couple-facing review state. Comments are separate so feedback can be placed
+// directly on a milestone and resolved without losing the conversation.
+export const timelineReviews = pgTable(
+  'timeline_reviews',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    status: text('status').notNull().default('open'), // open|changes_requested|approved
+    decidedBy: text('decided_by'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqTimeline: unique().on(t.timelineId) }),
+);
+
+export const timelineComments = pgTable(
+  'timeline_comments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    itemKey: text('item_key'),
+    authorName: text('author_name').notNull(),
+    body: text('body').notNull(),
+    kind: text('kind').notNull().default('comment'), // comment|change_request
+    status: text('status').notNull().default('open'), // open|resolved
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  },
+  (t) => ({ timelineCreatedIdx: index().on(t.timelineId, t.createdAt) }),
 );
 
 export const milestoneOverrides = pgTable(

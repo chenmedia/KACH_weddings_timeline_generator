@@ -4,6 +4,7 @@ import { el } from '../../ui/dom.js';
 import { buildControls } from '../timeline/controls.js';
 import { renderTimeline } from '../timeline/render.js';
 import { buildSharePanel } from '../timeline/share-panel.js';
+import { buildPhotographerReview } from './review-workspace.js';
 
 export function buildTimelineWorkspace({ locale, state, onChange, onReset, onOpenSharing }) {
   const preview = el('section', {
@@ -65,7 +66,7 @@ export function buildTimelineWorkspace({ locale, state, onChange, onReset, onOpe
   ]);
 }
 
-export function buildSharingWorkspace({ locale, timelineId, state }) {
+export function buildSharingWorkspace({ locale, timelineId, state, review, milestones, onResolve, onReset }) {
   return el('section', { class: 'journey-sharing-workspace' }, [
     el('header', { class: 'journey-embedded-heading' }, [
       el('p', { class: 'journey-studio-kicker', text: locale.journey.sharingWorkspace.kicker }),
@@ -73,5 +74,6 @@ export function buildSharingWorkspace({ locale, timelineId, state }) {
       el('p', { text: locale.journey.sharingWorkspace.intro }),
     ]),
     buildSharePanel(locale, { timelineId, state }),
+    buildPhotographerReview({ locale, review, milestones, onResolve, onReset }),
   ]);
 }

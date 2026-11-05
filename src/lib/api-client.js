@@ -42,6 +42,21 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ journey, expectedVersion }),
     }),
+  updateClientProfile: (id, profile, expectedVersion) =>
+    authed(`/api/clients/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ profile, expectedVersion }),
+    }),
+  importFocl: (id, payload) =>
+    authed(`/api/clients/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      body: JSON.stringify({ payload }),
+    }),
+  updateReview: (id, body) =>
+    authed(`/api/reviews/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
   create: (state) => authed('/api/timelines', { method: 'POST', body: JSON.stringify(state) }),
   update: (id, state) => authed(`/api/timelines/${id}`, { method: 'PUT', body: JSON.stringify(state) }),
   remove: (id) => authed(`/api/timelines/${id}`, { method: 'DELETE' }),
@@ -55,4 +70,18 @@ export const api = {
     fetch(`/api/public/timeline/${encodeURIComponent(slug)}`).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
     ),
+  publicReview: (slug) =>
+    fetch(`/api/public/review/${encodeURIComponent(slug)}`).then((r) =>
+      r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
+    ),
+  submitPublicReview: (slug, body) =>
+    fetch(`/api/public/review/${encodeURIComponent(slug)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(async (r) => {
+      const payload = await r.json().catch(() => null);
+      if (!r.ok) throw new ApiError(payload?.error || String(r.status), { status: r.status, payload });
+      return payload;
+    }),
 };

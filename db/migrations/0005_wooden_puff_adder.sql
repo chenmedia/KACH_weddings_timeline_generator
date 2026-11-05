@@ -1,0 +1,1 @@
+CREATE INDEX "timeline_comments_timeline_id_created_at_index" ON "timeline_comments" USING btree ("timeline_id","created_at");

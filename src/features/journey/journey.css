@@ -11,6 +11,279 @@
   width: 100%;
 }
 
+/* Client card + FOCL bridge */
+.client-card-workspace {
+  display: grid;
+  gap: 28px;
+  max-width: 1080px;
+}
+
+.focl-sync-card,
+.client-card-section,
+.client-list-section,
+.photographer-review {
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  padding: clamp(22px, 3vw, 38px);
+}
+
+.focl-sync-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px 34px;
+  background: var(--journey-forest);
+  color: #f5f0e8;
+}
+
+.focl-sync-card h2 {
+  margin-top: 8px;
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 300;
+  line-height: 1.05;
+}
+
+.focl-sync-card > div:first-child > p:last-child {
+  max-width: 64ch;
+  margin-top: 14px;
+  color: #c9c7bf;
+  line-height: 1.65;
+}
+
+.focl-sync-status {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 5px;
+  color: #ebe0d5;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.focl-sync-status small {
+  color: #aaa99f;
+  font-size: 9px;
+}
+
+.focl-sync-card .client-card-field,
+.focl-import-area,
+.focl-sync-actions {
+  grid-column: 1 / -1;
+}
+
+.focl-sync-card input,
+.focl-import-area textarea {
+  border-color: #565b52;
+  background: #2b302a;
+  color: #fff;
+}
+
+.focl-sync-actions,
+.focl-import-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.focl-import-area[hidden] {
+  display: none;
+}
+
+.focl-import-area textarea {
+  flex: 1 1 auto;
+  resize: vertical;
+}
+
+.client-partners {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.client-contact-card,
+.client-list-card {
+  padding: 22px;
+  border: 1px solid var(--hairline);
+  background: #fff;
+}
+
+.client-planner-card {
+  margin-top: 18px;
+}
+
+.client-contact-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.client-card-field {
+  display: block;
+  min-width: 0;
+}
+
+.client-card-field > span,
+.client-list-section > h3,
+.client-section-line h3 {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.client-card-field input,
+.client-list-section textarea {
+  width: 100%;
+  min-height: 43px;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.client-add-card {
+  min-height: 170px;
+  border: 1px dashed var(--hairline-strong);
+  background: transparent;
+  color: var(--muted);
+}
+
+.client-section-line,
+.photographer-review-heading,
+.photographer-review-list article footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.client-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.client-list-section > p {
+  margin-top: 16px;
+  color: var(--muted);
+}
+
+.client-remove {
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  text-decoration: underline;
+}
+
+.focl-day-timeline {
+  margin-top: 20px;
+  list-style: none;
+}
+
+.focl-day-timeline li {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.focl-day-timeline time {
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+.focl-day-timeline span,
+.focl-day-timeline p {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Photographer side of the review loop */
+.photographer-review {
+  margin-top: 26px;
+}
+
+.photographer-review-heading h3 {
+  margin: 8px 0;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.photographer-review-heading > div:last-child {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photographer-review-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.photographer-review-list article {
+  padding: 18px;
+  border: 1px solid var(--hairline);
+  background: #fff;
+}
+
+.photographer-review-list article.is-resolved {
+  opacity: 0.54;
+}
+
+.photographer-review-meta {
+  display: flex;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.photographer-review-list blockquote {
+  margin: 12px 0 16px;
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  .focl-sync-card,
+  .client-partners,
+  .client-list-grid,
+  .client-contact-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .focl-sync-status {
+    align-items: flex-start;
+  }
+
+  .focl-sync-actions,
+  .focl-import-area,
+  .photographer-review-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .focl-day-timeline li {
+    grid-template-columns: 74px minmax(0, 1fr);
+  }
+}
+
 .journey-content,
 .journey-studio,
 .journey-studio-main,

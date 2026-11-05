@@ -1337,6 +1337,189 @@ button:active:not(:disabled) {
   font-size: 26px;
 }
 
+/* Couple review — lightweight, contextual feedback on the shared timeline. */
+.couple-item-comment {
+  margin-top: 14px;
+  padding: 0 0 3px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.couple-item-comment:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.couple-review-panel {
+  margin-top: 56px;
+  padding: clamp(24px, 5vw, 46px);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+}
+
+.couple-review-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.couple-review-kicker {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.couple-review-heading h2 {
+  margin-top: 10px;
+  font-family: var(--serif);
+  font-size: clamp(27px, 4vw, 39px);
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.couple-review-heading > div > p:last-child {
+  max-width: 55ch;
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.couple-review-status {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid var(--hairline-strong);
+  color: var(--ink-soft);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.couple-review-panel.is-approved .couple-review-status,
+.couple-review-status.is-approved {
+  border-color: #75806c;
+  color: #4c5947;
+}
+
+.couple-review-panel.is-changes_requested .couple-review-status,
+.couple-review-status.is-changes_requested {
+  border-color: #a67d63;
+  color: #8b6148;
+}
+
+.couple-review-name {
+  display: block;
+  margin-top: 28px;
+}
+
+.couple-review-name span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.couple-review-name input {
+  width: min(100%, 360px);
+  min-height: 44px;
+  background: var(--bg);
+}
+
+.couple-review-actions,
+.couple-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.couple-comment-composer {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.couple-comment-composer > p {
+  margin-bottom: 9px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.couple-comment-composer textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  background: #fff;
+}
+
+.couple-comment-actions select {
+  min-height: 42px;
+  margin-right: auto;
+  background: #fff;
+}
+
+.couple-review-panel > h3 {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.couple-review-comments article {
+  padding: 17px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.couple-review-comments article.is-resolved {
+  opacity: 0.52;
+}
+
+.couple-review-comments article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.couple-review-comments article p {
+  margin-top: 8px;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 600px) {
+  .couple-review-heading,
+  .couple-review-actions,
+  .couple-comment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .couple-review-status {
+    align-self: flex-start;
+  }
+
+  .couple-comment-actions select {
+    width: 100%;
+  }
+}
+
 /* ---------- Off-rail feature-kort (parfoto / album) ---------- */
 .aside {
   position: relative;
