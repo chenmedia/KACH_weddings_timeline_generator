@@ -24,6 +24,23 @@ export default {
     skip: 'Hopp til hovedinnhold',
   },
 
+  account: {
+    kicker: 'KACH studiokonto',
+    title: 'Din profil',
+    intro: 'Kontoen du bruker til å følge alle klientreiser og tidslinjer i KACH Weddings.',
+    open: 'Åpne profilmeny',
+    close: 'Lukk profil',
+    profile: 'Se profil',
+    signOut: 'Logg ut',
+    signingOut: 'Logger ut …',
+    email: 'E-postadresse',
+    workspace: 'Arbeidsområde',
+    access: 'Tilgang',
+    accessValue: 'Sikker studiotilgang',
+    securityNote: 'Den sikre innloggingsøkten din er fortsatt beskyttet i bakgrunnen.',
+    noEmail: 'Ingen e-postadresse',
+  },
+
   tools: {
     journey: {
       title: 'Klientreise',

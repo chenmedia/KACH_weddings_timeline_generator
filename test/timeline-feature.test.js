@@ -10,7 +10,6 @@ function ctx() {
     authEnabled: false,
     isSignedIn: () => false,
     getToken: async () => undefined,
-    mountUserButton() {},
     navigate() {},
     requestRender() {},
   };

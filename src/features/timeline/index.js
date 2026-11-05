@@ -31,7 +31,7 @@ let clientView = false; // read-only (couple view)
 let outputEl = null;
 let editorContainer = null;
 let dashboardInstance = null;
-let ctx = null; // shell context (getToken, mountUserButton, …)
+let ctx = null; // shell context (getToken, navigate, …)
 let publicCache = null; // { slug, state } for couple links
 let saveInFlight = false;
 let saveQueued = false;
@@ -198,7 +198,6 @@ function makeDashboard() {
     onSelect: selectTimeline,
     onNew: newTimeline,
     onDelete: deleteTimeline,
-    mountUserButton: (elm) => ctx.mountUserButton(elm),
   });
 }
 
