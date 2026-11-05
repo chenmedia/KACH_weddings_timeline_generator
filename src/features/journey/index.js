@@ -2,7 +2,7 @@ import './journey.css';
 import { api } from '../../lib/api-client.js';
 import { fmtDate, parseISO } from '../../lib/dates.js';
 import { getMilestones } from '../../lib/milestones.js';
-import { replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
+import { pathForWedding, replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
 import { getLang, t } from '../../i18n.js';
 import { el } from '../../ui/dom.js';
 import { confirmDialog, toast } from '../../ui/feedback.js';
@@ -65,6 +65,25 @@ function inputField({ id, label, type = 'text', value = '', placeholder = '', on
   return el('div', { class: 'journey-field' }, [el('label', { for: id, text: label }), input]);
 }
 
+async function switchCouple(nextId, resetControl) {
+  if (!nextId || nextId === currentId) return;
+  const locale = t();
+  if (projectDirty || journeyDirty) {
+    const discard = await confirmDialog({
+      title: locale.journey.unsaved.title,
+      body: locale.journey.unsaved.body,
+      confirmLabel: locale.journey.unsaved.discard,
+      cancelLabel: locale.feedback.cancel,
+      danger: true,
+    });
+    if (!discard) {
+      resetControl?.();
+      return;
+    }
+  }
+  await loadWorkspace(nextId);
+}
+
 function coupleSelector(locale) {
   const select = el('select', { id: 'journey-couple-select', 'aria-label': locale.journey.selectCouple });
   couples.forEach((couple) => {
@@ -75,24 +94,42 @@ function coupleSelector(locale) {
   });
   select.addEventListener('change', async () => {
     const nextId = select.value;
-    if ((projectDirty || journeyDirty) && nextId !== currentId) {
-      const discard = await confirmDialog({
-        title: locale.journey.unsaved.title,
-        body: locale.journey.unsaved.body,
-        confirmLabel: locale.journey.unsaved.discard,
-        cancelLabel: locale.feedback.cancel,
-        danger: true,
-      });
-      if (!discard) {
-        select.value = currentId;
-        return;
-      }
-    }
-    await loadWorkspace(nextId);
+    await switchCouple(nextId, () => {
+      select.value = currentId;
+    });
   });
   return el('div', { class: 'journey-selector' }, [
     el('label', { for: 'journey-couple-select', text: locale.journey.selectCouple }),
     select,
+  ]);
+}
+
+function clientRail(locale) {
+  const year = workspace.project.wdate?.slice(0, 4) || new Date().getFullYear();
+  const list = el('nav', {
+    class: 'journey-client-list',
+    'aria-label': locale.journey.selectCouple,
+  });
+  couples.forEach((couple, index) => {
+    const button = el('button', {
+      type: 'button',
+      class: couple.id === currentId ? 'is-active' : '',
+      'aria-current': couple.id === currentId ? 'true' : 'false',
+    });
+    button.append(
+      el('span', { class: 'journey-client-number', text: String(index + 1).padStart(2, '0') }),
+      el('span', { class: 'journey-client-name', text: couple.couple || locale.timeline.defaultCouple }),
+      el('span', { class: 'journey-client-date', text: formatDate(couple.wdate, locale) }),
+    );
+    button.addEventListener('click', () => switchCouple(couple.id));
+    list.appendChild(button);
+  });
+  return el('aside', { class: 'journey-client-rail' }, [
+    el('p', { class: 'journey-studio-kicker', text: `${year} ${locale.journey.studio.season}` }),
+    el('h2', { text: locale.journey.studio.stories(couples.length) }),
+    el('p', { class: 'journey-client-intro', text: locale.journey.studio.clientIntro }),
+    list,
+    el('blockquote', { text: locale.journey.studio.promise }),
   ]);
 }
 
@@ -101,41 +138,101 @@ function summaryHeader(locale) {
   const journey = workspace.journey;
   const progress = journeyProgress(journey);
   const next = nextJourneyAction(project, workspace.milestones, journey);
-  const content = [
-    el('div', { class: 'journey-heading-copy' }, [
+  const hero = el('section', { class: 'journey-hero' }, [
+    el('img', {
+      src: '/images/kach-journey-hero.jpeg',
+      alt: locale.journey.studio.heroAlt,
+    }),
+    el('div', { class: 'journey-hero-shade', 'aria-hidden': 'true' }),
+    el('div', { class: 'journey-hero-copy' }, [
+      el('p', { class: 'journey-studio-kicker', text: locale.journey.studio.heroKicker }),
       el('h2', { text: project.couple || locale.timeline.defaultCouple }),
       el('p', {
         class: 'journey-heading-meta',
         text: [formatDate(project.wdate, locale), project.place].filter(Boolean).join(' · '),
       }),
     ]),
-    el('dl', { class: 'journey-summary-list' }, [
-      el('div', {}, [
-        el('dt', { text: locale.journey.nextAction }),
-        el('dd', { text: next ? locale.journey.tasks[next.id] : locale.home.overview.noAction }),
-      ]),
-      el('div', {}, [
-        el('dt', { text: locale.journey.progress }),
-        el('dd', { text: locale.home.overview.progress(progress.completed, progress.total) }),
-      ]),
-      el('div', {}, [
-        el('dt', { text: locale.journey.lastTouch }),
-        el('dd', { text: formatDate(journey.lastTouch, locale) }),
-      ]),
+    el('div', { class: 'journey-hero-progress' }, [
+      el('span', { text: `${locale.journey.progress} ${progress.percent}%` }),
+      el('i', { 'aria-hidden': 'true' }, [el('b', { style: `width:${progress.percent}%` })]),
+    ]),
+    el('button', {
+      type: 'button',
+      class: 'journey-edit-couple',
+      text: `${locale.journey.studio.editCouple} ↗`,
+    }),
+  ]);
+  hero.querySelector('.journey-edit-couple').addEventListener('click', () => {
+    shellCtx.navigate(pathForWedding('/timeline', currentId));
+  });
+
+  const foclContent = [
+    el('img', { src: '/images/kach-journey-detail.jpg', alt: '' }),
+    el('span', {}, [
+      el('small', { text: 'FOCL planning' }),
+      el('strong', {
+        text: journey.foclUrl ? `${locale.journey.openFocl} ↗` : `${locale.journey.setupFocl} ↗`,
+      }),
     ]),
   ];
-  if (journey.foclUrl) {
-    content.push(
-      el('a', {
-        class: 'btn-ghost journey-focl-link',
-        href: journey.foclUrl,
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        text: locale.journey.openFocl,
-      }),
-    );
+  const foclTile = journey.foclUrl
+    ? el(
+        'a',
+        {
+          class: 'journey-summary-card journey-focl-card',
+          href: journey.foclUrl,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+        foclContent,
+      )
+    : el('button', { type: 'button', class: 'journey-summary-card journey-focl-card' }, foclContent);
+  if (!journey.foclUrl) {
+    foclTile.addEventListener('click', () => {
+      activeTab = 'templates';
+      renderWorkspace();
+      host.querySelector('#journey-focl-url')?.focus();
+    });
   }
-  return el('section', { class: 'journey-hero' }, content);
+
+  const summary = el(
+    'section',
+    {
+      class: 'journey-summary-grid',
+      'aria-label': locale.journey.studio.clientSummary,
+    },
+    [
+      el('article', { class: 'journey-summary-card journey-next-card' }, [
+        el('p', { text: locale.journey.studio.nextThoughtfulAction }),
+        el('h3', { text: next ? locale.journey.tasks[next.id] : locale.home.overview.noAction }),
+        el('span', { text: next?.dateISO ? formatDate(next.dateISO, locale) : '—' }),
+        el('button', { type: 'button', text: `${locale.journey.studio.viewJourney} ↗` }),
+      ]),
+      el('article', { class: 'journey-summary-card journey-touch-card' }, [
+        el('p', { text: locale.journey.lastTouch }),
+        el('h3', { text: formatDate(journey.lastTouch, locale) }),
+        el('span', { text: locale.journey.studio.personalTouchNote }),
+      ]),
+      el('article', { class: 'journey-summary-card journey-budget-card' }, [
+        el('p', { text: locale.journey.studio.experienceBudget }),
+        el('h3', { text: `${referralBudget(journey).toLocaleString(locale.dateLocale)} NOK` }),
+        el('span', {
+          text: locale.journey.referrals.plans[journey.plan] || locale.journey.referrals.plans.custom,
+        }),
+      ]),
+      foclTile,
+    ],
+  );
+  summary.querySelector('.journey-next-card button').addEventListener('click', () => {
+    activeTab = 'journey';
+    renderWorkspace();
+    host.querySelector('.journey-ledger-intro')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  return el('div', { class: 'journey-studio' }, [
+    clientRail(locale),
+    el('div', { class: 'journey-studio-main' }, [hero, summary]),
+  ]);
 }
 
 function tabBar(locale) {
@@ -216,14 +313,22 @@ function milestoneDateControl(locale, row) {
 
 function milestoneList(locale) {
   const list = el('ol', { class: 'journey-milestones' });
-  for (const row of workspace.milestones?.rows || []) {
+  const referralNumbers = { welcome: 1, timelineQ: 2, day: 4, gallery: 5 };
+  for (const [index, row] of (workspace.milestones?.rows || []).entries()) {
+    const referralNumber = referralNumbers[row.key];
     list.appendChild(
       el('li', { class: row.isDay ? 'is-day' : '' }, [
-        el('div', { class: 'journey-milestone-marker', 'aria-hidden': 'true' }),
+        el('span', { class: 'journey-milestone-number', text: String(index + 1).padStart(2, '0') }),
         el('div', { class: 'journey-milestone-copy' }, [
           el('span', { class: 'journey-stage-name', text: row.phase }),
           el('h4', { text: row.title }),
           row.desc ? el('p', { text: row.desc }) : null,
+          referralNumber
+            ? el('span', {
+                class: 'journey-referral-badge',
+                text: `✦ ${locale.journey.studio.referralMoment} ${referralNumber}`,
+              })
+            : null,
         ]),
         milestoneDateControl(locale, row),
       ]),
@@ -239,6 +344,7 @@ function checklist(locale) {
   const stage = next?.stage || journeyStage(workspace.project, derived.dates);
   const activeIds = new Set(activeJourneyTasks(journey).map((task) => task.id));
   const tasks = JOURNEY_TASKS.filter((task) => task.stage === stage && activeIds.has(task.id));
+  const completedInStage = tasks.filter((task) => journey.completedTasks.includes(task.id)).length;
   const list = el('div', { class: 'journey-checklist' });
   tasks.forEach((task) => {
     const input = el('input', { type: 'checkbox', id: `task-${task.id}` });
@@ -261,16 +367,33 @@ function checklist(locale) {
     );
   });
   return el('aside', { class: 'journey-stage-panel' }, [
-    el('p', { class: 'journey-stage-kicker', text: locale.journey.stages[stage] }),
+    el('div', { class: 'journey-stage-heading' }, [
+      el('p', {
+        class: 'journey-stage-kicker',
+        text: `${locale.journey.studio.stage} · ${locale.journey.stages[stage]}`,
+      }),
+      el('strong', { text: `${completedInStage} / ${tasks.length}` }),
+    ]),
     el('h3', { text: locale.journey.checklistTitle }),
+    el('p', { class: 'journey-stage-intro', text: locale.journey.studio.stageIntro }),
     list,
   ]);
 }
 
 function journeyPanel(locale) {
-  return el('div', { class: 'journey-workspace' }, [
-    el('section', { class: 'journey-timeline-panel' }, [milestoneList(locale)]),
-    checklist(locale),
+  return el('div', {}, [
+    el('header', { class: 'journey-ledger-intro' }, [
+      el('p', { class: 'journey-studio-kicker', text: locale.journey.studio.contractToAnniversary }),
+      el('h2', {}, [
+        document.createTextNode(`${locale.journey.studio.relationship} `),
+        el('em', { text: locale.journey.studio.notSequence }),
+      ]),
+      el('p', { text: locale.journey.studio.ledgerIntro }),
+    ]),
+    el('div', { class: 'journey-workspace' }, [
+      el('section', { class: 'journey-timeline-panel' }, [milestoneList(locale)]),
+      checklist(locale),
+    ]),
   ]);
 }
 
@@ -520,12 +643,7 @@ async function loadWorkspace(id) {
 async function mount(container, ctx) {
   shellCtx = ctx;
   const locale = t();
-  const wrap = el('section', { class: 'journey-feature no-print' }, [
-    el('header', { class: 'journey-page-header' }, [
-      el('h1', { text: locale.journey.title }),
-      el('p', { text: locale.journey.intro }),
-    ]),
-  ]);
+  const wrap = el('section', { class: 'journey-feature no-print' });
   host = el('div', { class: 'journey-content' }, [
     el('p', { class: 'dash-empty', text: locale.dashboard.loading }),
   ]);
