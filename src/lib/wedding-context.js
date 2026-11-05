@@ -12,6 +12,12 @@ export function pathForWedding(path, weddingId) {
   return `${url.pathname}${url.search}`;
 }
 
+export function pathForWeddingTab(weddingId, tab = 'journey') {
+  const url = new URL(pathForWedding('/journey', weddingId), location.origin);
+  if (tab && tab !== 'journey') url.searchParams.set('tab', tab);
+  return `${url.pathname}${url.search}`;
+}
+
 export function replaceSelectedWedding(weddingId) {
   const url = new URL(location.href);
   if (UUID_RE.test(weddingId || '')) url.searchParams.set('wedding', weddingId);

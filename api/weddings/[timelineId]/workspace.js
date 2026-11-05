@@ -30,7 +30,14 @@ async function handler(req, res) {
       .from(clientJourneys)
       .where(and(eq(clientJourneys.timelineId, timelineId), eq(clientJourneys.ownerId, uid))),
   ]);
-  const project = rowToState(row, overrideRows);
+  const project = {
+    ...rowToState(row, overrideRows),
+    shareSlug: row.shareSlug,
+    shareEnabled: row.shareEnabled,
+    shareExpiresAt: row.shareExpiresAt,
+    viewCount: row.viewCount || 0,
+    lastViewedAt: row.lastViewedAt,
+  };
   const journeyRow = journeyRows[0];
   const locale = req.query.locale === 'en' ? en : nb;
   return ok(res, {

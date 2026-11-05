@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-/* global document, history */
+/* global document, history, location */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import journey from '../src/features/journey/index.js';
 import { defaultJourney } from '../src/features/journey/model.js';
@@ -34,7 +34,7 @@ afterEach(() => {
 });
 
 describe('journey feature', () => {
-  it('loads a selected couple and exposes all three working tabs', async () => {
+  it('loads a selected couple with journey, timeline, sharing, referral and template tabs', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn((url) => {
@@ -73,8 +73,14 @@ describe('journey feature', () => {
     expect(container.querySelector('.journey-ledger-intro h2').textContent).toContain('En relasjon');
     expect(container.querySelectorAll('.journey-milestone-number').length).toBeGreaterThan(8);
     const tabs = container.querySelectorAll('[role="tab"]');
-    expect(tabs).toHaveLength(3);
+    expect(tabs).toHaveLength(5);
     tabs[1].click();
+    expect(container.querySelector('.journey-timeline-workspace')).toBeTruthy();
+    expect(container.querySelector('.journey-timeline-preview .timeline')).toBeTruthy();
+    expect(location.search).toContain('tab=timeline');
+    tabs[2].click();
+    expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();
+    tabs[3].click();
     expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
   });
 });

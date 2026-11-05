@@ -2,7 +2,12 @@ import './journey.css';
 import { api } from '../../lib/api-client.js';
 import { fmtDate, parseISO } from '../../lib/dates.js';
 import { getMilestones } from '../../lib/milestones.js';
-import { pathForWedding, replaceSelectedWedding, selectedWeddingFromUrl } from '../../lib/wedding-context.js';
+import { defaultState } from '../../lib/state.js';
+import {
+  pathForWeddingTab,
+  replaceSelectedWedding,
+  selectedWeddingFromUrl,
+} from '../../lib/wedding-context.js';
 import { getLang, t } from '../../i18n.js';
 import { el } from '../../ui/dom.js';
 import { confirmDialog, toast } from '../../ui/feedback.js';
@@ -20,11 +25,12 @@ import {
   referralBudget,
   sanitizeJourney,
 } from './model.js';
+import { buildSharingWorkspace, buildTimelineWorkspace } from './timeline-workspace.js';
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
 const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
+const WORKSPACE_TABS = new Set(['journey', 'timeline', 'sharing', 'referrals', 'templates']);
 
-let shellCtx = null;
 let host = null;
 let couples = [];
 let currentId = '';
@@ -33,6 +39,20 @@ let activeTab = 'journey';
 let projectDirty = false;
 let journeyDirty = false;
 let saving = false;
+
+function tabFromUrl(search = location.search) {
+  const tab = new URLSearchParams(search).get('tab') || 'journey';
+  return WORKSPACE_TABS.has(tab) ? tab : 'journey';
+}
+
+function setWorkspaceTab(tab) {
+  activeTab = WORKSPACE_TABS.has(tab) ? tab : 'journey';
+  const url = new URL(location.href);
+  if (activeTab === 'journey') url.searchParams.delete('tab');
+  else url.searchParams.set('tab', activeTab);
+  history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+  renderWorkspace();
+}
 
 function formatDate(value, locale = t()) {
   const date = typeof value === 'string' ? parseISO(value) : value;
@@ -179,7 +199,7 @@ function summaryHeader(locale) {
     }),
   ]);
   hero.querySelector('.journey-edit-couple').addEventListener('click', () => {
-    shellCtx.navigate(pathForWedding('/timeline', currentId));
+    setWorkspaceTab('timeline');
   });
 
   const foclContent = [
@@ -205,8 +225,7 @@ function summaryHeader(locale) {
     : el('button', { type: 'button', class: 'journey-summary-card journey-focl-card' }, foclContent);
   if (!journey.foclUrl) {
     foclTile.addEventListener('click', () => {
-      activeTab = 'templates';
-      renderWorkspace();
+      setWorkspaceTab('templates');
       host.querySelector('#journey-focl-url')?.focus();
     });
   }
@@ -240,8 +259,7 @@ function summaryHeader(locale) {
     ],
   );
   summary.querySelector('.journey-next-card button').addEventListener('click', () => {
-    activeTab = 'journey';
-    renderWorkspace();
+    setWorkspaceTab('journey');
     host.querySelector('.journey-ledger-intro')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
@@ -253,7 +271,7 @@ function summaryHeader(locale) {
 
 function tabBar(locale) {
   const bar = el('div', { class: 'journey-tabs', role: 'tablist', 'aria-label': locale.journey.title });
-  for (const key of ['journey', 'referrals', 'templates']) {
+  for (const key of ['journey', 'timeline', 'sharing', 'referrals', 'templates']) {
     const button = el('button', {
       type: 'button',
       role: 'tab',
@@ -262,8 +280,7 @@ function tabBar(locale) {
       text: locale.journey.tabs[key],
     });
     button.addEventListener('click', () => {
-      activeTab = key;
-      renderWorkspace();
+      setWorkspaceTab(key);
     });
     bar.appendChild(button);
   }
@@ -411,6 +428,41 @@ function journeyPanel(locale) {
       checklist(locale),
     ]),
   ]);
+}
+
+function timelinePanel(locale) {
+  return buildTimelineWorkspace({
+    locale,
+    state: workspace.project,
+    onChange: () => {
+      refreshMilestones();
+      setDirty('project');
+    },
+    onReset: (defaults) => {
+      const metadata = {
+        id: workspace.project.id,
+        status: workspace.project.status,
+        shareSlug: workspace.project.shareSlug,
+        shareEnabled: workspace.project.shareEnabled,
+        shareExpiresAt: workspace.project.shareExpiresAt,
+        viewCount: workspace.project.viewCount,
+        lastViewedAt: workspace.project.lastViewedAt,
+      };
+      workspace.project = { ...defaults, ...metadata };
+      refreshMilestones();
+      setDirty('project');
+      renderWorkspace();
+    },
+    onOpenSharing: () => setWorkspaceTab('sharing'),
+  });
+}
+
+function sharingPanel(locale) {
+  return buildSharingWorkspace({
+    locale,
+    timelineId: currentId,
+    state: workspace.project,
+  });
 }
 
 function referralPanel(locale) {
@@ -594,6 +646,11 @@ async function saveWorkspace() {
       journeyDirty = false;
     }
     workspace = await api.workspace(currentId, getLang());
+    couples = couples.map((couple) =>
+      couple.id === currentId
+        ? { ...couple, couple: workspace.project.couple, wdate: workspace.project.wdate }
+        : couple,
+    );
     saving = false;
     toast(locale.journey.saved, { type: 'success' });
     renderWorkspace();
@@ -627,14 +684,30 @@ function renderWorkspace() {
   host.appendChild(summaryHeader(locale));
   host.appendChild(tabBar(locale));
   const panel = el('div', { class: 'journey-tab-panel', role: 'tabpanel' });
-  panel.appendChild(
-    activeTab === 'journey'
-      ? journeyPanel(locale)
-      : activeTab === 'referrals'
-        ? referralPanel(locale)
-        : templatesPanel(locale),
-  );
+  const panels = {
+    journey: journeyPanel,
+    timeline: timelinePanel,
+    sharing: sharingPanel,
+    referrals: referralPanel,
+    templates: templatesPanel,
+  };
+  panel.appendChild((panels[activeTab] || journeyPanel)(locale));
   host.appendChild(panel);
+}
+
+async function createCouple() {
+  const locale = t();
+  try {
+    const created = await api.create(defaultState());
+    const result = await api.list();
+    couples = result.timelines || [];
+    activeTab = 'timeline';
+    const url = new URL(pathForWeddingTab(created.id, 'timeline'), location.origin);
+    history.replaceState({}, '', `${url.pathname}${url.search}`);
+    await loadWorkspace(created.id);
+  } catch {
+    toast(locale.feedback.createFailed, { type: 'error' });
+  }
 }
 
 async function loadWorkspace(id) {
@@ -656,8 +729,8 @@ async function loadWorkspace(id) {
   }
 }
 
-async function mount(container, ctx) {
-  shellCtx = ctx;
+async function mount(container) {
+  activeTab = tabFromUrl();
   const locale = t();
   const wrap = el('section', { class: 'journey-feature no-print' });
   host = el('div', { class: 'journey-content' }, [journeyLoading(locale)]);
@@ -665,6 +738,14 @@ async function mount(container, ctx) {
   container.appendChild(wrap);
 
   try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('new') === '1') {
+      params.delete('new');
+      const clean = `${location.pathname}${params.toString() ? `?${params}` : ''}`;
+      history.replaceState({}, '', clean);
+      await createCouple();
+      return;
+    }
     const result = await api.list();
     couples = result.timelines || [];
     if (!couples.length) {
@@ -674,7 +755,7 @@ async function mount(container, ctx) {
         class: 'btn-primary',
         text: locale.journey.createCouple,
       });
-      create.addEventListener('click', () => shellCtx.navigate('/timeline'));
+      create.addEventListener('click', createCouple);
       host.appendChild(
         el('div', { class: 'journey-empty' }, [el('p', { text: locale.journey.noCouples }), create]),
       );
@@ -690,7 +771,6 @@ async function mount(container, ctx) {
 }
 
 function reset() {
-  shellCtx = null;
   host = null;
   couples = [];
   currentId = '';

@@ -16,7 +16,7 @@ export default {
 
   nav: {
     home: 'Overview',
-    journey: 'Client journey',
+    journey: 'Client journeys',
     timeline: 'Couples',
     workspace: 'Workspace',
     soon: 'Soon',
@@ -44,8 +44,8 @@ export default {
 
   tools: {
     journey: {
-      title: 'Client journey',
-      summary: 'Guide every couple from signed contract to first anniversary.',
+      title: 'Client journeys',
+      summary: 'Everything for each couple, from signed contract to timeline and first anniversary.',
     },
     timeline: {
       title: 'Timeline generator',
@@ -140,7 +140,7 @@ export default {
         'Every couple should feel as cared for six months after booking as they did the day they signed.',
       heroAlt: 'A KACH Weddings couple walking through a wooded landscape',
       heroKicker: 'The welcome experience',
-      editCouple: 'Edit couple',
+      editCouple: 'Open wedding day',
       clientSummary: 'Client summary',
       nextThoughtfulAction: 'Next thoughtful action',
       viewJourney: 'View client journey',
@@ -162,8 +162,22 @@ export default {
     },
     tabs: {
       journey: 'Client journey',
+      timeline: 'Wedding day',
+      sharing: 'Sharing',
       referrals: 'Referral moments',
       templates: 'Templates & FOCL',
+    },
+    timelineWorkspace: {
+      kicker: 'Wedding day',
+      title: 'The timeline, inside the client journey.',
+      intro:
+        'Plan the photography, adjust delivery dates and review the couple-facing timeline without leaving the workspace.',
+    },
+    sharingWorkspace: {
+      kicker: 'Couple view',
+      title: 'Share one calm, up-to-date timeline.',
+      intro:
+        'Enable the couple link, copy the address or QR code, and see whether the timeline has been opened.',
     },
     stages: {
       welcome: 'Welcome',

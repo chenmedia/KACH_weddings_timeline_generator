@@ -437,6 +437,68 @@
   padding-top: clamp(52px, 7vw, 94px);
 }
 
+.journey-embedded-heading {
+  max-width: 760px;
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+.journey-embedded-heading h2 {
+  max-width: 14ch;
+  margin-top: 16px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(40px, 5vw, 66px);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.journey-embedded-heading > p:last-child {
+  max-width: 62ch;
+  margin-top: 21px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.journey-timeline-layout {
+  display: grid;
+  grid-template-columns: minmax(350px, 0.72fr) minmax(470px, 1.28fr);
+  align-items: start;
+  gap: clamp(26px, 4vw, 54px);
+}
+
+.journey-timeline-layout .controls {
+  position: sticky;
+  top: 24px;
+  margin: 0;
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.journey-timeline-preview {
+  min-width: 0;
+  padding: clamp(30px, 5vw, 64px);
+  background: var(--surface);
+}
+
+.journey-sharing-workspace .share-panel {
+  max-width: 860px;
+  margin-bottom: 0;
+  padding: clamp(26px, 4vw, 42px);
+}
+
+@media (max-width: 1180px) {
+  .journey-timeline-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-timeline-layout .controls {
+    position: static;
+  }
+}
+
 .journey-ledger-intro {
   max-width: 760px;
   margin-bottom: clamp(44px, 7vw, 84px);

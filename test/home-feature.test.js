@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
-/* global document, sessionStorage */
-// Smoke test for the Home overview: greeting + primary actions. "New couple"
-// flags a handoff and navigates to the Brudepar feature; "all couples" just
-// navigates. (Recent couples are DB-backed and covered elsewhere.)
+/* global document */
+// Smoke test for the Home overview: primary actions now enter the unified
+// client workspace rather than a separate timeline dashboard.
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import home, { NEW_KEY } from '../src/features/home/index.js';
+import home from '../src/features/home/index.js';
 
 describe('home feature descriptor', () => {
   it('is a valid feature at the root path', () => {
@@ -15,7 +14,7 @@ describe('home feature descriptor', () => {
 });
 
 describe('home overview mount', () => {
-  it('renders greeting + actions; "new couple" hands off and navigates to /timeline', () => {
+  it('renders greeting + actions and starts new couples in the unified workspace', () => {
     const calls = [];
     const container = document.createElement('div');
     // Anonymous ctx → no DB-backed recent list, just greeting + actions.
@@ -29,8 +28,7 @@ describe('home overview mount', () => {
     expect(buttons.length).toBe(2);
 
     buttons[0].click(); // "new couple"
-    expect(sessionStorage.getItem(NEW_KEY)).toBe('1');
-    expect(calls).toContain('/timeline');
+    expect(calls).toContain('/journey?new=1&tab=timeline');
   });
 
   it('loads one operational dashboard and opens the selected journey', async () => {
@@ -73,6 +71,8 @@ describe('home overview mount', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     container.querySelector('.overview-primary').click();
     expect(calls).toContain(`/journey?wedding=${id}`);
+    container.querySelector('.overview-secondary').click();
+    expect(calls).toContain(`/journey?wedding=${id}&tab=timeline`);
   });
 });
 
