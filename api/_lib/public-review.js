@@ -1,7 +1,5 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
-import { getDb, schema } from '../../_lib/db.js';
-import { ok, fail, methodNotAllowed } from '../../_lib/respond.js';
-import { withErrorCapture } from '../../_lib/observability.js';
+import { desc, eq, sql } from 'drizzle-orm';
+import { ok, fail } from './respond.js';
 
 const ITEM_KEY = /^[a-zA-Z0-9_-]{1,80}$/;
 
@@ -9,16 +7,8 @@ function clean(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
-async function sharedTimeline(db, slug, timelines) {
-  const [row] = await db
-    .select({ id: timelines.id, shareExpiresAt: timelines.shareExpiresAt })
-    .from(timelines)
-    .where(and(eq(timelines.shareSlug, slug), eq(timelines.shareEnabled, true)));
-  if (!row || (row.shareExpiresAt && new Date(row.shareExpiresAt) < new Date())) return null;
-  return row;
-}
-
-async function response(db, timelineId, timelineReviews, timelineComments) {
+export async function readPublicReview(db, timelineId, schema) {
+  const { timelineReviews, timelineComments } = schema;
   const [[review], comments] = await Promise.all([
     db.select().from(timelineReviews).where(eq(timelineReviews.timelineId, timelineId)),
     db
@@ -43,18 +33,8 @@ async function response(db, timelineId, timelineReviews, timelineComments) {
   };
 }
 
-async function handler(req, res) {
-  const db = getDb();
-  const { timelines, timelineReviews, timelineComments } = schema;
-  const row = await sharedTimeline(db, req.query.slug, timelines);
-  if (!row) return fail(res, 404, 'not found');
-  res.setHeader('Cache-Control', 'private, no-store');
-
-  if (req.method === 'GET') {
-    return ok(res, { review: await response(db, row.id, timelineReviews, timelineComments) });
-  }
-  if (req.method !== 'POST') return methodNotAllowed(res, ['GET', 'POST']);
-
+export async function submitPublicReview(req, res, { db, timelineId, schema }) {
+  const { timelineReviews, timelineComments } = schema;
   const action = req.body?.action;
   const authorName = clean(req.body?.authorName, 120);
   if (!authorName) return fail(res, 422, 'name is required');
@@ -67,24 +47,13 @@ async function handler(req, res) {
     const [{ count }] = await db
       .select({ count: sql`count(*)::int` })
       .from(timelineComments)
-      .where(eq(timelineComments.timelineId, row.id));
+      .where(eq(timelineComments.timelineId, timelineId));
     if (count >= 200) return fail(res, 429, 'comment limit reached');
-    await db.insert(timelineComments).values({
-      timelineId: row.id,
-      itemKey,
-      authorName,
-      body,
-      kind,
-    });
+    await db.insert(timelineComments).values({ timelineId, itemKey, authorName, body, kind });
     if (kind === 'change_request') {
       await db
         .insert(timelineReviews)
-        .values({
-          timelineId: row.id,
-          status: 'changes_requested',
-          decidedBy: authorName,
-          decidedAt: new Date(),
-        })
+        .values({ timelineId, status: 'changes_requested', decidedBy: authorName, decidedAt: new Date() })
         .onConflictDoUpdate({
           target: timelineReviews.timelineId,
           set: {
@@ -102,7 +71,7 @@ async function handler(req, res) {
     }
     await db
       .insert(timelineReviews)
-      .values({ timelineId: row.id, status, decidedBy: authorName, decidedAt: new Date() })
+      .values({ timelineId, status, decidedBy: authorName, decidedAt: new Date() })
       .onConflictDoUpdate({
         target: timelineReviews.timelineId,
         set: { status, decidedBy: authorName, decidedAt: new Date(), updatedAt: new Date() },
@@ -111,7 +80,5 @@ async function handler(req, res) {
     return fail(res, 422, 'valid action is required');
   }
 
-  return ok(res, { review: await response(db, row.id, timelineReviews, timelineComments) }, 201);
+  return ok(res, { review: await readPublicReview(db, timelineId, schema) }, 201);
 }
-
-export default withErrorCapture(handler);

@@ -43,17 +43,17 @@ export const api = {
       body: JSON.stringify({ journey, expectedVersion }),
     }),
   updateClientProfile: (id, profile, expectedVersion) =>
-    authed(`/api/clients/${encodeURIComponent(id)}`, {
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      body: JSON.stringify({ profile, expectedVersion }),
+      body: JSON.stringify({ resource: 'client_profile', profile, expectedVersion }),
     }),
   importFocl: (id, payload) =>
-    authed(`/api/clients/${encodeURIComponent(id)}`, {
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
       method: 'POST',
-      body: JSON.stringify({ payload }),
+      body: JSON.stringify({ action: 'focl_import', payload }),
     }),
   updateReview: (id, body) =>
-    authed(`/api/reviews/${encodeURIComponent(id)}`, {
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(body),
     }),
@@ -70,12 +70,8 @@ export const api = {
     fetch(`/api/public/timeline/${encodeURIComponent(slug)}`).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
     ),
-  publicReview: (slug) =>
-    fetch(`/api/public/review/${encodeURIComponent(slug)}`).then((r) =>
-      r.ok ? r.json() : Promise.reject(new Error(String(r.status))),
-    ),
   submitPublicReview: (slug, body) =>
-    fetch(`/api/public/review/${encodeURIComponent(slug)}`, {
+    fetch(`/api/public/timeline/${encodeURIComponent(slug)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

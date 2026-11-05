@@ -372,12 +372,9 @@ async function mountPublic(container, shellCtx, match) {
   state = null;
   renderPublic('loading'); // distinct message while fetching
   try {
-    const [data, reviewData] = await Promise.all([
-      api.publicGet(match.slug),
-      api.publicReview(match.slug).catch(() => ({ review: { status: 'open', comments: [] } })),
-    ]);
+    const data = await api.publicGet(match.slug);
     state = data.state;
-    publicReview = reviewData.review;
+    publicReview = data.review || { status: 'open', comments: [] };
     publicCache = { slug: match.slug, state: data.state, review: publicReview };
     if (data.lang && data.lang !== getLang()) {
       setLang(data.lang, false);

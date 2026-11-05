@@ -4,6 +4,7 @@ import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed } from '../_lib/respond.js';
 import { withErrorCapture } from '../_lib/observability.js';
 import { journeyToRow, rowToJourney } from '../_lib/journey-row.js';
+import { importFocl, updateClientProfile, updatePhotographerReview } from '../_lib/client-actions.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -17,6 +18,17 @@ async function handler(req, res) {
     .from(timelines)
     .where(and(eq(timelines.id, timelineId), eq(timelines.ownerId, uid)));
   if (!project) return fail(res, 404, 'not found', 'NOT_FOUND');
+
+  const actionContext = { db, uid, timelineId, schema };
+  if (req.method === 'PUT' && req.body?.resource === 'client_profile') {
+    return updateClientProfile(req, res, actionContext);
+  }
+  if (req.method === 'POST' && req.body?.action === 'focl_import') {
+    return importFocl(req, res, actionContext);
+  }
+  if (req.method === 'PATCH') {
+    return updatePhotographerReview(req, res, actionContext);
+  }
 
   const [current] = await db
     .select()
@@ -61,7 +73,7 @@ async function handler(req, res) {
     return ok(res, { timelineId, journey: rowToJourney(updated), journeyVersion: updated.version });
   }
 
-  return methodNotAllowed(res, ['GET', 'PUT']);
+  return methodNotAllowed(res, ['GET', 'PUT', 'POST', 'PATCH']);
 }
 
 export default withErrorCapture(handler);
