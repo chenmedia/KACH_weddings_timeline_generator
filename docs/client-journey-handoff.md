@@ -272,16 +272,21 @@ No visible string should be hardcoded in the feature.
 
 ## Visual direction
 
-The route is an **Operate** surface. Preserve the incumbent KACH tool system:
+The route is an **Operate** surface. Its design thesis is **FOCL discipline, Chen Media soul**. Use GetFOCL as inspiration for focus, hierarchy, compact controls, and low-noise chrome while keeping the visual identity unmistakably KACH Weddings.
 
 - use existing self-hosted Cormorant Garamond for editorial headings and Montserrat for controls/body;
-- use the existing neutral palette and `--sp-*` spacing scale;
-- keep controls sharp/restrained and states familiar;
+- use warm paper surfaces, espresso text, quiet borders, and restrained moss/clay accents;
+- use soft outer frames and restrained controls, with sharper internal rules and timeline geometry;
+- keep states familiar, task-focused, and visually quiet;
 - use the existing sidebar, buttons, focus behavior, toast system, and responsive drawer;
 - headings need more space above than below, readable line-height, and a 45–75 character measure for explanatory copy;
-- no oversized marketing hero, glass effects, decorative gradients, or separate visual world;
+- use at most one decisive wedding photograph in the selected-couple header; the working area stays solid and readable;
+- reserve translucent glass for an optional photographic overlay or sign-in context, never routine dashboard cards;
+- no oversized marketing hero, decorative gradients, card grid of equal importance, or separate visual world;
 - expand `.app-canvas` only for this route if the two-column workflow needs it, without widening the timeline editor globally;
 - at ≤720 px, stack milestone and checklist regions and keep every control inside the viewport.
+
+The detailed surface brief, tokens, component rules, responsive behavior, and visual acceptance checklist are in `docs/client-journey-design-direction.md`.
 
 ## Save behavior
 
