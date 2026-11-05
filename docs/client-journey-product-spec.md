@@ -5,7 +5,7 @@
 **Date:** 5 November 2026  
 **Repository:** `chenmedia/KACH_weddings_timeline_generator`  
 **Target route:** `/journey`  
-**Related route:** `/timeline`  
+**Related route:** `/timeline`
 
 ## 1. Executive decision
 
@@ -272,101 +272,101 @@ When the selected wedding changes inside Journey or Timeline, update the URL wit
 
 ### 10.1 Workspace and couple selection
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-001 | Register `/journey` in the existing feature registry and sidebar. | Must | Route requires authentication and uses the existing shell. |
-| FR-002 | Load owned couples from the existing timeline list API. | Must | Current four and future records appear without code changes. |
-| FR-003 | Persist the last selected couple locally for convenience, without treating it as canonical data. | Should | Returning to the route reselects an owned existing couple. |
-| FR-004 | Provide an empty state linking to `/timeline`. | Must | With no records, no broken dashboard is shown. |
-| FR-005 | Show couple name, wedding date, location, package, progress, next action, and last touch. | Must | Missing optional fields degrade gracefully. |
-| FR-006 | Upgrade the existing Home feature into an operational cross-wedding dashboard. | Must | Home shows season summary and prioritized next actions, not only tool cards or recent couples. |
-| FR-007 | Provide primary **Open journey** and secondary **Edit timeline** actions per dashboard row. | Must | Both preserve the selected wedding through `?wedding=<id>`. |
-| FR-008 | Load dashboard summaries in one request rather than one journey request per couple. | Must | Network inspection shows no N+1 pattern as the wedding count grows. |
-| FR-009 | Sort dashboard work by actionable urgency. | Must | Overdue/today items precede upcoming items; completed/disabled items do not become next action. |
+| ID     | Requirement                                                                                      | Priority | Acceptance                                                                                      |
+| ------ | ------------------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------- |
+| FR-001 | Register `/journey` in the existing feature registry and sidebar.                                | Must     | Route requires authentication and uses the existing shell.                                      |
+| FR-002 | Load owned couples from the existing timeline list API.                                          | Must     | Current four and future records appear without code changes.                                    |
+| FR-003 | Persist the last selected couple locally for convenience, without treating it as canonical data. | Should   | Returning to the route reselects an owned existing couple.                                      |
+| FR-004 | Provide an empty state linking to `/timeline`.                                                   | Must     | With no records, no broken dashboard is shown.                                                  |
+| FR-005 | Show couple name, wedding date, location, package, progress, next action, and last touch.        | Must     | Missing optional fields degrade gracefully.                                                     |
+| FR-006 | Upgrade the existing Home feature into an operational cross-wedding dashboard.                   | Must     | Home shows season summary and prioritized next actions, not only tool cards or recent couples.  |
+| FR-007 | Provide primary **Open journey** and secondary **Edit timeline** actions per dashboard row.      | Must     | Both preserve the selected wedding through `?wedding=<id>`.                                     |
+| FR-008 | Load dashboard summaries in one request rather than one journey request per couple.              | Must     | Network inspection shows no N+1 pattern as the wedding count grows.                             |
+| FR-009 | Sort dashboard work by actionable urgency.                                                       | Must     | Overdue/today items precede upcoming items; completed/disabled items do not become next action. |
 
 ### 10.2 Journey timeline and dates
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-010 | Display journey from booking through first anniversary. | Must | All defined stages are present in chronological order. |
-| FR-011 | Read shared milestone dates only from `getMilestones()`. | Must | Snapshot comparison matches `/timeline` for the same project. |
-| FR-012 | Distinguish **Calculated** and **Manual** dates. | Must | Manual overrides have a reset action. |
-| FR-013 | Write shared date edits to the canonical project field/override. | Must | Reloading either tool shows the same saved date. |
-| FR-014 | Store only journey-only date overrides in `client_journeys`. | Must | No duplicate canonical date columns or JSON values are introduced. |
-| FR-015 | Recalculate derived dates when a base fact changes while preserving explicit overrides. | Must | Wedding-date change moves calculated dates but not manual dates. |
+| ID     | Requirement                                                                             | Priority | Acceptance                                                         |
+| ------ | --------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------ |
+| FR-010 | Display journey from booking through first anniversary.                                 | Must     | All defined stages are present in chronological order.             |
+| FR-011 | Read shared milestone dates only from `getMilestones()`.                                | Must     | Snapshot comparison matches `/timeline` for the same project.      |
+| FR-012 | Distinguish **Calculated** and **Manual** dates.                                        | Must     | Manual overrides have a reset action.                              |
+| FR-013 | Write shared date edits to the canonical project field/override.                        | Must     | Reloading either tool shows the same saved date.                   |
+| FR-014 | Store only journey-only date overrides in `client_journeys`.                            | Must     | No duplicate canonical date columns or JSON values are introduced. |
+| FR-015 | Recalculate derived dates when a base fact changes while preserving explicit overrides. | Must     | Wedding-date change moves calculated dates but not manual dates.   |
 
 ### 10.3 Stage checklists
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-020 | Show tasks relevant to the selected stage. | Must | Active stage tasks are visible beside/below the timeline. |
-| FR-021 | Persist completion per couple. | Must | Completion survives reload and does not affect other couples. |
-| FR-022 | Calculate progress from defined tasks, not manual percentage input. | Must | Progress changes when tasks change. |
-| FR-023 | Derive next action from the earliest incomplete due task/milestone. | Must | Completed or disabled items are skipped. |
-| FR-024 | Allow a completed task to be reopened. | Should | Unchecking updates progress and next action. |
+| ID     | Requirement                                                         | Priority | Acceptance                                                    |
+| ------ | ------------------------------------------------------------------- | -------- | ------------------------------------------------------------- |
+| FR-020 | Show tasks relevant to the selected stage.                          | Must     | Active stage tasks are visible beside/below the timeline.     |
+| FR-021 | Persist completion per couple.                                      | Must     | Completion survives reload and does not affect other couples. |
+| FR-022 | Calculate progress from defined tasks, not manual percentage input. | Must     | Progress changes when tasks change.                           |
+| FR-023 | Derive next action from the earliest incomplete due task/milestone. | Must     | Completed or disabled items are skipped.                      |
+| FR-024 | Allow a completed task to be reopened.                              | Should   | Unchecking updates progress and next action.                  |
 
 ### 10.4 Referral moments and budget
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-030 | Provide exactly eight localized referral moments. | Must | All moments in section 12 are visible in NB and EN. |
-| FR-031 | Allow each moment to be enabled/disabled and assigned a NOK cost. | Must | Negative and invalid costs are rejected. |
-| FR-032 | Provide Essential, Signature, and Premium presets. | Must | Applying a preset updates moment configuration but remains editable. |
-| FR-033 | Calculate per-wedding total. | Must | Total equals enabled moment costs. |
-| FR-034 | Calculate season total from actual owned journey data. | Must | Adding/removing a wedding changes the total without source edits. |
+| ID     | Requirement                                                       | Priority | Acceptance                                                           |
+| ------ | ----------------------------------------------------------------- | -------- | -------------------------------------------------------------------- |
+| FR-030 | Provide exactly eight localized referral moments.                 | Must     | All moments in section 12 are visible in NB and EN.                  |
+| FR-031 | Allow each moment to be enabled/disabled and assigned a NOK cost. | Must     | Negative and invalid costs are rejected.                             |
+| FR-032 | Provide Essential, Signature, and Premium presets.                | Must     | Applying a preset updates moment configuration but remains editable. |
+| FR-033 | Calculate per-wedding total.                                      | Must     | Total equals enabled moment costs.                                   |
+| FR-034 | Calculate season total from actual owned journey data.            | Must     | Adding/removing a wedding changes the total without source edits.    |
 
 ### 10.5 Templates and FOCL
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-040 | Provide localized message templates with copy action. | Must | Copy gives visible success feedback and preserves line breaks. |
-| FR-041 | Store one FOCL project URL per wedding. | Must | Only `https://` URLs are accepted for release 1. |
-| FR-042 | Show a direct FOCL action only when a valid URL exists. | Must | Missing/invalid URL shows setup state, not a broken link. |
-| FR-043 | Label future FOCL data areas as integration placeholders. | Must | UI never says imported, synced, or up to date without a verified connection. |
+| ID     | Requirement                                               | Priority | Acceptance                                                                   |
+| ------ | --------------------------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| FR-040 | Provide localized message templates with copy action.     | Must     | Copy gives visible success feedback and preserves line breaks.               |
+| FR-041 | Store one FOCL project URL per wedding.                   | Must     | Only `https://` URLs are accepted for release 1.                             |
+| FR-042 | Show a direct FOCL action only when a valid URL exists.   | Must     | Missing/invalid URL shows setup state, not a broken link.                    |
+| FR-043 | Label future FOCL data areas as integration placeholders. | Must     | UI never says imported, synced, or up to date without a verified connection. |
 
 ### 10.6 Save and conflict behavior
 
-| ID | Requirement | Priority | Acceptance |
-| --- | --- | --- | --- |
-| FR-050 | Track project-owned and journey-owned dirty state separately. | Must | UI can identify which save failed. |
-| FR-051 | Save project data with `projectVersion`. | Must | Stale write cannot overwrite a newer project. |
-| FR-052 | Save journey data with `journeyVersion`. | Must | Stale journey write returns conflict. |
-| FR-053 | Preserve unsaved input on network or partial failure. | Must | Retry is possible without re-entering data. |
-| FR-054 | Serialize or cancel duplicate saves for the same couple. | Must | Rapid clicks do not create out-of-order state. |
-| FR-055 | Warn before switching couples with unsaved changes. | Must | User can stay, discard, or save. |
+| ID     | Requirement                                                   | Priority | Acceptance                                     |
+| ------ | ------------------------------------------------------------- | -------- | ---------------------------------------------- |
+| FR-050 | Track project-owned and journey-owned dirty state separately. | Must     | UI can identify which save failed.             |
+| FR-051 | Save project data with `projectVersion`.                      | Must     | Stale write cannot overwrite a newer project.  |
+| FR-052 | Save journey data with `journeyVersion`.                      | Must     | Stale journey write returns conflict.          |
+| FR-053 | Preserve unsaved input on network or partial failure.         | Must     | Retry is possible without re-entering data.    |
+| FR-054 | Serialize or cancel duplicate saves for the same couple.      | Must     | Rapid clicks do not create out-of-order state. |
+| FR-055 | Warn before switching couples with unsaved changes.           | Must     | User can stay, discard, or save.               |
 
 ## 11. Milestone ownership map
 
-| Journey concept | Canonical key/source | Behavior |
-| --- | --- | --- |
-| Contract signed | `state.bdate` | Display/edit booking date. |
-| Welcome to KACH | `welcome` | Derived from booking state; optional separate send date is journey-only. |
-| Getting to know their story | `getToKnow` | Shared milestone; optional follow-up is journey-only. |
-| Planning questionnaire | `timelineQ` | Shared generated date; edit canonical override. |
-| Planning call | `plancall` | Shared generated date; edit canonical override. |
-| Final planning meeting | `finalSync` | Shared generated date; edit canonical override. |
-| Wedding day | `day` / `state.wdate` | Editing changes the wedding date, not an override. |
-| Gallery delivery | `gallery` | Shared generated date; edit `gallery` override. |
-| Thank-you/review | `thanks` | Shared generated date; edit canonical override. |
-| Wedding-week encouragement | Journey-only | Default `day - 5 days`; store only explicit override. |
-| Parent/family print connection | Journey-only | Default `gallery + 14 days`; store only explicit override. |
-| First holiday keepsake | Journey-only | Default 1 December after wedding; store only explicit override. |
-| First anniversary | Journey-only | Default `day + 1 year`; store only explicit override. |
+| Journey concept                | Canonical key/source  | Behavior                                                                 |
+| ------------------------------ | --------------------- | ------------------------------------------------------------------------ |
+| Contract signed                | `state.bdate`         | Display/edit booking date.                                               |
+| Welcome to KACH                | `welcome`             | Derived from booking state; optional separate send date is journey-only. |
+| Getting to know their story    | `getToKnow`           | Shared milestone; optional follow-up is journey-only.                    |
+| Planning questionnaire         | `timelineQ`           | Shared generated date; edit canonical override.                          |
+| Planning call                  | `plancall`            | Shared generated date; edit canonical override.                          |
+| Final planning meeting         | `finalSync`           | Shared generated date; edit canonical override.                          |
+| Wedding day                    | `day` / `state.wdate` | Editing changes the wedding date, not an override.                       |
+| Gallery delivery               | `gallery`             | Shared generated date; edit `gallery` override.                          |
+| Thank-you/review               | `thanks`              | Shared generated date; edit canonical override.                          |
+| Wedding-week encouragement     | Journey-only          | Default `day - 5 days`; store only explicit override.                    |
+| Parent/family print connection | Journey-only          | Default `gallery + 14 days`; store only explicit override.               |
+| First holiday keepsake         | Journey-only          | Default 1 December after wedding; store only explicit override.          |
+| First anniversary              | Journey-only          | Default `day + 1 year`; store only explicit override.                    |
 
 Journey-only defaults live in one pure module, proposed as `src/features/journey/model.js`.
 
 ## 12. Eight referral moments
 
-| # | Moment | Default anchor | Purpose |
-| --- | --- | --- | --- |
-| 1 | Welcome to KACH | Booking | Confirm belonging and set expectations. |
-| 2 | Engagement/couple-session experience | Session/planning phase | Create confidence and a shareable experience. |
-| 3 | Wedding-week encouragement | Five days before wedding | Reduce stress and demonstrate personal care. |
-| 4 | Calm care on the wedding day | Wedding day | Make the service itself referable. |
-| 5 | Gallery delivery and reliving the story | Gallery delivery | Turn delivery into an emotional moment. |
-| 6 | Parent/family print connection | Two weeks after gallery | Extend the relationship to family and print. |
-| 7 | First holiday-season keepsake | First December after wedding | Reconnect naturally with a meaningful gift. |
-| 8 | First-anniversary follow-up | One year after wedding | Close the journey and reopen referral/album conversation. |
+| #   | Moment                                  | Default anchor               | Purpose                                                   |
+| --- | --------------------------------------- | ---------------------------- | --------------------------------------------------------- |
+| 1   | Welcome to KACH                         | Booking                      | Confirm belonging and set expectations.                   |
+| 2   | Engagement/couple-session experience    | Session/planning phase       | Create confidence and a shareable experience.             |
+| 3   | Wedding-week encouragement              | Five days before wedding     | Reduce stress and demonstrate personal care.              |
+| 4   | Calm care on the wedding day            | Wedding day                  | Make the service itself referable.                        |
+| 5   | Gallery delivery and reliving the story | Gallery delivery             | Turn delivery into an emotional moment.                   |
+| 6   | Parent/family print connection          | Two weeks after gallery      | Extend the relationship to family and print.              |
+| 7   | First holiday-season keepsake           | First December after wedding | Reconnect naturally with a meaningful gift.               |
+| 8   | First-anniversary follow-up             | One year after wedding       | Close the journey and reopen referral/album conversation. |
 
 Each moment requires localized title, description, timing label, enabled state, cost, and related checklist/template action.
 
@@ -624,20 +624,20 @@ See `docs/client-journey-design-direction.md` for detailed tokens and acceptance
 
 The implementation is incomplete unless all states below are intentionally designed:
 
-| State | Required behavior |
-| --- | --- |
-| Loading | Preserve shell and show bounded skeleton/progress without layout jump. |
-| No weddings | Explain the empty state and link to create one in `/timeline`. |
-| No journey row | Render safe defaults; create only on first write. |
-| No FOCL URL | Show setup action and integration explanation. |
-| Dirty | Make unsaved state visible and enable save. |
-| Saving | Prevent duplicate action and identify which data group is saving. |
-| Saved | Confirm selected couple and successful save. |
-| Validation error | Focus/identify the exact invalid field. |
-| Network error | Keep local changes and allow retry. |
-| Version conflict | Explain external/newer change; offer reload/review without silent loss. |
-| Partial failure | State whether project or journey data failed; retain unsaved portion. |
-| All tasks complete | Celebrate quietly and show the next relationship milestone. |
+| State              | Required behavior                                                       |
+| ------------------ | ----------------------------------------------------------------------- |
+| Loading            | Preserve shell and show bounded skeleton/progress without layout jump.  |
+| No weddings        | Explain the empty state and link to create one in `/timeline`.          |
+| No journey row     | Render safe defaults; create only on first write.                       |
+| No FOCL URL        | Show setup action and integration explanation.                          |
+| Dirty              | Make unsaved state visible and enable save.                             |
+| Saving             | Prevent duplicate action and identify which data group is saving.       |
+| Saved              | Confirm selected couple and successful save.                            |
+| Validation error   | Focus/identify the exact invalid field.                                 |
+| Network error      | Keep local changes and allow retry.                                     |
+| Version conflict   | Explain external/newer change; offer reload/review without silent loss. |
+| Partial failure    | State whether project or journey data failed; retain unsaved portion.   |
+| All tasks complete | Celebrate quietly and show the next relationship milestone.             |
 
 ## 19. Non-functional requirements
 
@@ -806,18 +806,18 @@ Each slice should leave tests green. Do not postpone ownership, conflicts, or mo
 
 ## 24. Risks and resolved decisions
 
-| Risk/question | Decision |
-| --- | --- |
-| Dashboard or Timeline as source of truth? | Neither. The database-backed Wedding Project is authoritative. |
-| Where is date logic maintained? | One shared `getMilestones()` policy. |
-| Can generated dates be stored in journey JSON? | No. Store explicit overrides only. |
-| Can a pasted FOCL link import all data? | No. Release 1 opens a validated direct link only. |
-| Can both editors save safely? | Yes, with separate project/journey versions and atomic checks. |
-| Are the current four clients fixtures? | No. They are live data and the UI must be dynamic. |
-| Should the prototype be embedded? | No. Rebuild within the existing app shell and conventions. |
-| Should FOCL's look be copied? | No. Borrow product discipline; preserve KACH/Chen Media identity. |
-| Does Client Journey live only as a separate route? | No. `/journey` is the detail workflow, while `/` surfaces its next actions across all weddings. |
-| Should Home call every journey endpoint? | No. Use one derived dashboard-summary endpoint to avoid N+1 requests. |
+| Risk/question                                                     | Decision                                                                                                                            |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard or Timeline as source of truth?                         | Neither. The database-backed Wedding Project is authoritative.                                                                      |
+| Where is date logic maintained?                                   | One shared `getMilestones()` policy.                                                                                                |
+| Can generated dates be stored in journey JSON?                    | No. Store explicit overrides only.                                                                                                  |
+| Can a pasted FOCL link import all data?                           | No. Release 1 opens a validated direct link only.                                                                                   |
+| Can both editors save safely?                                     | Yes, with separate project/journey versions and atomic checks.                                                                      |
+| Are the current four clients fixtures?                            | No. They are live data and the UI must be dynamic.                                                                                  |
+| Should the prototype be embedded?                                 | No. Rebuild within the existing app shell and conventions.                                                                          |
+| Should FOCL's look be copied?                                     | No. Borrow product discipline; preserve KACH/Chen Media identity.                                                                   |
+| Does Client Journey live only as a separate route?                | No. `/journey` is the detail workflow, while `/` surfaces its next actions across all weddings.                                     |
+| Should Home call every journey endpoint?                          | No. Use one derived dashboard-summary endpoint to avoid N+1 requests.                                                               |
 | Production shell or repository `main` as implementation baseline? | Build against `main`; production currently shows an older top-nav/launcher shell. Verify the final shell in preview before release. |
 
 ### Open integration decision after release 1
@@ -883,4 +883,3 @@ the delivery order from the spec. Add the generated migration and all required
 tests. Run every repository check, deploy a Vercel preview, and attach desktop
 and mobile screenshots plus migration/rollback notes to the implementation PR.
 ```
-

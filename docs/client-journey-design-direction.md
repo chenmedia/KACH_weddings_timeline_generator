@@ -10,14 +10,14 @@ The public GetFOCL landing/sign-in experience is the reference currently reviewe
 
 ## What to borrow and what to translate
 
-| GetFOCL signal | KACH/Chen Media translation |
-| --- | --- |
-| One clear task and primary action | Make the next caring action visually dominant for the selected couple |
-| Compact, disciplined product UI | Keep navigation, filters, statuses, and controls concise and predictable |
-| Soft, refined outer container | Use a subtly rounded couple header and working frame, not rounded cards everywhere |
-| High-contrast action | Use an espresso primary action on warm paper; reserve white-on-photo for the image header |
-| Dark photographic atmosphere | Use one real wedding image as an accent, with a calm dark overlay when text sits on it |
-| Neutral sans-serif interface | Keep Montserrat for functional UI and metadata |
+| GetFOCL signal                    | KACH/Chen Media translation                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| One clear task and primary action | Make the next caring action visually dominant for the selected couple                     |
+| Compact, disciplined product UI   | Keep navigation, filters, statuses, and controls concise and predictable                  |
+| Soft, refined outer container     | Use a subtly rounded couple header and working frame, not rounded cards everywhere        |
+| High-contrast action              | Use an espresso primary action on warm paper; reserve white-on-photo for the image header |
+| Dark photographic atmosphere      | Use one real wedding image as an accent, with a calm dark overlay when text sits on it    |
+| Neutral sans-serif interface      | Keep Montserrat for functional UI and metadata                                            |
 
 ## Chen Media character
 
@@ -93,17 +93,17 @@ Start from the existing tokens and adjust only where this surface needs a cleare
 
 ### Color roles
 
-| Role | Suggested value | Use |
-| --- | --- | --- |
-| Warm paper | `#F6F4F1` | Main working background |
-| Canvas | `#ECEAE6` | App canvas and grouped regions |
-| Espresso | `#1A1816` | Primary text and primary actions |
-| Soft ink | `#3A3733` | Body text |
-| Muted | `#6B675F` | Metadata and secondary labels |
-| Quiet line | `#D8D4CD` | Dividers, input borders, timeline rules |
-| Forest | `#20251F` | Photo overlay and rare strong state |
-| Moss | `#5E5D50` | Calm completion/planning accent |
-| Clay | `#987760` | Referral and personal-care accent |
+| Role       | Suggested value | Use                                     |
+| ---------- | --------------- | --------------------------------------- |
+| Warm paper | `#F6F4F1`       | Main working background                 |
+| Canvas     | `#ECEAE6`       | App canvas and grouped regions          |
+| Espresso   | `#1A1816`       | Primary text and primary actions        |
+| Soft ink   | `#3A3733`       | Body text                               |
+| Muted      | `#6B675F`       | Metadata and secondary labels           |
+| Quiet line | `#D8D4CD`       | Dividers, input borders, timeline rules |
+| Forest     | `#20251F`       | Photo overlay and rare strong state     |
+| Moss       | `#5E5D50`       | Calm completion/planning accent         |
+| Clay       | `#987760`       | Referral and personal-care accent       |
 
 Validate all combinations against the existing contrast standards before merging. Accent colors must not carry status without text or icon support.
 

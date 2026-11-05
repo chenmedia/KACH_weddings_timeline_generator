@@ -15,6 +15,7 @@ export default {
 
   nav: {
     home: 'Oversikt',
+    journey: 'Klientreise',
     timeline: 'Brudepar',
     workspace: 'Arbeidsområde',
     soon: 'Snart',
@@ -23,6 +24,10 @@ export default {
   },
 
   tools: {
+    journey: {
+      title: 'Klientreise',
+      summary: 'Følg hvert brudepar fra signert avtale til første bryllupsdag.',
+    },
     timeline: {
       title: 'Tidslinjegenerator',
       summary: 'Lag en elegant fotograferingstidslinje for hvert brudepar.',
@@ -44,6 +49,20 @@ export default {
       { title: 'Maler', summary: 'Gjenbrukbare pakker for raskere oppsett.', icon: 'templates' },
       { title: 'Betaling', summary: 'Følg depositum og betalinger per brudepar.', icon: 'payments' },
     ],
+    overview: {
+      nextActions: 'Neste handlinger',
+      openJourney: 'Åpne klientreise',
+      editTimeline: 'Tidslinje',
+      noAction: 'Ingen åpne handlinger',
+      noDate: 'Ingen dato',
+      today: 'I dag',
+      due: (date) => `Planlagt ${date}`,
+      overdue: (date) => `Forfalt ${date}`,
+      progress: (completed, total) => `${completed} av ${total} fullført`,
+      weddingCount: (count) => `${count} ${count === 1 ? 'bryllup' : 'bryllup'}`,
+      needsAttention: (count) => `${count} trenger oppfølging`,
+      nextWedding: (date) => `neste bryllup ${date}`,
+    },
   },
 
   dashboard: {
@@ -57,6 +76,132 @@ export default {
     selectPrompt: 'Velg et brudepar i listen, eller opprett et nytt.',
     signInTitle: 'Logg inn',
     signInIntro: 'Logg inn for å lage og lagre tidslinjer.',
+  },
+
+  journey: {
+    title: 'Klientreisen',
+    intro: 'Se neste personlige handling, planlegg oppfølgingen og hold alle datoer samkjørt.',
+    selectCouple: 'Velg brudepar',
+    noCouples: 'Opprett det første brudeparet i tidslinjegeneratoren.',
+    createCouple: 'Nytt brudepar',
+    weddingDate: 'Bryllupsdato',
+    location: 'Sted',
+    packageName: 'Pakke',
+    lastTouch: 'Siste personlige kontakt',
+    nextAction: 'Neste handling',
+    progress: 'Fremdrift',
+    checklistTitle: 'Oppgaver i denne fasen',
+    calculated: 'Beregnet',
+    manual: 'Manuell',
+    resetDate: 'Tilbakestill',
+    save: 'Lagre endringer',
+    saving: 'Lagrer …',
+    saved: 'Endringene er lagret',
+    openFocl: 'Åpne i FOCL',
+    setupFocl: 'Legg til FOCL-lenke',
+    unsaved: {
+      title: 'Ulagrede endringer',
+      body: 'Hvis du bytter brudepar nå, mister du endringene som ikke er lagret.',
+      discard: 'Forkast endringer',
+    },
+    tabs: {
+      journey: 'Klientreise',
+      referrals: 'Referral moments',
+      templates: 'Maler og FOCL',
+    },
+    stages: {
+      welcome: 'Velkommen',
+      planning: 'Planlegging',
+      final: 'Før bryllupet',
+      wedding: 'Bryllupsdagen',
+      delivery: 'Levering',
+      nurture: 'Videre relasjon',
+    },
+    tasks: {
+      welcomeGuide: 'Send personlig velkomst og guide',
+      foclSetup: 'Opprett eller koble FOCL-prosjekt',
+      storyCall: 'Bli kjent med historien deres',
+      questionnaire: 'Send planleggingsskjema',
+      engagementSession: 'Planlegg parfotografering',
+      planningCall: 'Gjennomfør planleggingssamtale',
+      finalMeeting: 'Gjennomfør siste planleggingsmøte',
+      weddingEncouragement: 'Send rolig oppmuntring før bryllupet',
+      weddingCare: 'Planlegg personlig omsorg på bryllupsdagen',
+      backupCheck: 'Kontroller utstyr, backup og kontaktpunkter',
+      sneakPreview: 'Send en smakebit',
+      galleryDelivery: 'Lever galleriet som en opplevelse',
+      reviewRequest: 'Følg opp med takk og anmeldelse',
+      parentPrint: 'Følg opp foreldre og familie om print',
+      holidayGift: 'Send første julehilsen eller minne',
+      anniversaryTouch: 'Følg opp på første bryllupsdag',
+    },
+    referrals: {
+      title: 'Åtte referral moments',
+      intro: 'Velg hvilke personlige øyeblikk som skal inngå, og planlegg kostnaden per bryllup.',
+      enabled: 'Aktiv',
+      cost: 'Kostnad i NOK',
+      total: 'Budsjett for dette bryllupet',
+      plans: {
+        essential: 'Essential',
+        signature: 'Signature',
+        premium: 'Premium',
+        custom: 'Tilpasset',
+      },
+      moments: {
+        welcome: { title: 'Velkommen til KACH', desc: 'Bekreft tilhørighet og sett en trygg forventning.' },
+        engagement: {
+          title: 'Parfotograferingen',
+          desc: 'Skap trygghet og en opplevelse de naturlig deler.',
+        },
+        weddingWeek: { title: 'Bryllupsuken', desc: 'Reduser stress med en personlig og rolig hilsen.' },
+        weddingCare: { title: 'Omsorg på bryllupsdagen', desc: 'Gjør selve tjenesten verdt å anbefale.' },
+        gallery: { title: 'Gallerileveringen', desc: 'Gjør leveringen til et emosjonelt gjensyn.' },
+        parentPrint: {
+          title: 'Familie og print',
+          desc: 'Utvid relasjonen til foreldre, familie og fysiske minner.',
+        },
+        holiday: { title: 'Første jul', desc: 'Ta naturlig kontakt igjen med et meningsfullt minne.' },
+        anniversary: { title: 'Første bryllupsdag', desc: 'Avslutt reisen og åpne for album og anbefaling.' },
+      },
+    },
+    templates: {
+      title: 'Meldingsmaler',
+      intro: 'Et varmt utgangspunkt som alltid kan gjøres personlig før det sendes.',
+      copy: 'Kopier',
+      copied: 'Meldingen er kopiert',
+      foclTitle: 'FOCL-prosjekt',
+      foclHint: 'Lagre den direkte prosjektlenken. Automatisk synk er ikke aktivert ennå.',
+      foclPlaceholder: 'https://getfocl.app/…',
+      foclInvalid: 'Bruk en gyldig https-lenke.',
+      integrationAreas: [
+        'Tidslinje — klar for en fremtidig verifisert FOCL-integrasjon',
+        'Personer og grupper — ikke synkronisert ennå',
+        'Leverandører og steder — ikke synkronisert ennå',
+        'Historie og bildeprioriteringer — ikke synkronisert ennå',
+      ],
+      welcome: {
+        title: 'Velkommen',
+        body: 'Hei! Så utrolig fint å få ønske dere velkommen til KACH Weddings. Jeg gleder meg til å bli kjent med historien deres og skape en rolig, personlig opplevelse hele veien frem mot bryllupet.',
+      },
+      weddingWeek: {
+        title: 'Bryllupsuken',
+        body: 'Nå er bryllupsuken her. Dere trenger ikke å prestere noe foran kameraet – min jobb er å skape ro, se de små øyeblikkene og la dere være fullt til stede med menneskene deres.',
+      },
+      gallery: {
+        title: 'Galleriet er klart',
+        body: 'Galleriet deres er klart. Finn gjerne et rolig øyeblikk, hell noe godt i glasset og opplev dagen sammen på nytt. Tusen takk for at jeg fikk ta vare på minnene deres.',
+      },
+      anniversary: {
+        title: 'Første bryllupsdag',
+        body: 'Gratulerer med deres første bryllupsdag. Jeg håper bildene fortsatt tar dere tilbake til følelsen, menneskene og de små øyeblikkene som gjorde dagen helt deres.',
+      },
+    },
+    feedback: {
+      loadFailed: 'Kunne ikke laste klientreisen.',
+      saveFailed: 'Kunne ikke lagre alle endringene. Ingenting er skjult – prøv igjen.',
+      conflict: 'Denne klientreisen ble endret et annet sted. Last inn siste versjon før du lagrer igjen.',
+      invalidFocl: 'FOCL-lenken må starte med https://.',
+    },
   },
 
   share: {
@@ -85,6 +230,7 @@ export default {
 
   feedback: {
     saveFailed: 'Kunne ikke lagre endringene.',
+    conflict: 'Brudeparet er endret i en annen fane. Last siden på nytt før du lagrer igjen.',
     loadFailed: 'Kunne ikke laste brudeparet.',
     createFailed: 'Kunne ikke opprette brudeparet.',
     deleteFailed: 'Kunne ikke slette brudeparet.',

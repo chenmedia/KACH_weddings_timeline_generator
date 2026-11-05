@@ -16,6 +16,7 @@ export default {
 
   nav: {
     home: 'Overview',
+    journey: 'Client journey',
     timeline: 'Couples',
     workspace: 'Workspace',
     soon: 'Soon',
@@ -24,6 +25,10 @@ export default {
   },
 
   tools: {
+    journey: {
+      title: 'Client journey',
+      summary: 'Guide every couple from signed contract to first anniversary.',
+    },
     timeline: {
       title: 'Timeline generator',
       summary: 'Build an elegant photography timeline for each couple.',
@@ -45,6 +50,20 @@ export default {
       { title: 'Templates', summary: 'Reusable packages for faster setup.', icon: 'templates' },
       { title: 'Payments', summary: 'Track deposits and payments per couple.', icon: 'payments' },
     ],
+    overview: {
+      nextActions: 'Next actions',
+      openJourney: 'Open journey',
+      editTimeline: 'Timeline',
+      noAction: 'No open actions',
+      noDate: 'No date',
+      today: 'Today',
+      due: (date) => `Planned ${date}`,
+      overdue: (date) => `Overdue ${date}`,
+      progress: (completed, total) => `${completed} of ${total} complete`,
+      weddingCount: (count) => `${count} wedding${count === 1 ? '' : 's'}`,
+      needsAttention: (count) => `${count} need attention`,
+      nextWedding: (date) => `next wedding ${date}`,
+    },
   },
 
   dashboard: {
@@ -58,6 +77,138 @@ export default {
     selectPrompt: 'Select a couple from the list, or create a new one.',
     signInTitle: 'Sign in',
     signInIntro: 'Sign in to create and save timelines.',
+  },
+
+  journey: {
+    title: 'Client journey',
+    intro: 'See the next personal action, plan every follow-up, and keep all dates aligned.',
+    selectCouple: 'Select couple',
+    noCouples: 'Create your first couple in the Timeline Generator.',
+    createCouple: 'New couple',
+    weddingDate: 'Wedding date',
+    location: 'Location',
+    packageName: 'Package',
+    lastTouch: 'Last personal touch',
+    nextAction: 'Next action',
+    progress: 'Progress',
+    checklistTitle: 'Tasks in this stage',
+    calculated: 'Calculated',
+    manual: 'Manual',
+    resetDate: 'Reset',
+    save: 'Save changes',
+    saving: 'Saving …',
+    saved: 'Changes saved',
+    openFocl: 'Open in FOCL',
+    setupFocl: 'Add FOCL link',
+    unsaved: {
+      title: 'Unsaved changes',
+      body: 'Switching couples now will discard changes that have not been saved.',
+      discard: 'Discard changes',
+    },
+    tabs: {
+      journey: 'Client journey',
+      referrals: 'Referral moments',
+      templates: 'Templates & FOCL',
+    },
+    stages: {
+      welcome: 'Welcome',
+      planning: 'Planning',
+      final: 'Before the wedding',
+      wedding: 'Wedding day',
+      delivery: 'Delivery',
+      nurture: 'Ongoing relationship',
+    },
+    tasks: {
+      welcomeGuide: 'Send a personal welcome and guide',
+      foclSetup: 'Create or connect the FOCL project',
+      storyCall: 'Get to know their story',
+      questionnaire: 'Send the planning questionnaire',
+      engagementSession: 'Plan the couple session',
+      planningCall: 'Hold the planning call',
+      finalMeeting: 'Hold the final planning meeting',
+      weddingEncouragement: 'Send calm wedding-week encouragement',
+      weddingCare: 'Plan personal care on the wedding day',
+      backupCheck: 'Check equipment, backups and contact points',
+      sneakPreview: 'Send a preview',
+      galleryDelivery: 'Deliver the gallery as an experience',
+      reviewRequest: 'Follow up with thanks and a review request',
+      parentPrint: 'Follow up with parents and family about prints',
+      holidayGift: 'Send the first holiday keepsake',
+      anniversaryTouch: 'Follow up on the first anniversary',
+    },
+    referrals: {
+      title: 'Eight referral moments',
+      intro: 'Choose the personal moments to include and plan the cost for each wedding.',
+      enabled: 'Active',
+      cost: 'Cost in NOK',
+      total: 'Budget for this wedding',
+      plans: {
+        essential: 'Essential',
+        signature: 'Signature',
+        premium: 'Premium',
+        custom: 'Custom',
+      },
+      moments: {
+        welcome: { title: 'Welcome to KACH', desc: 'Confirm belonging and set a reassuring expectation.' },
+        engagement: {
+          title: 'The couple session',
+          desc: 'Build confidence and an experience they naturally share.',
+        },
+        weddingWeek: { title: 'Wedding week', desc: 'Reduce stress with a calm, personal message.' },
+        weddingCare: {
+          title: 'Care on the wedding day',
+          desc: 'Make the service itself worth recommending.',
+        },
+        gallery: { title: 'Gallery delivery', desc: 'Turn delivery into an emotional reunion with the day.' },
+        parentPrint: {
+          title: 'Family and print',
+          desc: 'Extend the relationship to parents, family and physical memories.',
+        },
+        holiday: { title: 'First holiday season', desc: 'Reconnect naturally with a meaningful keepsake.' },
+        anniversary: {
+          title: 'First anniversary',
+          desc: 'Close the journey and reopen the album and referral conversation.',
+        },
+      },
+    },
+    templates: {
+      title: 'Message templates',
+      intro: 'A warm starting point that should always be personalized before sending.',
+      copy: 'Copy',
+      copied: 'Message copied',
+      foclTitle: 'FOCL project',
+      foclHint: 'Save the direct project link. Automatic sync is not enabled yet.',
+      foclPlaceholder: 'https://getfocl.app/…',
+      foclInvalid: 'Use a valid https link.',
+      integrationAreas: [
+        'Timeline — ready for a future verified FOCL integration',
+        'People and groups — not synchronized yet',
+        'Vendors and locations — not synchronized yet',
+        'Story and image priorities — not synchronized yet',
+      ],
+      welcome: {
+        title: 'Welcome',
+        body: 'Hello! It is such a pleasure to welcome you to KACH Weddings. I cannot wait to learn your story and create a calm, personal experience all the way to your wedding day.',
+      },
+      weddingWeek: {
+        title: 'Wedding week',
+        body: 'Your wedding week is here. You do not need to perform for the camera — my job is to create calm, notice the small moments, and let you be fully present with your people.',
+      },
+      gallery: {
+        title: 'Your gallery is ready',
+        body: 'Your gallery is ready. Find a quiet moment, pour something lovely, and experience the day together again. Thank you for trusting me with your memories.',
+      },
+      anniversary: {
+        title: 'First anniversary',
+        body: 'Happy first anniversary. I hope the photographs still bring you back to the feeling, the people, and the small moments that made the day completely yours.',
+      },
+    },
+    feedback: {
+      loadFailed: 'Could not load the client journey.',
+      saveFailed: 'Could not save every change. Nothing is hidden — please try again.',
+      conflict: 'This client journey changed elsewhere. Load the latest version before saving again.',
+      invalidFocl: 'The FOCL link must start with https://.',
+    },
   },
 
   share: {
@@ -86,6 +237,7 @@ export default {
 
   feedback: {
     saveFailed: 'Could not save your changes.',
+    conflict: 'This couple changed in another tab. Reload before saving again.',
     loadFailed: 'Could not load the couple.',
     createFailed: 'Could not create the couple.',
     deleteFailed: 'Could not delete the couple.',

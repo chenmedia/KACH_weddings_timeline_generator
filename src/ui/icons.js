@@ -4,6 +4,8 @@ export const icons = {
   home: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20h12v-9.5"/><path d="M10 20v-5h4v5"/></svg>',
   timeline:
     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="6" y1="3" x2="6" y2="21"/><circle cx="6" cy="7" r="1.7"/><circle cx="6" cy="13" r="1.7"/><circle cx="6" cy="19" r="1.7"/><line x1="10" y1="7" x2="19" y2="7"/><line x1="10" y1="13" x2="17" y2="13"/><line x1="10" y1="19" x2="18" y2="19"/></svg>',
+  journey:
+    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5v4a3 3 0 0 0 3 3h8a3 3 0 0 1 3 3v5"/><circle cx="5" cy="4.5" r="2"/><circle cx="19" cy="19.5" r="2"/><path d="M12 8.5c-1.8-2-5 1-2.1 3.7L12 14l2.1-1.8C17 9.5 13.8 6.5 12 8.5Z"/></svg>',
   templates:
     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="3.5" y="3.5" width="11" height="11" rx="1.5"/><path d="M9.5 9.5h11v11h-11z"/></svg>',
   payments:

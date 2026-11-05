@@ -59,9 +59,34 @@ export const timelines = pgTable('timelines', {
   lastViewedAt: timestamp('last_viewed_at', { withTimezone: true }),
   status: text('status').default('lead'), // lead|booked|shooting_done|delivered|archived
   lang: text('lang').default('nb'),
+  version: integer('version').notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
+
+// Photographer-only relationship workflow. Canonical wedding facts and shared
+// milestone dates remain on timelines + milestone_overrides.
+export const clientJourneys = pgTable(
+  'client_journeys',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    ownerId: text('owner_id').notNull(),
+    version: integer('version').notNull().default(1),
+    plan: text('plan').notNull().default('signature'),
+    packageName: text('package_name'),
+    foclUrl: text('focl_url'),
+    lastTouch: date('last_touch'),
+    completedTasks: jsonb('completed_tasks').notNull().default([]),
+    referralMoments: jsonb('referral_moments').notNull().default({}),
+    journeyDateOverrides: jsonb('journey_date_overrides').notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqTimeline: unique().on(t.timelineId) }),
+);
 
 export const milestoneOverrides = pgTable(
   'milestone_overrides',

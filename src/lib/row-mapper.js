@@ -22,13 +22,14 @@ function toDateStr(v) {
 export function rowToState(row, overrideRows = []) {
   const overrides = {};
   for (const o of overrideRows || []) {
-    if (!o || !o.item_key) continue;
+    const itemKey = o && (o.itemKey ?? o.item_key);
+    if (!itemKey) continue;
     const clean = {};
     if (o.hidden) clean.hidden = true;
     const d = toDateStr(o.date);
     if (d) clean.date = d;
     if (o.note) clean.note = String(o.note);
-    overrides[o.item_key] = clean;
+    overrides[itemKey] = clean;
   }
   // Route through sanitizeState so the result matches exactly what the app expects.
   return sanitizeState({
@@ -37,18 +38,18 @@ export function rowToState(row, overrideRows = []) {
     bdate: toDateStr(row.bdate),
     place: row.place ?? '',
     delw: row.delw,
-    sendDays: row.send_days,
-    termDays: row.term_days,
-    finalOverride: toDateStr(row.final_override),
-    tEngage: !!row.t_engage,
-    tAlbum: !!row.t_album,
-    themeId: row.theme_id,
+    sendDays: row.sendDays ?? row.send_days,
+    termDays: row.termDays ?? row.term_days,
+    finalOverride: toDateStr(row.finalOverride ?? row.final_override),
+    tEngage: !!(row.tEngage ?? row.t_engage),
+    tAlbum: !!(row.tAlbum ?? row.t_album),
+    themeId: row.themeId ?? row.theme_id,
     overrides,
   });
 }
 
 /**
- * App state → `timelines` column values (snake_case). Inputs only.
+ * App state → Drizzle `timelines` property values. Inputs only.
  * @param {import('../types.js').State} state
  * @returns {Record<string, any>}
  */
@@ -60,12 +61,12 @@ export function stateToRow(state) {
     bdate: s.bdate || null,
     place: s.place,
     delw: Number(s.delw),
-    send_days: Number(s.sendDays),
-    term_days: Number(s.termDays),
-    final_override: s.finalOverride || null,
-    t_engage: s.tEngage,
-    t_album: s.tAlbum,
-    theme_id: s.themeId,
+    sendDays: Number(s.sendDays),
+    termDays: Number(s.termDays),
+    finalOverride: s.finalOverride || null,
+    tEngage: s.tEngage,
+    tAlbum: s.tAlbum,
+    themeId: s.themeId,
   };
 }
 
@@ -76,9 +77,9 @@ export function stateToRow(state) {
  */
 export function overridesToRows(timelineId, state) {
   const s = sanitizeState(state);
-  return Object.entries(s.overrides).map(([item_key, ov]) => ({
-    timeline_id: timelineId,
-    item_key,
+  return Object.entries(s.overrides).map(([itemKey, ov]) => ({
+    timelineId,
+    itemKey,
     hidden: !!ov.hidden,
     date: ov.date || null,
     note: ov.note || null,

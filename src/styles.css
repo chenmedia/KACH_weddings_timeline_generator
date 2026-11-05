@@ -24,6 +24,8 @@
    * re-skinned per-theme separately.) */
   --hover: #ece8e2;
   --active: #e7e3dd;
+  --moss: #5e5d50;
+  --clay: #987760;
   /* Radius scale — --radius-sm for inputs/buttons, --radius-md for cards/panels. */
   --radius-sm: 2px;
   --radius-md: 6px;
@@ -37,6 +39,15 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+::selection {
+  background: var(--ink);
+  color: var(--surface);
+}
+input,
+select,
+textarea {
+  caret-color: var(--ink);
 }
 body {
   background: var(--bg);

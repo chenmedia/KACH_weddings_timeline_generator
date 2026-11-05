@@ -41,38 +41,38 @@ See `docs/adr/0001-wedding-project-source-of-truth.md` for the decision and reje
 
 ## Data ownership matrix
 
-| Data | Canonical owner | Read in journey | Written from journey |
-| --- | --- | --- | --- |
-| Couple name | `timelines.couple` | `api.get(id)` | Existing timeline `PUT` |
-| Wedding date | `timelines.wdate` | `api.get(id)` | Existing timeline `PUT` |
-| Booking date | `timelines.bdate` | `api.get(id)` | Existing timeline `PUT` |
-| Location | `timelines.place` | `api.get(id)` | Existing timeline `PUT` |
-| Scheduling inputs | Database-backed Wedding Project (`timelines` in the current schema) | Workspace API | Same project command/API |
-| Generated timeline dates | Shared `getMilestones(state, locale)` policy | Returned as a projection or computed client-side from the same state | Never stored separately |
-| Shared date override | `milestone_overrides` via `state.overrides` | `getMilestones()` | Existing timeline `PUT` |
-| Checklist completion | New `client_journeys` row | Journey API | Journey API |
-| Referral moment on/off + cost | New `client_journeys` row | Journey API | Journey API |
-| Experience plan | New `client_journeys` row | Journey API | Journey API |
-| Package label | New `client_journeys` row | Journey API | Journey API |
-| FOCL project URL | New `client_journeys` row | Journey API | Journey API |
-| Last personal touch | New `client_journeys` row | Journey API | Journey API |
-| Journey-only date override | New `client_journeys` row | Journey API | Journey API |
+| Data                          | Canonical owner                                                     | Read in journey                                                      | Written from journey     |
+| ----------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------ |
+| Couple name                   | `timelines.couple`                                                  | `api.get(id)`                                                        | Existing timeline `PUT`  |
+| Wedding date                  | `timelines.wdate`                                                   | `api.get(id)`                                                        | Existing timeline `PUT`  |
+| Booking date                  | `timelines.bdate`                                                   | `api.get(id)`                                                        | Existing timeline `PUT`  |
+| Location                      | `timelines.place`                                                   | `api.get(id)`                                                        | Existing timeline `PUT`  |
+| Scheduling inputs             | Database-backed Wedding Project (`timelines` in the current schema) | Workspace API                                                        | Same project command/API |
+| Generated timeline dates      | Shared `getMilestones(state, locale)` policy                        | Returned as a projection or computed client-side from the same state | Never stored separately  |
+| Shared date override          | `milestone_overrides` via `state.overrides`                         | `getMilestones()`                                                    | Existing timeline `PUT`  |
+| Checklist completion          | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| Referral moment on/off + cost | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| Experience plan               | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| Package label                 | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| FOCL project URL              | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| Last personal touch           | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
+| Journey-only date override    | New `client_journeys` row                                           | Journey API                                                          | Journey API              |
 
 ## Milestone mapping
 
 The first implementation should map journey stages to canonical timeline keys as follows.
 
-| Journey concept | Canonical timeline key | Date behavior |
-| --- | --- | --- |
-| Contract signed | `welcome` + `state.bdate` | Display booking date; edit `bdate` |
-| Welcome to KACH | `welcome` | Booking-stage item; use `bdate`, with a journey-only follow-up date only if a separate send date is required |
-| Getting to know their story | `getToKnow` | Use `bdate`; optional journey-only follow-up date |
-| Planning questionnaire | `timelineQ` | Read `getMilestones()` row; edit the same override |
-| Planning call | `plancall` | Read `getMilestones()` row; edit the same override |
-| Final planning meeting | `finalSync` | Read `getMilestones()` row; edit the same override |
-| Wedding day | `day` | Read `getMilestones()` row; changing it means changing `wdate`, not an override |
-| Gallery delivery | `gallery` | Read generated delivery date; edit with the existing `gallery` override |
-| Thank-you/review follow-up | `thanks` | Read `getMilestones()` row; edit the same override |
+| Journey concept             | Canonical timeline key    | Date behavior                                                                                                |
+| --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Contract signed             | `welcome` + `state.bdate` | Display booking date; edit `bdate`                                                                           |
+| Welcome to KACH             | `welcome`                 | Booking-stage item; use `bdate`, with a journey-only follow-up date only if a separate send date is required |
+| Getting to know their story | `getToKnow`               | Use `bdate`; optional journey-only follow-up date                                                            |
+| Planning questionnaire      | `timelineQ`               | Read `getMilestones()` row; edit the same override                                                           |
+| Planning call               | `plancall`                | Read `getMilestones()` row; edit the same override                                                           |
+| Final planning meeting      | `finalSync`               | Read `getMilestones()` row; edit the same override                                                           |
+| Wedding day                 | `day`                     | Read `getMilestones()` row; changing it means changing `wdate`, not an override                              |
+| Gallery delivery            | `gallery`                 | Read generated delivery date; edit with the existing `gallery` override                                      |
+| Thank-you/review follow-up  | `thanks`                  | Read `getMilestones()` row; edit the same override                                                           |
 
 Journey-only moments may be anchored to a canonical date but stored separately when they do not belong in the couple-facing timeline:
 

@@ -2,18 +2,46 @@
 // Public couple endpoint needs no auth.
 import { getToken } from '../auth.js';
 
+export class ApiError extends Error {
+  /** @param {string} message @param {{status?:number, code?:string, payload?:any}} [opts] */
+  constructor(message, opts = {}) {
+    super(message);
+    const { status, code, payload } = opts;
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.payload = payload;
+  }
+}
+
 async function authed(url, opts = {}) {
   const token = await getToken();
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(url, { ...opts, headers });
-  if (!res.ok) throw new Error(`${opts.method || 'GET'} ${url} → ${res.status}`);
-  return res.status === 204 ? null : res.json();
+  const payload = res.status === 204 ? null : await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new ApiError(payload?.error || `${opts.method || 'GET'} ${url} → ${res.status}`, {
+      status: res.status,
+      code: payload?.code,
+      payload,
+    });
+  }
+  return payload;
 }
 
 export const api = {
   list: () => authed('/api/timelines'),
   get: (id) => authed(`/api/timelines/${id}`),
+  dashboard: () => authed('/api/weddings/dashboard'),
+  workspace: (id, locale = 'nb') =>
+    authed(`/api/weddings/${encodeURIComponent(id)}/workspace?locale=${encodeURIComponent(locale)}`),
+  getJourney: (id) => authed(`/api/journeys/${encodeURIComponent(id)}`),
+  updateJourney: (id, journey, expectedVersion) =>
+    authed(`/api/journeys/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ journey, expectedVersion }),
+    }),
   create: (state) => authed('/api/timelines', { method: 'POST', body: JSON.stringify(state) }),
   update: (id, state) => authed(`/api/timelines/${id}`, { method: 'PUT', body: JSON.stringify(state) }),
   remove: (id) => authed(`/api/timelines/${id}`, { method: 'DELETE' }),

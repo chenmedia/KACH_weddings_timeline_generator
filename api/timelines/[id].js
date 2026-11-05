@@ -1,7 +1,7 @@
 // GET    /api/timelines/:id  → one timeline as a `state` object (+ id)
 // PUT    /api/timelines/:id  → replace inputs + overrides
 // DELETE /api/timelines/:id  → delete (cascades to overrides/payments/links)
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { getDb, schema } from '../_lib/db.js';
 import { requireUser } from '../_lib/auth.js';
 import { ok, fail, methodNotAllowed, genSlug } from '../_lib/respond.js';
@@ -32,20 +32,27 @@ async function handler(req, res) {
       shareExpiresAt: row.shareExpiresAt,
       viewCount: row.viewCount || 0,
       lastViewedAt: row.lastViewedAt,
+      projectVersion: row.version,
     });
   }
 
   if (req.method === 'PUT') {
     const state = req.body || {};
-    await db
+    const expectedVersion = Number(state.projectVersion);
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 1) {
+      return fail(res, 428, 'projectVersion is required', 'VERSION_REQUIRED');
+    }
+    const [updated] = await db
       .update(timelines)
-      .set({ ...stateToRow(state), updatedAt: new Date() })
-      .where(eq(timelines.id, id));
+      .set({ ...stateToRow(state), updatedAt: new Date(), version: sql`${timelines.version} + 1` })
+      .where(and(eq(timelines.id, id), eq(timelines.ownerId, uid), eq(timelines.version, expectedVersion)))
+      .returning();
+    if (!updated) return fail(res, 412, 'project changed in another session', 'VERSION_CONFLICT');
     // Replace overrides wholesale (simple + correct for the editor UI).
     await db.delete(milestoneOverrides).where(eq(milestoneOverrides.timelineId, id));
     const ovRows = overridesToRows(id, state);
     if (ovRows.length) await db.insert(milestoneOverrides).values(ovRows);
-    return ok(res, { id, ...rowToState({ ...row, ...stateToRow(state) }, ovRows) });
+    return ok(res, { id, ...rowToState(updated, ovRows), projectVersion: updated.version });
   }
 
   if (req.method === 'DELETE') {
