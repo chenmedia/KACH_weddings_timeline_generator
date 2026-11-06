@@ -32,7 +32,7 @@ import { defaultClientProfile, sanitizeClientProfile } from '../../lib/client-pr
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
 const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
-const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'activity', 'referrals', 'templates'];
+const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'referrals', 'templates', 'activity'];
 const WORKSPACE_TABS = new Set(WORKSPACE_TAB_KEYS);
 
 let host = null;
@@ -57,6 +57,7 @@ function setWorkspaceTab(tab, { focus = true } = {}) {
   else url.searchParams.set('tab', activeTab);
   history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
   renderWorkspace();
+  if (focus) host?.scrollIntoView?.({ behavior: 'auto', block: 'start' });
   if (focus) host?.querySelector(`#journey-tab-${activeTab}`)?.focus();
 }
 
@@ -285,6 +286,10 @@ function summaryHeader(locale) {
 
 function tabBar(locale) {
   const bar = el('div', { class: 'journey-tabs', role: 'tablist', 'aria-label': locale.journey.title });
+  const mobileSelect = el('select', {
+    id: 'journey-mobile-tab-select',
+    'aria-label': locale.journey.workspaceNavigation,
+  });
   for (const key of WORKSPACE_TAB_KEYS) {
     const button = el('button', {
       id: `journey-tab-${key}`,
@@ -312,8 +317,22 @@ function tabBar(locale) {
       setWorkspaceTab(WORKSPACE_TAB_KEYS[next]);
     });
     bar.appendChild(button);
+    const option = el('option', { value: key, text: locale.journey.tabs[key] });
+    if (activeTab === key) option.selected = true;
+    mobileSelect.appendChild(option);
   }
-  return bar;
+  mobileSelect.addEventListener('change', () => {
+    setWorkspaceTab(mobileSelect.value, { focus: false });
+    host?.scrollIntoView?.({ behavior: 'auto', block: 'start' });
+    host?.querySelector('#journey-mobile-tab-select')?.focus();
+  });
+  return el('div', { class: 'journey-tab-navigation' }, [
+    bar,
+    el('div', { class: 'journey-mobile-tabs' }, [
+      el('label', { for: 'journey-mobile-tab-select', text: locale.journey.workspaceNavigation }),
+      mobileSelect,
+    ]),
+  ]);
 }
 
 function compactClientHeader(locale) {
@@ -321,7 +340,7 @@ function compactClientHeader(locale) {
   const overview = el('button', {
     type: 'button',
     class: 'journey-context-overview',
-    text: `← ${locale.journey.viewOverview}`,
+    text: `← ${locale.journey.studio.viewJourney}`,
   });
   overview.addEventListener('click', () => setWorkspaceTab('journey'));
   return el('header', { class: 'journey-compact-header' }, [

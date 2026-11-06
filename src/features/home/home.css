@@ -15,7 +15,7 @@
 }
 
 .home-hero-copy {
-  padding: clamp(24px, 4vw, 54px) 0 clamp(18px, 3vw, 38px);
+  padding: clamp(18px, 3vw, 38px) 0 clamp(14px, 2vw, 28px);
 }
 
 .home-kicker,
@@ -34,7 +34,7 @@
   margin-top: 16px;
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(50px, 7vw, 86px);
+  font-size: clamp(48px, 6vw, 76px);
   letter-spacing: -0.025em;
   line-height: 0.92;
   color: var(--ink);
@@ -56,7 +56,7 @@
 
 .home-image {
   position: relative;
-  min-height: 460px;
+  min-height: 340px;
   overflow: hidden;
   background: #d7d1c8;
 }
@@ -93,7 +93,7 @@
 }
 
 .home-overview {
-  margin-top: clamp(50px, 7vw, 88px);
+  margin-top: clamp(38px, 5vw, 62px);
 }
 
 .home-loading,
@@ -311,7 +311,7 @@
   }
 
   .home-image {
-    min-height: 400px;
+    min-height: 320px;
   }
 
   .overview-row {

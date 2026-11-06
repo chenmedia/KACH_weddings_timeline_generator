@@ -25,7 +25,13 @@ async function handler(req, res) {
 
   if (req.method === 'POST') {
     res.setHeader('Cache-Control', 'private, no-store');
-    return submitPublicReview(req, res, { db, timelineId: row.id, ownerId: row.ownerId, schema });
+    return submitPublicReview(req, res, {
+      db,
+      timelineId: row.id,
+      ownerId: row.ownerId,
+      couple: row.couple,
+      schema,
+    });
   }
 
   const ovRows = await db.select().from(milestoneOverrides).where(eq(milestoneOverrides.timelineId, row.id));

@@ -3,6 +3,7 @@ import { normalizeFoclImport } from '../../src/lib/client-profile.js';
 import { profileToRow, rowToClientProfile } from './client-profile-row.js';
 import { ok, fail } from './respond.js';
 import { captureVersion, logActivity } from './history.js';
+import { createNotification, resolveNotifications } from './notifications.js';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -64,7 +65,7 @@ export async function updateClientProfile(req, res, { db, uid, timelineId, schem
   });
 }
 
-export async function importFocl(req, res, { db, uid, timelineId, schema }) {
+export async function importFocl(req, res, { db, uid, timelineId, couple, schema }) {
   const { timelines, clientJourneys, clientProfiles } = schema;
   const [current] = await db
     .select()
@@ -76,7 +77,17 @@ export async function importFocl(req, res, { db, uid, timelineId, schema }) {
     normalized.sourceUrl ||
     normalized.project.couple ||
     normalized.profile.partners.some((partner) => partner.name);
-  if (!hasUsefulData) return fail(res, 422, 'FOCL payload contains no recognizable wedding data');
+  if (!hasUsefulData) {
+    await createNotification(db, schema, {
+      ownerId: uid,
+      timelineId,
+      kind: 'sync.failed',
+      dedupeKey: `sync.failed:${timelineId}:${new Date().toISOString().slice(0, 13)}`,
+      payload: { couple: couple || '', provider: 'FOCL', targetTab: 'client' },
+      reopen: true,
+    });
+    return fail(res, 422, 'FOCL payload contains no recognizable wedding data');
+  }
 
   await captureVersion(db, schema, {
     timelineId,
@@ -154,6 +165,11 @@ export async function importFocl(req, res, { db, uid, timelineId, schema }) {
       vendors: normalized.profile.vendors.length,
       timelineItems: normalized.profile.foclTimeline.length,
     },
+  });
+  await resolveNotifications(db, schema, {
+    ownerId: uid,
+    timelineId,
+    kind: 'sync.failed',
   });
 
   return ok(res, {

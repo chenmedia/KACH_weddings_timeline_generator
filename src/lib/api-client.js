@@ -34,6 +34,17 @@ export const api = {
   list: () => authed('/api/timelines'),
   get: (id) => authed(`/api/timelines/${id}`),
   dashboard: () => authed('/api/weddings/dashboard'),
+  notifications: () => authed('/api/notifications'),
+  markNotificationsRead: (ids) =>
+    authed('/api/notifications', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'mark_read', ids }),
+    }),
+  markAllNotificationsRead: () =>
+    authed('/api/notifications', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'mark_all_read' }),
+    }),
   workspace: (id, locale = 'nb') =>
     authed(`/api/weddings/${encodeURIComponent(id)}/workspace?locale=${encodeURIComponent(locale)}`),
   getJourney: (id) => authed(`/api/journeys/${encodeURIComponent(id)}`),

@@ -19,6 +19,7 @@ import { icons } from '../ui/icons.js';
 import { registerFeature, getFeatures } from './registry.js';
 import { resolveRoute, navigate, onRouteChange } from './router.js';
 import { buildAccountControl, closeAccountSurface } from './account.js';
+import { buildNotificationControl, closeNotificationCenter } from './notifications.js';
 
 const root = document.getElementById('app'); // the .wrap element
 const SIDEBAR_KEY = 'kach-sidebar-collapsed';
@@ -164,7 +165,11 @@ function toggleCollapse() {
   const next = !root.classList.contains('is-collapsed');
   root.classList.toggle('is-collapsed', next);
   const btn = root.querySelector('.side-collapse');
-  if (btn) btn.setAttribute('aria-expanded', String(!next)); // expanded = not collapsed
+  if (btn) {
+    btn.setAttribute('aria-expanded', String(!next)); // expanded = not collapsed
+    btn.setAttribute('aria-label', next ? t().nav.expand : t().nav.collapse);
+    btn.setAttribute('title', next ? t().nav.expand : t().nav.collapse);
+  }
   try {
     localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0');
   } catch {
@@ -220,18 +225,26 @@ function buildSidebar(features, active) {
   const nav = el('nav', { class: 'side-nav', 'aria-label': locale.nav.menu }, [
     sideGroup(locale.nav.workspace, workspace),
   ]);
-
-  // Not-yet-built tools as disabled teasers (from the locale), so the roadmap is
-  // visible without faking navigation.
-  const soon = (locale.home.comingSoon || []).map((c) =>
-    sideItem({ label: c.title, icon: icons[c.icon] || '', soon: true }),
-  );
-  if (soon.length) nav.appendChild(sideGroup(locale.nav.soon, soon));
+  if (authEnabled && isSignedIn()) {
+    nav.appendChild(
+      sideGroup(locale.nav.updates, [
+        buildNotificationControl({
+          locale,
+          navigate,
+          beforeOpen: () => {
+            closeAccountSurface();
+            setDrawerOpen(false);
+          },
+        }),
+      ]),
+    );
+  }
 
   const collapse = el('button', {
     class: 'side-collapse',
     type: 'button',
-    'aria-label': locale.nav.menu,
+    'aria-label': isCollapsed() ? locale.nav.expand : locale.nav.collapse,
+    title: isCollapsed() ? locale.nav.expand : locale.nav.collapse,
     'aria-expanded': String(!isCollapsed()),
   });
   collapse.innerHTML = `<span class="side-ico" aria-hidden="true">${icons.chevron}</span>`;
@@ -240,7 +253,14 @@ function buildSidebar(features, active) {
   // KACH account control at the foot. Clerk remains the session provider only.
   const footChildren = [];
   if (authEnabled && isSignedIn()) {
-    footChildren.push(buildAccountControl({ user: getUser(), locale, onSignOut: signOut }));
+    footChildren.push(
+      buildAccountControl({
+        user: getUser(),
+        locale,
+        onSignOut: signOut,
+        beforeOpen: closeNotificationCenter,
+      }),
+    );
   }
   footChildren.push(buildLangbar(), collapse);
 
@@ -305,6 +325,7 @@ function resetLayout() {
 
 function render() {
   closeAccountSurface();
+  closeNotificationCenter();
   applyMeta();
   const features = getFeatures();
   const route = resolveRoute(features);

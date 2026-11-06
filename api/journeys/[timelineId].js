@@ -6,6 +6,7 @@ import { withErrorCapture } from '../_lib/observability.js';
 import { journeyToRow, rowToJourney } from '../_lib/journey-row.js';
 import { importFocl, updateClientProfile, updatePhotographerReview } from '../_lib/client-actions.js';
 import { captureVersion, logActivity, restoreVersion } from '../_lib/history.js';
+import { createNotification } from '../_lib/notifications.js';
 
 async function handler(req, res) {
   const uid = await requireUser(req, res);
@@ -15,17 +16,33 @@ async function handler(req, res) {
   const timelineId = req.query.timelineId;
 
   const [project] = await db
-    .select({ id: timelines.id })
+    .select({ id: timelines.id, couple: timelines.couple })
     .from(timelines)
     .where(and(eq(timelines.id, timelineId), eq(timelines.ownerId, uid)));
   if (!project) return fail(res, 404, 'not found', 'NOT_FOUND');
 
-  const actionContext = { db, uid, timelineId, schema };
+  const actionContext = { db, uid, timelineId, couple: project.couple, schema };
   if (req.method === 'PUT' && req.body?.resource === 'client_profile') {
     return updateClientProfile(req, res, actionContext);
   }
   if (req.method === 'POST' && req.body?.action === 'focl_import') {
-    return importFocl(req, res, actionContext);
+    try {
+      return await importFocl(req, res, actionContext);
+    } catch (error) {
+      try {
+        await createNotification(db, schema, {
+          ownerId: uid,
+          timelineId,
+          kind: 'sync.failed',
+          dedupeKey: `sync.failed:${timelineId}:${new Date().toISOString().slice(0, 13)}`,
+          payload: { couple: project.couple || '', provider: 'FOCL', targetTab: 'client' },
+          reopen: true,
+        });
+      } catch {
+        // A notification failure must not hide the original sync error.
+      }
+      throw error;
+    }
   }
   if (req.method === 'POST' && req.body?.action === 'create_version') {
     const version = await captureVersion(db, schema, {

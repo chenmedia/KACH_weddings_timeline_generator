@@ -185,6 +185,29 @@ export const weddingVersions = pgTable(
   }),
 );
 
+// Studio-wide notification inbox. Each event has a stable dedupe key so
+// repeated dashboard reconciliation does not create duplicate alerts.
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    ownerId: text('owner_id').notNull(),
+    timelineId: uuid('timeline_id').references(() => timelines.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    itemKey: text('item_key'),
+    dedupeKey: text('dedupe_key').notNull(),
+    payload: jsonb('payload').notNull().default({}),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqOwnerDedupe: unique().on(t.ownerId, t.dedupeKey),
+    ownerCreatedIdx: index().on(t.ownerId, t.createdAt),
+    ownerReadIdx: index().on(t.ownerId, t.readAt),
+  }),
+);
+
 export const milestoneOverrides = pgTable(
   'milestone_overrides',
   {

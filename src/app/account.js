@@ -158,7 +158,7 @@ function openProfilePanel({ identity, copy, trigger, onSignOut }) {
   close.focus();
 }
 
-export function buildAccountControl({ user, locale, onSignOut }) {
+export function buildAccountControl({ user, locale, onSignOut, beforeOpen = null }) {
   const copy = locale.account;
   const identity = accountIdentity(user);
   const wrapper = el('div', { class: 'side-account', 'aria-label': locale.nav.account });
@@ -179,6 +179,7 @@ export function buildAccountControl({ user, locale, onSignOut }) {
   );
 
   const openMenu = () => {
+    beforeOpen?.();
     closeAccountSurface();
     const menu = el('div', { class: 'account-menu', role: 'menu' });
     const profileButton = el('button', {

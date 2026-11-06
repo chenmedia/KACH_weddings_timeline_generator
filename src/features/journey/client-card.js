@@ -291,7 +291,7 @@ export function buildClientCard({ locale, workspace, onProfileChange, onJourneyC
   profile.foclTimeline.forEach((item) => {
     foclTimeline.appendChild(
       el('li', {}, [
-        el('time', { text: [item.startTime, item.endTime].filter(Boolean).join('–') || '—' }),
+        el('time', { text: [item.startTime, item.endTime].filter(Boolean).join('-') || '-' }),
         el('div', {}, [
           el('strong', { text: item.title }),
           item.location ? el('span', { text: item.location }) : null,

@@ -127,11 +127,22 @@ describe('journey feature', () => {
     expect(container.querySelector('.journey-sharing-workspace .share-panel')).toBeTruthy();
     tabs = container.querySelectorAll('[role="tab"]');
     tabs[4].click();
+    expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
+    tabs = container.querySelectorAll('[role="tab"]');
+    tabs[6].click();
     expect(container.querySelector('.history-workspace')).toBeTruthy();
     expect(container.querySelectorAll('.activity-feed li')).toHaveLength(1);
     expect(container.querySelectorAll('.version-list article')).toHaveLength(1);
-    tabs = container.querySelectorAll('[role="tab"]');
-    tabs[5].click();
-    expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
+    const mobileNav = container.querySelector('#journey-mobile-tab-select');
+    expect(mobileNav).toBeTruthy();
+    expect(Array.from(mobileNav.options).map((option) => option.value)).toEqual([
+      'journey',
+      'client',
+      'timeline',
+      'sharing',
+      'referrals',
+      'templates',
+      'activity',
+    ]);
   });
 });

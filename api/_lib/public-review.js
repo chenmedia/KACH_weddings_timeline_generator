@@ -1,6 +1,7 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { ok, fail } from './respond.js';
 import { logActivity } from './history.js';
+import { createNotification } from './notifications.js';
 
 const ITEM_KEY = /^[a-zA-Z0-9_-]{1,80}$/;
 
@@ -34,7 +35,7 @@ export async function readPublicReview(db, timelineId, schema) {
   };
 }
 
-export async function submitPublicReview(req, res, { db, timelineId, ownerId, schema }) {
+export async function submitPublicReview(req, res, { db, timelineId, ownerId, couple, schema }) {
   const { timelineReviews, timelineComments } = schema;
   const action = req.body?.action;
   const authorName = clean(req.body?.authorName, 120);
@@ -50,7 +51,10 @@ export async function submitPublicReview(req, res, { db, timelineId, ownerId, sc
       .from(timelineComments)
       .where(eq(timelineComments.timelineId, timelineId));
     if (count >= 200) return fail(res, 429, 'comment limit reached');
-    await db.insert(timelineComments).values({ timelineId, itemKey, authorName, body, kind });
+    const [comment] = await db
+      .insert(timelineComments)
+      .values({ timelineId, itemKey, authorName, body, kind })
+      .returning({ id: timelineComments.id });
     await logActivity(db, schema, {
       timelineId,
       ownerId,
@@ -58,6 +62,19 @@ export async function submitPublicReview(req, res, { db, timelineId, ownerId, sc
       actorName: authorName,
       action: kind === 'change_request' ? 'review.changes_requested' : 'review.comment_added',
       itemKey,
+    });
+    await createNotification(db, schema, {
+      ownerId,
+      timelineId,
+      kind: kind === 'change_request' ? 'review.changes_requested' : 'review.comment',
+      itemKey,
+      dedupeKey: `review.comment:${comment.id}`,
+      payload: {
+        couple: couple || '',
+        actorName: authorName,
+        commentId: comment.id,
+        targetTab: 'sharing',
+      },
     });
     if (kind === 'change_request') {
       await db
@@ -91,6 +108,18 @@ export async function submitPublicReview(req, res, { db, timelineId, ownerId, sc
       actorType: 'couple',
       actorName: authorName,
       action: status === 'approved' ? 'review.approved' : 'review.changes_requested',
+    });
+    const decidedAt = new Date();
+    await createNotification(db, schema, {
+      ownerId,
+      timelineId,
+      kind: status === 'approved' ? 'review.approved' : 'review.changes_requested',
+      dedupeKey: `review.decision:${timelineId}:${decidedAt.toISOString()}`,
+      payload: {
+        couple: couple || '',
+        actorName: authorName,
+        targetTab: 'sharing',
+      },
     });
   } else {
     return fail(res, 422, 'valid action is required');
