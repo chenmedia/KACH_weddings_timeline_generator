@@ -41,6 +41,7 @@ export const JOURNEY_TASKS = [
 ];
 
 const TASK_IDS = new Set(JOURNEY_TASKS.map((task) => task.id));
+export const MESSAGE_TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
 const DATE_OVERRIDE_KEYS = new Set(['weddingWeek', 'parentPrint', 'holiday', 'anniversary']);
 
 function dateString(value) {
@@ -84,7 +85,9 @@ export function defaultJourney() {
     foclUrl: '',
     lastTouch: '',
     completedTasks: [],
+    enabledTasks: JOURNEY_TASKS.map((task) => task.id),
     referralMoments: defaultReferrals('signature'),
+    messageTemplates: {},
     journeyDateOverrides: {},
   };
 }
@@ -106,6 +109,14 @@ export function sanitizeJourney(input = {}) {
   const completedTasks = Array.isArray(input.completedTasks)
     ? [...new Set(input.completedTasks.filter((id) => TASK_IDS.has(id)))]
     : [];
+  const enabledTasks = Array.isArray(input.enabledTasks)
+    ? [...new Set(input.enabledTasks.filter((id) => TASK_IDS.has(id)))]
+    : JOURNEY_TASKS.map((task) => task.id);
+  const messageTemplates = Object.fromEntries(
+    MESSAGE_TEMPLATE_KEYS.map((key) => [key, cleanText(input.messageTemplates?.[key], 4000)]).filter(
+      ([, value]) => value,
+    ),
+  );
   const journeyDateOverrides = {};
   for (const [key, value] of Object.entries(input.journeyDateOverrides || {})) {
     if (!DATE_OVERRIDE_KEYS.has(key)) continue;
@@ -119,7 +130,9 @@ export function sanitizeJourney(input = {}) {
     foclUrl: cleanFoclUrl(input.foclUrl),
     lastTouch: dateString(input.lastTouch),
     completedTasks,
+    enabledTasks,
     referralMoments,
+    messageTemplates,
     journeyDateOverrides,
   };
 }
@@ -191,7 +204,9 @@ export function journeyDates(project, milestoneProjection, journey) {
 export function activeJourneyTasks(journey) {
   const clean = sanitizeJourney(journey);
   return JOURNEY_TASKS.filter(
-    (task) => !task.referralKey || clean.referralMoments[task.referralKey]?.enabled,
+    (task) =>
+      clean.enabledTasks.includes(task.id) &&
+      (!task.referralKey || clean.referralMoments[task.referralKey]?.enabled),
   );
 }
 

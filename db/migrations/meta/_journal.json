@@ -57,6 +57,13 @@
       "when": 1793924109268,
       "tag": "0007_elite_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793968050817,
+      "tag": "0008_shallow_naoko",
+      "breakpoints": true
     }
   ]
 }

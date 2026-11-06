@@ -17,7 +17,9 @@ export function rowToJourney(row) {
     foclUrl: row.foclUrl,
     lastTouch: toDateString(row.lastTouch),
     completedTasks: row.completedTasks,
+    enabledTasks: row.enabledTasks,
     referralMoments: row.referralMoments,
+    messageTemplates: row.messageTemplates,
     journeyDateOverrides: row.journeyDateOverrides,
   });
 }
@@ -30,7 +32,9 @@ export function journeyToRow(input) {
     foclUrl: journey.foclUrl || null,
     lastTouch: journey.lastTouch || null,
     completedTasks: journey.completedTasks,
+    enabledTasks: journey.enabledTasks,
     referralMoments: journey.referralMoments,
+    messageTemplates: journey.messageTemplates,
     journeyDateOverrides: journey.journeyDateOverrides,
   };
 }

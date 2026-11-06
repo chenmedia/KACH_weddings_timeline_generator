@@ -45,6 +45,7 @@ describe('journey model', () => {
     expect(journey.foclUrl).toBe('');
     expect(journey.lastTouch).toBe('');
     expect(journey.completedTasks).toEqual(['welcomeGuide']);
+    expect(journey.enabledTasks).toHaveLength(16);
     expect(journey.referralMoments.welcome.costNok).toBe(0);
     expect(journey.referralMoments.evil).toBeUndefined();
     expect(journey.journeyDateOverrides).toEqual({ anniversary: '2028-06-12' });
@@ -56,6 +57,17 @@ describe('journey model', () => {
     const premium = applyReferralPreset(journey, 'premium');
     expect(premium.referralMoments.parentPrint.enabled).toBe(true);
     expect(premium.referralMoments.parentPrint.costNok).toBe(850);
+  });
+
+  it('supports a template-specific checklist and message copy', () => {
+    const journey = sanitizeJourney({
+      ...defaultJourney(),
+      enabledTasks: ['welcomeGuide', 'galleryDelivery', 'not-real'],
+      messageTemplates: { welcome: 'Velkommen, {{couple}}', evil: 'ignored' },
+    });
+    expect(journey.enabledTasks).toEqual(['welcomeGuide', 'galleryDelivery']);
+    expect(journey.messageTemplates).toEqual({ welcome: 'Velkommen, {{couple}}' });
+    expect(journeyProgress(journey).total).toBe(2);
   });
 
   it('derives journey-only dates from the canonical milestone projection', () => {

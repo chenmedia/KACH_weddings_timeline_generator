@@ -518,6 +518,7 @@
 
 .journey-selector select,
 .journey-field input,
+.journey-field textarea,
 .journey-date-control input,
 .referral-cost input {
   min-height: 44px;
@@ -1396,6 +1397,221 @@
   gap: clamp(40px, 7vw, 80px);
 }
 
+.workflow-template-manager,
+.workflow-template-editor {
+  grid-column: 1 / -1;
+}
+
+.workflow-template-manager {
+  padding-bottom: clamp(40px, 6vw, 72px);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.workflow-template-manager-head,
+.workflow-template-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.workflow-template-manager-head .journey-section-heading {
+  max-width: 720px;
+}
+
+.workflow-template-manager-head .journey-section-heading > p:last-child {
+  max-width: 62ch;
+}
+
+.workflow-template-library {
+  margin-top: 28px;
+  border-top: 1px solid var(--hairline);
+}
+
+.workflow-template-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.workflow-template-default {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--journey-clay);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.workflow-template-card h4,
+.workflow-template-empty h4,
+.workflow-template-editor-head h3 {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.workflow-template-card-copy > p,
+.workflow-template-empty p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.workflow-template-card-actions,
+.workflow-template-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.workflow-template-card-actions button {
+  min-height: 40px;
+}
+
+.workflow-template-delete {
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-transform: uppercase;
+}
+
+.workflow-template-empty {
+  margin-top: 28px;
+  padding: 34px;
+  background: var(--journey-paper);
+  text-align: center;
+}
+
+.workflow-template-editor {
+  display: grid;
+  gap: 30px;
+  padding: clamp(26px, 4vw, 44px);
+  background: var(--journey-paper);
+}
+
+.workflow-template-editor fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.workflow-template-editor legend {
+  padding: 26px 0 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 23px;
+}
+
+.workflow-template-help {
+  max-width: 62ch;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.workflow-template-timing {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.workflow-template-toggle {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 11px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.workflow-template-toggle input,
+.workflow-template-referral input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.workflow-template-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 28px;
+  margin-top: 18px;
+}
+
+.workflow-template-referrals {
+  margin-top: 18px;
+  border-top: 1px solid var(--hairline);
+}
+
+.workflow-template-referral {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.34fr);
+  align-items: center;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.workflow-template-referral > label,
+.workflow-template-referral > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.workflow-template-referral > div {
+  justify-content: flex-end;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workflow-template-referral input[type='number'] {
+  width: 110px;
+  min-height: 40px;
+  background: #fff;
+}
+
+.workflow-template-messages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.workflow-template-messages .journey-field + .journey-field {
+  margin-top: 0;
+}
+
+.workflow-template-messages textarea {
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  background: #fff;
+  line-height: 1.55;
+}
+
 .focl-panel {
   padding: 30px;
   background: var(--journey-paper);
@@ -1525,6 +1741,14 @@
   .journey-stage-panel {
     order: -1;
     position: static;
+  }
+
+  .workflow-template-card {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-template-card-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -1713,6 +1937,33 @@
 
   .message-template button {
     width: 100%;
+  }
+
+  .workflow-template-manager-head,
+  .workflow-template-editor-head {
+    flex-direction: column;
+  }
+
+  .workflow-template-timing,
+  .workflow-template-checklist,
+  .workflow-template-messages {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-template-referral {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .workflow-template-referral > div {
+    justify-content: flex-start;
+  }
+
+  .workflow-template-card-actions,
+  .workflow-template-editor-actions {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

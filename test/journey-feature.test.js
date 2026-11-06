@@ -44,6 +44,27 @@ describe('journey feature', () => {
             response({ timelines: [{ id: ID, couple: project.couple, wdate: project.wdate }] }),
           );
         }
+        if (url === '/api/workflow-templates') {
+          return Promise.resolve(
+            response({
+              templates: [
+                {
+                  id: '22222222-2222-4222-8222-222222222222',
+                  name: 'Signatur',
+                  isDefault: true,
+                  timelineDefaults: {
+                    delw: 4,
+                    sendDays: 1,
+                    termDays: 10,
+                    includeEngage: true,
+                    includeAlbum: false,
+                  },
+                  journeyDefaults: defaultJourney(),
+                },
+              ],
+            }),
+          );
+        }
         if (String(url).startsWith(`/api/weddings/${ID}/workspace`)) {
           return Promise.resolve(
             response({
@@ -128,6 +149,10 @@ describe('journey feature', () => {
     tabs = container.querySelectorAll('[role="tab"]');
     tabs[4].click();
     expect(container.querySelectorAll('.referral-row')).toHaveLength(8);
+    tabs = container.querySelectorAll('[role="tab"]');
+    tabs[5].click();
+    expect(container.querySelector('.workflow-template-manager')).toBeTruthy();
+    expect(container.querySelector('.workflow-template-card h4').textContent).toBe('Signatur');
     tabs = container.querySelectorAll('[role="tab"]');
     tabs[6].click();
     expect(container.querySelector('.history-workspace')).toBeTruthy();

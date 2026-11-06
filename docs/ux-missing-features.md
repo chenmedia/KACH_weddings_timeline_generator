@@ -18,7 +18,7 @@ Decision log updated 6 November 2026. All capabilities below are approved in pri
    Send or schedule email from a template, with delivery status and an activity-log record. Do not implement SMS in the first version.
 3. **In-app notification center — implemented**
    Surface overdue actions, upcoming milestones, new couple comments, failed email delivery and sync failures inside the dashboard. Email digests can be considered later.
-4. **Reusable workflow templates**
+4. **Reusable workflow templates — implemented**
    Save milestone, checklist, gift budget and message defaults by package, then apply them when a couple is created.
 
 ## Priority 1: reduce studio administration
@@ -51,8 +51,8 @@ Decision log updated 6 November 2026. All capabilities below are approved in pri
 
 ### Phase 1: operational foundation
 
-1. In-app notification center and notification preferences
-2. Reusable workflow templates by package
+1. In-app notification center — implemented; notification preferences remain deferred
+2. Reusable workflow templates by package — implemented
 3. Search, filters and season archive
 4. Scheduled restore points and complete client export
 
@@ -90,6 +90,10 @@ The first notification-center release is implementation-ready and includes:
 
 Upcoming milestone reminders, failed Resend delivery and calendar-conflict notifications are intentionally deferred until those underlying workflows exist.
 
+## Implemented: reusable workflow templates
+
+KACH can now create package templates for timeline timing, included engagement sessions and albums, active checklist tasks, referral touchpoints, gift budgets and message copy. The default template is copied into every new couple, so later template edits do not alter existing client work. A template can also be deliberately applied to an existing couple while preserving completed tasks, the FOCL link, last-touch history and manual dates.
+
 ## Recommended next implementation
 
-Build reusable workflow templates by package. This should let KACH define one set of default milestones, checklists, gift budgets and message templates, then apply it when a new couple is created without overwriting later client-specific adjustments.
+Build search, filters and a season archive across the client overview. Start with couple, venue, date, stage and status filters, saved in the URL so the current working view survives reloads and can be bookmarked.

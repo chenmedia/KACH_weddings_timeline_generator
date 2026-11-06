@@ -14,6 +14,7 @@ import { confirmDialog, toast } from '../../ui/feedback.js';
 import { icons } from '../../ui/icons.js';
 import {
   JOURNEY_TASKS,
+  MESSAGE_TEMPLATE_KEYS,
   REFERRAL_MOMENTS,
   activeJourneyTasks,
   applyReferralPreset,
@@ -25,13 +26,17 @@ import {
   referralBudget,
   sanitizeJourney,
 } from './model.js';
+import {
+  defaultWorkflowTemplate,
+  sanitizeWorkflowTemplate,
+  workflowTemplateSummary,
+} from './workflow-templates.js';
 import { buildSharingWorkspace, buildTimelineWorkspace } from './timeline-workspace.js';
 import { buildClientCard } from './client-card.js';
 import { buildHistoryWorkspace } from './history-workspace.js';
 import { defaultClientProfile, sanitizeClientProfile } from '../../lib/client-profile.js';
 
 const SHARED_OVERRIDE_KEYS = new Set(['timelineQ', 'plancall', 'finalSync', 'sneak', 'gallery', 'thanks']);
-const TEMPLATE_KEYS = ['welcome', 'weddingWeek', 'gallery', 'anniversary'];
 const WORKSPACE_TAB_KEYS = ['journey', 'client', 'timeline', 'sharing', 'referrals', 'templates', 'activity'];
 const WORKSPACE_TABS = new Set(WORKSPACE_TAB_KEYS);
 
@@ -44,6 +49,8 @@ let projectDirty = false;
 let journeyDirty = false;
 let profileDirty = false;
 let saving = false;
+let workflowTemplates = [];
+let templateEditor = null;
 
 function tabFromUrl(search = location.search) {
   const tab = new URLSearchParams(search).get('tab') || 'journey';
@@ -693,11 +700,318 @@ async function copyTemplate(text, locale) {
 
 function templateCard(locale, key) {
   const template = locale.journey.templates[key];
+  const body = workspace.journey.messageTemplates?.[key] || template.body;
   const button = el('button', { type: 'button', class: 'btn-ghost', text: locale.journey.templates.copy });
-  button.addEventListener('click', () => copyTemplate(template.body, locale));
+  button.addEventListener('click', () => copyTemplate(body, locale));
   return el('article', { class: 'message-template' }, [
-    el('div', {}, [el('h4', { text: template.title }), el('p', { text: template.body })]),
+    el('div', {}, [el('h4', { text: template.title }), el('p', { text: body })]),
     button,
+  ]);
+}
+
+function templateNumberField({ id, label, value, min, max, onInput }) {
+  const input = el('input', {
+    id,
+    type: 'number',
+    min: String(min),
+    max: String(max),
+    value: String(value),
+  });
+  input.addEventListener('input', () => onInput(Number(input.value)));
+  return el('div', { class: 'journey-field' }, [el('label', { for: id, text: label }), input]);
+}
+
+function templateToggle(id, label, checked, onChange) {
+  const input = el('input', { id, type: 'checkbox' });
+  input.checked = checked;
+  input.addEventListener('change', () => onChange(input.checked));
+  return el('label', { class: 'workflow-template-toggle', for: id }, [input, el('span', { text: label })]);
+}
+
+function templateEditorPanel(locale) {
+  const copy = locale.journey.templates.workflow;
+  const draft = sanitizeWorkflowTemplate(
+    templateEditor?.id
+      ? templateEditor
+      : { ...defaultWorkflowTemplate(), isDefault: !workflowTemplates.length },
+  );
+  const form = el('form', { class: 'workflow-template-editor' });
+  const name = el('input', {
+    id: 'workflow-template-name',
+    type: 'text',
+    value: draft.name,
+    maxlength: '120',
+    placeholder: copy.namePlaceholder,
+  });
+  name.addEventListener('input', () => {
+    draft.name = name.value;
+    name.setAttribute('aria-invalid', 'false');
+  });
+
+  const timing = el('div', { class: 'workflow-template-timing' }, [
+    templateNumberField({
+      id: 'workflow-template-delivery',
+      label: copy.deliveryWeeks,
+      value: draft.timelineDefaults.delw,
+      min: 1,
+      max: 20,
+      onInput: (value) => {
+        draft.timelineDefaults.delw = value;
+      },
+    }),
+    templateNumberField({
+      id: 'workflow-template-send',
+      label: copy.sendDays,
+      value: draft.timelineDefaults.sendDays,
+      min: 0,
+      max: 60,
+      onInput: (value) => {
+        draft.timelineDefaults.sendDays = value;
+      },
+    }),
+    templateNumberField({
+      id: 'workflow-template-expiry',
+      label: copy.expiryDays,
+      value: draft.timelineDefaults.termDays,
+      min: 1,
+      max: 60,
+      onInput: (value) => {
+        draft.timelineDefaults.termDays = value;
+      },
+    }),
+  ]);
+
+  const tasks = el('div', { class: 'workflow-template-checklist' });
+  for (const task of JOURNEY_TASKS) {
+    tasks.appendChild(
+      templateToggle(
+        `workflow-task-${task.id}`,
+        locale.journey.tasks[task.id] || task.id,
+        draft.journeyDefaults.enabledTasks.includes(task.id),
+        (checked) => {
+          const selected = new Set(draft.journeyDefaults.enabledTasks);
+          if (checked) selected.add(task.id);
+          else selected.delete(task.id);
+          draft.journeyDefaults.enabledTasks = [...selected];
+        },
+      ),
+    );
+  }
+
+  const referrals = el('div', { class: 'workflow-template-referrals' });
+  for (const { key } of REFERRAL_MOMENTS) {
+    const moment = draft.journeyDefaults.referralMoments[key];
+    const toggle = el('input', { id: `workflow-referral-${key}`, type: 'checkbox' });
+    toggle.checked = moment.enabled;
+    toggle.addEventListener('change', () => {
+      moment.enabled = toggle.checked;
+      draft.journeyDefaults.plan = 'custom';
+    });
+    const cost = el('input', {
+      type: 'number',
+      min: '0',
+      max: '100000',
+      step: '50',
+      value: String(moment.costNok),
+      'aria-label': `${locale.journey.referrals.moments[key].title} - ${copy.cost}`,
+    });
+    cost.addEventListener('input', () => {
+      moment.costNok = Math.max(0, Math.round(Number(cost.value) || 0));
+      draft.journeyDefaults.plan = 'custom';
+    });
+    referrals.appendChild(
+      el('div', { class: 'workflow-template-referral' }, [
+        el('label', { for: `workflow-referral-${key}` }, [
+          toggle,
+          el('span', { text: locale.journey.referrals.moments[key].title }),
+        ]),
+        el('div', {}, [el('span', { text: copy.cost }), cost]),
+      ]),
+    );
+  }
+
+  const messages = el('div', { class: 'workflow-template-messages' });
+  for (const key of MESSAGE_TEMPLATE_KEYS) {
+    const base = locale.journey.templates[key];
+    const textarea = el('textarea', {
+      id: `workflow-message-${key}`,
+      rows: '4',
+      placeholder: base.body,
+    });
+    textarea.value = draft.journeyDefaults.messageTemplates[key] || '';
+    textarea.addEventListener('input', () => {
+      draft.journeyDefaults.messageTemplates[key] = textarea.value;
+    });
+    messages.appendChild(
+      el('div', { class: 'journey-field' }, [el('label', { for: textarea.id, text: base.title }), textarea]),
+    );
+  }
+
+  const makeDefault = templateToggle(
+    'workflow-template-default',
+    copy.makeDefault,
+    draft.isDefault,
+    (checked) => {
+      draft.isDefault = checked;
+    },
+  );
+  if (draft.id && draft.isDefault) makeDefault.querySelector('input').disabled = true;
+
+  const cancel = el('button', { type: 'button', class: 'btn-ghost', text: copy.cancel });
+  cancel.addEventListener('click', () => {
+    templateEditor = null;
+    renderWorkspace();
+  });
+  const save = el('button', { type: 'submit', class: 'btn-primary', text: copy.save });
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!name.value.trim()) {
+      name.setAttribute('aria-invalid', 'true');
+      name.focus();
+      return;
+    }
+    save.disabled = true;
+    try {
+      const payload = sanitizeWorkflowTemplate({ ...draft, name: name.value });
+      if (payload.id) await api.updateWorkflowTemplate(payload.id, payload);
+      else await api.createWorkflowTemplate(payload);
+      const result = await api.workflowTemplates();
+      workflowTemplates = result.templates || [];
+      templateEditor = null;
+      toast(payload.id ? copy.updated : copy.created, { type: 'success' });
+      renderWorkspace();
+    } catch {
+      save.disabled = false;
+      toast(copy.saveFailed, { type: 'error' });
+    }
+  });
+
+  form.append(
+    el('div', { class: 'workflow-template-editor-head' }, [
+      el('div', {}, [
+        el('p', { class: 'journey-stage-kicker', text: copy.kicker }),
+        el('h3', { text: draft.id ? copy.editTitle : copy.createTitle }),
+      ]),
+      cancel,
+    ]),
+    el('div', { class: 'journey-field' }, [el('label', { for: name.id, text: copy.name }), name]),
+    makeDefault,
+    el('fieldset', {}, [el('legend', { text: copy.timingTitle }), timing]),
+    el('fieldset', {}, [
+      el('legend', { text: copy.checklistTitle }),
+      el('p', { class: 'workflow-template-help', text: copy.checklistIntro }),
+      tasks,
+    ]),
+    el('fieldset', {}, [el('legend', { text: copy.referralsTitle }), referrals]),
+    el('fieldset', {}, [
+      el('legend', { text: copy.messagesTitle }),
+      el('p', { class: 'workflow-template-help', text: copy.messagesIntro }),
+      messages,
+    ]),
+    el('div', { class: 'workflow-template-editor-actions' }, [cancel.cloneNode(true), save]),
+  );
+  form.querySelector('.workflow-template-editor-actions .btn-ghost').addEventListener('click', () => {
+    templateEditor = null;
+    renderWorkspace();
+  });
+  return form;
+}
+
+function workflowTemplateCard(locale, template) {
+  const copy = locale.journey.templates.workflow;
+  const summary = workflowTemplateSummary(template);
+  const apply = el('button', { type: 'button', class: 'btn-primary', text: copy.apply });
+  apply.addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      title: copy.applyConfirmTitle,
+      body: copy.applyConfirmBody(template.name),
+      confirmLabel: copy.apply,
+      cancelLabel: copy.cancel,
+    });
+    if (!confirmed) return;
+    if (projectDirty || journeyDirty || profileDirty) {
+      const saved = await saveWorkspace();
+      if (!saved) return;
+    }
+    try {
+      await api.applyWorkflowTemplate(template.id, currentId);
+      toast(copy.applied, { type: 'success' });
+      await loadWorkspace(currentId);
+    } catch {
+      toast(copy.actionFailed, { type: 'error' });
+    }
+  });
+  const edit = el('button', { type: 'button', class: 'btn-ghost', text: copy.edit });
+  edit.addEventListener('click', () => {
+    templateEditor = template;
+    renderWorkspace();
+  });
+  const remove = el('button', { type: 'button', class: 'workflow-template-delete', text: copy.remove });
+  remove.addEventListener('click', async () => {
+    const confirmed = await confirmDialog({
+      title: copy.deleteConfirmTitle,
+      body: copy.deleteConfirmBody(template.name),
+      confirmLabel: copy.remove,
+      cancelLabel: copy.cancel,
+      danger: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.deleteWorkflowTemplate(template.id);
+      const result = await api.workflowTemplates();
+      workflowTemplates = result.templates || [];
+      toast(copy.deleted, { type: 'success' });
+      renderWorkspace();
+    } catch {
+      toast(copy.actionFailed, { type: 'error' });
+    }
+  });
+  return el('article', { class: 'workflow-template-card' }, [
+    el('div', { class: 'workflow-template-card-copy' }, [
+      template.isDefault ? el('span', { class: 'workflow-template-default', text: copy.defaultLabel }) : null,
+      el('h4', { text: template.name }),
+      el('p', {
+        text: [
+          copy.timing(template.timelineDefaults.delw),
+          copy.taskCount(summary.taskCount),
+          copy.referralCount(summary.referralCount),
+          copy.messageCount(summary.messageCount),
+        ].join(' · '),
+      }),
+    ]),
+    el('div', { class: 'workflow-template-card-actions' }, [apply, edit, remove]),
+  ]);
+}
+
+function workflowTemplateManager(locale) {
+  const copy = locale.journey.templates.workflow;
+  if (templateEditor) return templateEditorPanel(locale);
+  const create = el('button', { type: 'button', class: 'btn-primary', text: copy.create });
+  create.addEventListener('click', () => {
+    templateEditor = defaultWorkflowTemplate();
+    templateEditor.isDefault = !workflowTemplates.length;
+    renderWorkspace();
+  });
+  const content = workflowTemplates.length
+    ? el(
+        'div',
+        { class: 'workflow-template-library' },
+        workflowTemplates.map((template) => workflowTemplateCard(locale, template)),
+      )
+    : el('div', { class: 'workflow-template-empty' }, [
+        el('h4', { text: copy.emptyTitle }),
+        el('p', { text: copy.emptyBody }),
+      ]);
+  return el('section', { class: 'workflow-template-manager' }, [
+    el('div', { class: 'workflow-template-manager-head' }, [
+      el('div', { class: 'journey-section-heading' }, [
+        el('p', { class: 'journey-stage-kicker', text: copy.kicker }),
+        el('h3', { text: copy.title }),
+        el('p', { text: copy.intro }),
+      ]),
+      create,
+    ]),
+    content,
   ]);
 }
 
@@ -741,6 +1055,7 @@ function templatesPanel(locale) {
   ]);
 
   return el('div', { class: 'templates-panel' }, [
+    workflowTemplateManager(locale),
     el('section', { class: 'focl-panel' }, [
       el('div', { class: 'journey-section-heading' }, [
         el('h3', { text: copy.foclTitle }),
@@ -759,7 +1074,7 @@ function templatesPanel(locale) {
         el('h3', { text: copy.title }),
         el('p', { text: copy.intro }),
       ]),
-      ...TEMPLATE_KEYS.map((key) => templateCard(locale, key)),
+      ...MESSAGE_TEMPLATE_KEYS.map((key) => templateCard(locale, key)),
     ]),
   ]);
 }
@@ -910,6 +1225,7 @@ async function loadWorkspace(id) {
   projectDirty = false;
   journeyDirty = false;
   profileDirty = false;
+  templateEditor = null;
   host.innerHTML = '';
   host.appendChild(journeyLoading(t()));
   try {
@@ -942,6 +1258,8 @@ async function mount(container) {
   container.appendChild(wrap);
 
   try {
+    const templateResult = await api.workflowTemplates().catch(() => ({ templates: [] }));
+    workflowTemplates = templateResult.templates || [];
     const params = new URLSearchParams(location.search);
     if (params.get('new') === '1') {
       params.delete('new');
@@ -984,6 +1302,8 @@ function reset() {
   journeyDirty = false;
   profileDirty = false;
   saving = false;
+  workflowTemplates = [];
+  templateEditor = null;
 }
 
 const journeyFeature = {

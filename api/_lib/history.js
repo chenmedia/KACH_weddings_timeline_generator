@@ -60,7 +60,11 @@ async function weddingSnapshot(db, schema, timelineId, ownerId) {
   ]);
   if (!project) return null;
   return {
-    project: { ...rowToState(project, overrides), status: project.status || 'lead' },
+    project: {
+      ...rowToState(project, overrides),
+      templateId: project.templateId || null,
+      status: project.status || 'lead',
+    },
     journey: rowToJourney(journey),
     profile: rowToClientProfile(profile),
   };
@@ -148,6 +152,9 @@ export async function restoreVersion(db, schema, { timelineId, ownerId, versionI
     .update(timelines)
     .set({
       ...stateToRow(snapshot.project),
+      ...(Object.hasOwn(snapshot.project, 'templateId')
+        ? { templateId: snapshot.project.templateId || null }
+        : {}),
       status: snapshot.project.status || 'lead',
       updatedAt: new Date(),
       version: sql`${timelines.version} + 1`,

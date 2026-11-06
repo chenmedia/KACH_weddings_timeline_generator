@@ -34,14 +34,16 @@ export const templates = pgTable('templates', {
   includeEngage: boolean('include_engage').default(false),
   includeAlbum: boolean('include_album').default(false),
   enabledItemKeys: jsonb('enabled_item_keys').notNull().default([]),
+  journeyDefaults: jsonb('journey_defaults').notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // One per couple — mirrors the in-app `state` inputs.
 export const timelines = pgTable('timelines', {
   id: uuid('id').defaultRandom().primaryKey(),
   ownerId: text('owner_id').notNull(),
-  templateId: uuid('template_id').references(() => templates.id),
+  templateId: uuid('template_id').references(() => templates.id, { onDelete: 'set null' }),
   couple: text('couple').notNull().default(''),
   wdate: date('wdate').notNull(),
   bdate: date('bdate'),
@@ -81,7 +83,28 @@ export const clientJourneys = pgTable(
     foclUrl: text('focl_url'),
     lastTouch: date('last_touch'),
     completedTasks: jsonb('completed_tasks').notNull().default([]),
+    enabledTasks: jsonb('enabled_tasks')
+      .notNull()
+      .default([
+        'welcomeGuide',
+        'foclSetup',
+        'storyCall',
+        'questionnaire',
+        'engagementSession',
+        'planningCall',
+        'finalMeeting',
+        'weddingEncouragement',
+        'weddingCare',
+        'backupCheck',
+        'sneakPreview',
+        'galleryDelivery',
+        'reviewRequest',
+        'parentPrint',
+        'holidayGift',
+        'anniversaryTouch',
+      ]),
     referralMoments: jsonb('referral_moments').notNull().default({}),
+    messageTemplates: jsonb('message_templates').notNull().default({}),
     journeyDateOverrides: jsonb('journey_date_overrides').notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

@@ -46,6 +46,7 @@ async function handler(req, res) {
   ]);
   const project = {
     ...rowToState(row, overrideRows),
+    templateId: row.templateId,
     shareSlug: row.shareSlug,
     shareEnabled: row.shareEnabled,
     shareExpiresAt: row.shareExpiresAt,

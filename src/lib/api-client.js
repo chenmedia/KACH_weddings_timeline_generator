@@ -45,6 +45,24 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ action: 'mark_all_read' }),
     }),
+  workflowTemplates: () => authed('/api/workflow-templates'),
+  createWorkflowTemplate: (template) =>
+    authed('/api/workflow-templates', {
+      method: 'POST',
+      body: JSON.stringify(template),
+    }),
+  updateWorkflowTemplate: (id, template) =>
+    authed(`/api/workflow-templates/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(template),
+    }),
+  deleteWorkflowTemplate: (id) =>
+    authed(`/api/workflow-templates/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  applyWorkflowTemplate: (id, timelineId) =>
+    authed(`/api/workflow-templates/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'apply', timelineId }),
+    }),
   workspace: (id, locale = 'nb') =>
     authed(`/api/weddings/${encodeURIComponent(id)}/workspace?locale=${encodeURIComponent(locale)}`),
   getJourney: (id) => authed(`/api/journeys/${encodeURIComponent(id)}`),
