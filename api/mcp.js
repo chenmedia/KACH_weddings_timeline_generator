@@ -6,14 +6,31 @@ import { withErrorCapture } from './_lib/observability.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Mcp-Session-Id');
   res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id, WWW-Authenticate');
+}
+
+function setAuthChallenge(res, options = {}) {
+  const parameters = [
+    `resource_metadata="${MCP_RESOURCE_METADATA_URL}"`,
+    `scope="${MCP_REQUIRED_SCOPES.join(' ')}"`,
+  ];
+  if (options.error) parameters.push(`error="${options.error}"`);
+  res.setHeader('WWW-Authenticate', `Bearer ${parameters.join(', ')}`);
 }
 
 async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method === 'GET') {
+    setAuthChallenge(res);
+    return res.status(401).json({
+      jsonrpc: '2.0',
+      error: { code: -32001, message: 'Unauthorized' },
+      id: null,
+    });
+  }
   if (req.method !== 'POST') {
     return res.status(405).json({
       jsonrpc: '2.0',
@@ -24,7 +41,7 @@ async function handler(req, res) {
 
   const auth = await authenticateMcpRequest(req);
   if (!auth) {
-    res.setHeader('WWW-Authenticate', `Bearer resource_metadata="${MCP_RESOURCE_METADATA_URL}"`);
+    setAuthChallenge(res);
     return res.status(401).json({
       jsonrpc: '2.0',
       error: { code: -32001, message: 'Unauthorized' },
@@ -33,10 +50,7 @@ async function handler(req, res) {
   }
   const missingScopes = MCP_REQUIRED_SCOPES.filter((scope) => !auth.authInfo.scopes.includes(scope));
   if (missingScopes.length) {
-    res.setHeader(
-      'WWW-Authenticate',
-      `Bearer resource_metadata="${MCP_RESOURCE_METADATA_URL}", error="insufficient_scope", scope="${MCP_REQUIRED_SCOPES.join(' ')}"`,
-    );
+    setAuthChallenge(res, { error: 'insufficient_scope' });
     return res.status(403).json({
       jsonrpc: '2.0',
       error: { code: -32003, message: 'Insufficient OAuth scope' },
