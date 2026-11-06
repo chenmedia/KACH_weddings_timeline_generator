@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.18"
   },
   "scripts": {
     "dev": "vite",
@@ -37,10 +37,13 @@
   "dependencies": {
     "@clerk/backend": "^3.7.0",
     "@clerk/clerk-js": "^6.16.1",
+    "@clerk/mcp-tools": "^0.8.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@neondatabase/serverless": "^1.1.0",
     "@sentry/browser": "^8.55.2",
     "@sentry/node": "^8.55.2",
     "drizzle-orm": "^0.45.2",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "zod": "^4.6.7"
   }
 }

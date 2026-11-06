@@ -20,7 +20,7 @@ async function handler(req, res) {
   const cutoffStr = cutoff.toISOString().slice(0, 10);
 
   const db = getDb();
-  const { timelines, notifications } = schema;
+  const { timelines, notifications, foclImportSessions } = schema;
 
   const purged = await db.delete(timelines).where(lt(timelines.wdate, cutoffStr)).returning({
     id: timelines.id,
@@ -47,10 +47,24 @@ async function handler(req, res) {
     .where(and(isNotNull(notifications.readAt), lt(notifications.createdAt, readNotificationCutoff)))
     .returning({ id: notifications.id });
 
+  const expiredFoclPreviews = await db
+    .update(foclImportSessions)
+    .set({ status: 'expired', payload: {} })
+    .where(and(eq(foclImportSessions.status, 'pending'), lt(foclImportSessions.expiresAt, now)))
+    .returning({ id: foclImportSessions.id });
+  const oldFoclCutoff = new Date();
+  oldFoclCutoff.setDate(oldFoclCutoff.getDate() - 30);
+  const oldFoclPreviews = await db
+    .delete(foclImportSessions)
+    .where(lt(foclImportSessions.createdAt, oldFoclCutoff))
+    .returning({ id: foclImportSessions.id });
+
   return ok(res, {
     purged: purged.length,
     sharesDisabled: expired.length,
     notificationsDeleted: oldNotifications.length + readNotifications.length,
+    foclPreviewsExpired: expiredFoclPreviews.length,
+    foclPreviewsDeleted: oldFoclPreviews.length,
     cutoff: cutoffStr,
   });
 }

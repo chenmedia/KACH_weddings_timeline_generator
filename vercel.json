@@ -5,7 +5,18 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/" }],
+  "rewrites": [
+    { "source": "/mcp", "destination": "/api/mcp" },
+    {
+      "source": "/.well-known/oauth-protected-resource/mcp",
+      "destination": "/api/oauth-protected-resource"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/api/oauth-authorization-server"
+    },
+    { "source": "/((?!api/).*)", "destination": "/" }
+  ],
   "crons": [
     { "path": "/api/cron/retention", "schedule": "0 3 * * 1" },
     { "path": "/api/cron/storage-report", "schedule": "0 4 * * 1" }

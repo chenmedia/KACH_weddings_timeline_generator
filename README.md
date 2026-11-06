@@ -134,6 +134,9 @@ Det som er på plass i denne fasen:
   fortsatt av `getMilestones()` fra bryllupsprosjektet.
 - **Oversikt:** `/api/weddings/dashboard` avleder neste handling og fremdrift for
   alle bryllup i ett kall uten å lagre en separat dashboardkopi.
+- **FOCL via ChatGPT:** et privat MCP-endepunkt på `/mcp` lar ChatGPT hente
+  data fra brukerens FOCL-tilkobling, forhåndsvise forskjeller og først etter
+  godkjenning skrive dem til klientkortet. Se `docs/kach-focl-mcp.md`.
 - **Adaptere (rene, testet):** `src/lib/row-mapper.js` (DB-rad ↔ `state`) og
   `src/lib/state-source.js` (localStorage i dag, API når påslått). Dato­logikken i
   `milestones.js`/`dates.js` er fortsatt eneste kilde — beregnede datoer lagres

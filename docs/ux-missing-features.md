@@ -12,8 +12,8 @@ Decision log updated 6 November 2026. All capabilities below are approved in pri
 
 ## Priority 0: complete the core workflow
 
-1. **Verified FOCL sync**
-   Replace the current copy-and-paste bridge with verified import, field mapping, conflict handling and a visible last-sync state. Preserve manual overrides and show which source changed each field.
+1. **Verified FOCL sync — implementation ready**
+   The private KACH MCP now receives data from the connected FOCL Wedding Planner through ChatGPT, creates a reviewable import preview, rejects stale changes, preserves manual KACH data and records a restore point plus activity entry. Production activation still requires migration `0009`, the two private Vercel environment variables and connecting `/api/mcp` in ChatGPT.
 2. **Scheduled email through Resend**
    Send or schedule email from a template, with delivery status and an activity-log record. Do not implement SMS in the first version.
 3. **In-app notification center — implemented**

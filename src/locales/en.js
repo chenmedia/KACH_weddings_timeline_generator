@@ -408,9 +408,9 @@ export default {
 
   clientCard: {
     foclKicker: 'FOCL connection',
-    foclTitle: 'Import once. Keep the client card together.',
+    foclTitle: 'Sync through ChatGPT. Keep the client card together.',
     foclIntro:
-      'Copy the request into ChatGPT with your FOCL connection, then paste its response here. The import updates the couple, dates, venue, vendors and day timeline.',
+      'Once the KACH connection is active, ChatGPT can preview and send approved FOCL data directly here. Copy and paste remains available as a fallback.',
     foclUrl: 'FOCL link',
     copyPrompt: 'Copy ChatGPT request',
     promptCopied: 'The request was copied',
@@ -452,6 +452,15 @@ export default {
     groupName: 'Group name',
     people: 'People, separated by commas',
     notes: 'Private notes',
+    weddingBrief: 'Wedding brief from FOCL',
+    style: 'Style',
+    priorities: 'Priorities',
+    logistics: 'Logistics',
+    shotList: 'Shot list from FOCL',
+    foclChecklist: 'Checklist from FOCL',
+    documents: 'Documents from FOCL',
+    document: 'Document',
+    openDocument: 'Open document ↗',
     foclTimeline: 'Day timeline from FOCL',
     noFoclTimeline: 'Import from FOCL to show the day timeline here.',
     add: '+ Add',

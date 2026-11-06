@@ -401,9 +401,9 @@ export default {
 
   clientCard: {
     foclKicker: 'FOCL-forbindelse',
-    foclTitle: 'Importer én gang. Hold klientkortet samlet.',
+    foclTitle: 'Synkroniser via ChatGPT. Hold klientkortet samlet.',
     foclIntro:
-      'Kopier forespørselen til ChatGPT med FOCL-tilkoblingen din, og lim svaret inn her. Importen oppdaterer brudepar, dato, sted, leverandører og dagsplan.',
+      'Når KACH-tilkoblingen er aktiv, kan ChatGPT forhåndsvise og sende FOCL-data direkte hit etter godkjenning. Kopier og lim inn er fortsatt tilgjengelig som reserve.',
     foclUrl: 'FOCL-lenke',
     copyPrompt: 'Kopier ChatGPT-forespørsel',
     promptCopied: 'Forespørselen er kopiert',
@@ -445,6 +445,15 @@ export default {
     groupName: 'Navn på gruppe',
     people: 'Personer, adskilt med komma',
     notes: 'Private notater',
+    weddingBrief: 'Bryllupsbrief fra FOCL',
+    style: 'Stil',
+    priorities: 'Prioriteringer',
+    logistics: 'Praktisk',
+    shotList: 'Shot list fra FOCL',
+    foclChecklist: 'Sjekkliste fra FOCL',
+    documents: 'Dokumenter fra FOCL',
+    document: 'Dokument',
+    openDocument: 'Åpne dokument ↗',
     foclTimeline: 'Dagsplan fra FOCL',
     noFoclTimeline: 'Importer fra FOCL for å vise dagsplanen her.',
     add: '+ Legg til',

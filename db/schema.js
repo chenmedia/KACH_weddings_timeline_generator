@@ -135,6 +135,33 @@ export const clientProfiles = pgTable(
   (t) => ({ uniqTimeline: unique().on(t.timelineId) }),
 );
 
+// Short-lived, reviewable FOCL import plans created by the KACH MCP server.
+// Applying a plan requires the same project/profile versions seen at preview
+// time, preventing an assistant from overwriting newer photographer edits.
+export const foclImportSessions = pgTable(
+  'focl_import_sessions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    timelineId: uuid('timeline_id')
+      .notNull()
+      .references(() => timelines.id, { onDelete: 'cascade' }),
+    ownerId: text('owner_id').notNull(),
+    status: text('status').notNull().default('pending'), // pending|applied|expired|superseded
+    sourceId: text('source_id'),
+    payload: jsonb('payload').notNull(),
+    changes: jsonb('changes').notNull().default([]),
+    expectedProjectVersion: integer('expected_project_version').notNull(),
+    expectedProfileVersion: integer('expected_profile_version').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    appliedAt: timestamp('applied_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    ownerStatusIdx: index().on(t.ownerId, t.status, t.createdAt),
+    timelineCreatedIdx: index().on(t.timelineId, t.createdAt),
+  }),
+);
+
 // Couple-facing review state. Comments are separate so feedback can be placed
 // directly on a milestone and resolved without losing the conversation.
 export const timelineReviews = pgTable(

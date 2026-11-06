@@ -45,7 +45,7 @@ function listSection({ title, empty, items, renderItem, addLabel }) {
 
 function buildFoclPrompt(foclUrl) {
   return `Use my connected FOCL account and export the wedding${foclUrl ? ` at ${foclUrl}` : ''}. Return ONLY valid JSON with this exact shape:
-{"foclWeddingId":"","foclUrl":"","wedding":{"couple":"","weddingDate":"YYYY-MM-DD","bookingDate":"YYYY-MM-DD","venue":""},"clients":[{"name":"","email":"","phone":"","instagram":""}],"planner":{"name":"","email":"","phone":"","company":""},"contacts":[],"locations":[{"name":"","type":"","address":"","notes":""}],"vendors":[{"name":"","type":"","email":"","phone":"","website":""}],"familyGroups":[{"label":"","people":[]}],"timeline":[{"id":"","title":"","startTime":"","endTime":"","location":"","notes":""}],"notes":""}
+{"foclWeddingId":"","foclUrl":"","wedding":{"couple":"","weddingDate":"YYYY-MM-DD","bookingDate":"YYYY-MM-DD","venue":""},"clients":[{"name":"","email":"","phone":"","instagram":""}],"planner":{"name":"","email":"","phone":"","company":""},"contacts":[],"locations":[{"name":"","type":"","address":"","notes":""}],"vendors":[{"name":"","type":"","email":"","phone":"","website":""}],"familyGroups":[{"label":"","people":[]}],"timeline":[{"id":"","title":"","startTime":"","endTime":"","location":"","notes":""}],"shotList":[],"documents":[],"checklist":[],"weddingBrief":{"summary":"","priorities":[],"style":"","logistics":""},"notes":""}
 Use empty strings or empty arrays when FOCL has no value. Do not add markdown.`;
 }
 
@@ -301,6 +301,91 @@ export function buildClientCard({ locale, workspace, onProfileChange, onJourneyC
     );
   });
 
+  const briefLines = [
+    profile.brief.summary,
+    profile.brief.style ? `${copy.style}: ${profile.brief.style}` : '',
+    profile.brief.priorities.length ? `${copy.priorities}: ${profile.brief.priorities.join(', ')}` : '',
+    profile.brief.logistics ? `${copy.logistics}: ${profile.brief.logistics}` : '',
+  ].filter(Boolean);
+  const planningSections = [
+    briefLines.length
+      ? el('section', { class: 'client-list-section' }, [
+          el('div', { class: 'client-section-line' }, [el('h3', { text: copy.weddingBrief })]),
+          ...briefLines.map((line) => el('p', { text: line })),
+        ])
+      : null,
+    profile.shotList.length
+      ? el('section', { class: 'client-list-section' }, [
+          el('div', { class: 'client-section-line' }, [
+            el('h3', { text: copy.shotList }),
+            el('span', { text: String(profile.shotList.length) }),
+          ]),
+          el(
+            'ol',
+            { class: 'focl-day-timeline' },
+            profile.shotList.map((shot) =>
+              el('li', {}, [
+                el('time', { text: shot.priority || shot.category || '·' }),
+                el('div', {}, [
+                  el('strong', { text: shot.title }),
+                  shot.people.length ? el('span', { text: shot.people.join(', ') }) : null,
+                  shot.notes ? el('p', { text: shot.notes }) : null,
+                ]),
+              ]),
+            ),
+          ),
+        ])
+      : null,
+    profile.checklist.length
+      ? el('section', { class: 'client-list-section' }, [
+          el('div', { class: 'client-section-line' }, [
+            el('h3', { text: copy.foclChecklist }),
+            el('span', { text: String(profile.checklist.length) }),
+          ]),
+          el(
+            'ol',
+            { class: 'focl-day-timeline' },
+            profile.checklist.map((item) =>
+              el('li', {}, [
+                el('time', { text: item.dueDate || item.status || '·' }),
+                el('div', {}, [
+                  el('strong', { text: item.title }),
+                  item.notes ? el('p', { text: item.notes }) : null,
+                ]),
+              ]),
+            ),
+          ),
+        ])
+      : null,
+    profile.documents.length
+      ? el('section', { class: 'client-list-section' }, [
+          el('div', { class: 'client-section-line' }, [
+            el('h3', { text: copy.documents }),
+            el('span', { text: String(profile.documents.length) }),
+          ]),
+          el(
+            'div',
+            { class: 'client-list-grid' },
+            profile.documents.map((document) =>
+              el('article', { class: 'client-list-card' }, [
+                el('strong', { text: document.title || copy.document }),
+                document.type ? el('p', { text: document.type }) : null,
+                document.notes ? el('p', { text: document.notes }) : null,
+                document.url
+                  ? el('a', {
+                      href: document.url,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      text: copy.openDocument,
+                    })
+                  : null,
+              ]),
+            ),
+          ),
+        ])
+      : null,
+  ].filter(Boolean);
+
   return el('div', { class: 'client-card-workspace' }, [
     el('section', { class: 'focl-sync-card' }, [
       el('div', {}, [
@@ -339,6 +424,7 @@ export function buildClientCard({ locale, workspace, onProfileChange, onJourneyC
     vendors,
     familyGroups,
     el('section', { class: 'client-list-section' }, [el('h3', { text: copy.notes }), notes]),
+    ...planningSections,
     el('section', { class: 'client-list-section' }, [
       el('div', { class: 'client-section-line' }, [
         el('h3', { text: copy.foclTimeline }),

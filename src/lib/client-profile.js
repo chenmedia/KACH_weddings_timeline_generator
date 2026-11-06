@@ -3,6 +3,7 @@ const MAX = {
   note: 4000,
   list: 40,
   timeline: 80,
+  checklist: 120,
 };
 
 function text(value, max = MAX.short) {
@@ -50,6 +51,10 @@ export function defaultClientProfile() {
     vendors: [],
     familyGroups: [],
     foclTimeline: [],
+    shotList: [],
+    documents: [],
+    checklist: [],
+    brief: { summary: '', priorities: [], style: '', logistics: '' },
     notes: '',
   };
 }
@@ -103,6 +108,67 @@ export function sanitizeClientProfile(input = {}) {
       },
       MAX.timeline,
     ),
+    shotList: list(
+      source.shotList || source.shots,
+      (item, index) => {
+        if (!item || typeof item !== 'object') return null;
+        item = record(item);
+        const title = text(item.title || item.name || item.shot);
+        if (!title) return null;
+        return {
+          id: text(item.id || `shot-${index}`),
+          title,
+          category: text(item.category || item.group),
+          people: list(item.people, (person) => text(person), 30),
+          notes: text(item.notes || item.description, 1000),
+          priority: text(item.priority, 40),
+          completed: Boolean(item.completed || item.done),
+        };
+      },
+      MAX.checklist,
+    ),
+    documents: list(source.documents, (item) => {
+      if (!item || typeof item !== 'object') return null;
+      item = record(item);
+      const title = text(item.title || item.name);
+      const documentUrl = url(item.url || item.link);
+      if (!title && !documentUrl) return null;
+      return {
+        title,
+        type: text(item.type || item.category),
+        url: documentUrl,
+        notes: text(item.notes || item.description, 1000),
+      };
+    }),
+    checklist: list(
+      source.checklist || source.checklists,
+      (item, index) => {
+        if (!item || typeof item !== 'object') return null;
+        item = record(item);
+        const title = text(item.title || item.name || item.task);
+        if (!title) return null;
+        return {
+          id: text(item.id || `check-${index}`),
+          title,
+          status: text(item.status || (item.completed ? 'completed' : 'open'), 40),
+          dueDate: text(item.dueDate || item.date, 10),
+          notes: text(item.notes || item.description, 1000),
+        };
+      },
+      MAX.checklist,
+    ),
+    brief: (() => {
+      const brief = record(source.brief || source.weddingBrief);
+      return {
+        summary: text(
+          brief.summary || brief.overview || (typeof source.brief === 'string' ? source.brief : ''),
+          MAX.note,
+        ),
+        priorities: list(brief.priorities || brief.goals, (item) => text(item), 20),
+        style: text(brief.style || brief.aesthetic, 1000),
+        logistics: text(brief.logistics || brief.practicalNotes, MAX.note),
+      };
+    })(),
     notes: text(source.notes, MAX.note),
   };
 }
@@ -121,6 +187,10 @@ export function normalizeFoclImport(input = {}) {
     vendors: root.vendors || wedding.vendors,
     familyGroups: root.familyGroups || root.familyPhotos || wedding.familyGroups,
     foclTimeline: root.timeline || wedding.timeline,
+    shotList: root.shotList || root.shots || wedding.shotList,
+    documents: root.documents || wedding.documents,
+    checklist: root.checklist || root.checklists || wedding.checklist,
+    brief: root.weddingBrief || root.brief || wedding.brief,
     notes: root.notes || wedding.notes,
   });
   const names = profile.partners.map((partner) => partner.name).filter(Boolean);
