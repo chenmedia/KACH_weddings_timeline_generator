@@ -1,4 +1,5 @@
 import { fetchClerkAuthorizationServerMetadata } from '@clerk/mcp-tools/server';
+import { getClerkPublishableKey } from './_lib/mcp-auth.js';
 import { withErrorCapture } from './_lib/observability.js';
 
 let cachedMetadata;
@@ -14,7 +15,7 @@ async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
-  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const publishableKey = getClerkPublishableKey();
   if (!publishableKey) return res.status(503).json({ error: 'clerk_not_configured' });
   cachedMetadata ||= await fetchClerkAuthorizationServerMetadata({ publishableKey });
   return res.status(200).json(cachedMetadata);

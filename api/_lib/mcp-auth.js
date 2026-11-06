@@ -7,10 +7,19 @@ export const MCP_RESOURCE_METADATA_URL = new URL(
   MCP_RESOURCE_URL,
 ).href;
 
+export function getClerkPublishableKey() {
+  return (
+    process.env.CLERK_PUBLISHABLE_KEY ||
+    process.env.VITE_CLERK_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    ''
+  );
+}
+
 function clerkClient() {
   return createClerkClient({
     secretKey: process.env.CLERK_SECRET_KEY,
-    publishableKey: process.env.CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY,
+    publishableKey: getClerkPublishableKey(),
     apiUrl: process.env.CLERK_API_URL,
   });
 }
